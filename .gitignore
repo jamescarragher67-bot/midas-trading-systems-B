@@ -1,0 +1,10 @@
+.env
+.env.bak
+__pycache__/
+*.pyc
+logs/
+seen_tickets.json
+heartbeat.json
+open_positions.json
+*.log
+.vscode/
