@@ -478,5 +478,22 @@
     "result": "WIN",
     "notes": "Auto-synced",
     "source": "auto"
+  },
+  {
+    "id": 8796594860,
+    "position_id": 9158500485,
+    "date": "2026-06-18",
+    "time": "17:01",
+    "time_open": "16:45",
+    "dir": "SELL",
+    "entry": 4264.85,
+    "exit": 4248.87,
+    "price_delta": 15.98,
+    "lots": 0.01,
+    "pnl": 15.98,
+    "rr": 1.56,
+    "result": "WIN",
+    "notes": "Auto-synced",
+    "source": "auto"
   }
 ]

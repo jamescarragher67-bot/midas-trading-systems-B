@@ -1,122 +1,122 @@
 {
   "0": {
-    "win_rate": 50.0,
-    "trades": 2,
-    "wins": 1
+    "win_rate": 80.0,
+    "trades": 10,
+    "wins": 8
   },
   "1": {
-    "win_rate": 53.3,
-    "trades": 15,
-    "wins": 8
+    "win_rate": 62.2,
+    "trades": 90,
+    "wins": 56
   },
   "2": {
-    "win_rate": 41.2,
-    "trades": 17,
-    "wins": 7
+    "win_rate": 75.8,
+    "trades": 91,
+    "wins": 69
   },
   "3": {
-    "win_rate": 66.7,
-    "trades": 12,
-    "wins": 8
+    "win_rate": 68.7,
+    "trades": 67,
+    "wins": 46
   },
   "4": {
-    "win_rate": 73.3,
-    "trades": 15,
-    "wins": 11
+    "win_rate": 72.0,
+    "trades": 75,
+    "wins": 54
   },
   "5": {
-    "win_rate": 53.3,
-    "trades": 15,
-    "wins": 8
+    "win_rate": 75.3,
+    "trades": 93,
+    "wins": 70
   },
   "6": {
-    "win_rate": 37.5,
-    "trades": 16,
-    "wins": 6
+    "win_rate": 59.1,
+    "trades": 66,
+    "wins": 39
   },
   "7": {
-    "win_rate": 50.0,
-    "trades": 8,
-    "wins": 4
+    "win_rate": 72.9,
+    "trades": 70,
+    "wins": 51
   },
   "8": {
-    "win_rate": 56.2,
-    "trades": 16,
-    "wins": 9
+    "win_rate": 69.8,
+    "trades": 86,
+    "wins": 60
   },
   "9": {
-    "win_rate": 60.0,
-    "trades": 15,
-    "wins": 9
+    "win_rate": 74.0,
+    "trades": 73,
+    "wins": 54
   },
   "10": {
-    "win_rate": 46.2,
-    "trades": 13,
-    "wins": 6
+    "win_rate": 73.7,
+    "trades": 76,
+    "wins": 56
   },
   "11": {
-    "win_rate": 57.1,
-    "trades": 7,
-    "wins": 4
+    "win_rate": 74.4,
+    "trades": 86,
+    "wins": 64
   },
   "12": {
-    "win_rate": 33.3,
-    "trades": 15,
-    "wins": 5
+    "win_rate": 69.2,
+    "trades": 78,
+    "wins": 54
   },
   "13": {
-    "win_rate": 42.9,
-    "trades": 7,
-    "wins": 3
+    "win_rate": 61.3,
+    "trades": 80,
+    "wins": 49
   },
   "14": {
-    "win_rate": 76.9,
-    "trades": 13,
-    "wins": 10
+    "win_rate": 69.9,
+    "trades": 83,
+    "wins": 58
   },
   "15": {
-    "win_rate": 23.5,
-    "trades": 17,
-    "wins": 4
+    "win_rate": 40.0,
+    "trades": 5,
+    "wins": 2
   },
   "16": {
-    "win_rate": 50.0,
-    "trades": 18,
-    "wins": 9
+    "win_rate": 0,
+    "trades": 0,
+    "wins": 0
   },
   "17": {
-    "win_rate": 62.5,
-    "trades": 16,
-    "wins": 10
+    "win_rate": 0,
+    "trades": 0,
+    "wins": 0
   },
   "18": {
-    "win_rate": 66.7,
-    "trades": 12,
-    "wins": 8
+    "win_rate": 0,
+    "trades": 0,
+    "wins": 0
   },
   "19": {
-    "win_rate": 37.5,
-    "trades": 16,
-    "wins": 6
+    "win_rate": 0,
+    "trades": 0,
+    "wins": 0
   },
   "20": {
-    "win_rate": 50.0,
-    "trades": 12,
-    "wins": 6
+    "win_rate": 66.2,
+    "trades": 77,
+    "wins": 51
   },
   "21": {
-    "win_rate": 60.0,
-    "trades": 10,
-    "wins": 6
+    "win_rate": 65.8,
+    "trades": 79,
+    "wins": 52
   },
   "22": {
-    "win_rate": 33.3,
-    "trades": 12,
-    "wins": 4
+    "win_rate": 76.6,
+    "trades": 77,
+    "wins": 59
   },
   "23": {
-    "win_rate": 42.9,
-    "trades": 7,
-    "wins": 3
+    "win_rate": 75.0,
+    "trades": 16,
+    "wins": 12
   }
 }

@@ -1,13 +1,14 @@
 """
-backtest/engine.py — MIDAS BACKTESTING ENGINE (CLEAN REBUILD)
+backtest/engine.py — MIDAS BACKTESTING ENGINE
 
-Clean bar-by-bar simulation on H1 data.
-Fixed 0.5% risk — no dynamic scaling to keep results clean and comparable.
+Bar-by-bar simulation on H1 data.
+Now includes trailing stop simulation matching trade_manager.py logic.
 
 Features simulated:
   - 5-strategy voting engine (4/5 threshold)
   - Smart SL placement (structural swing levels)
-  - Time-based exit (8h soft, 24h hard)
+  - Trailing stop (mirrors TRAILING_ENABLED / TRAILING_STEP_PIPS per profile)
+  - Time-based exit (soft + hard)
   - Session filter
   - Cooldown between trades
   - Performance monitor (reduces risk during bad streaks)
@@ -28,6 +29,7 @@ from strategy.candlestick_patterns import get_signal as candle_signal
 # ── Constants ─────────────────────────────────────────────────────────────────
 CONTRACT_SIZE = 100
 MIN_LOOKBACK  = 60
+POINT         = 0.01   # XAUUSD point size
 
 INDICATOR_CONFIG = {
     "EMA_FAST":   9,
@@ -49,9 +51,9 @@ STRATEGIES = [
 # ── Data fetching ─────────────────────────────────────────────────────────────
 def fetch_historical_data(symbol: str, days: int) -> pd.DataFrame:
     mt5.symbol_select(symbol, True)
-    num_bars = min(days * 24, 100000)
-    print(f"Requesting {num_bars} H1 bars from MT5...")
-    rates = mt5.copy_rates_from_pos(symbol, mt5.TIMEFRAME_H1, 0, num_bars)
+    num_bars = min(days * 288, 30000)
+    print(f"Requesting {num_bars} M5 bars from MT5...")
+    rates = mt5.copy_rates_from_pos(symbol, mt5.TIMEFRAME_M5, 0, num_bars)
     if rates is None or len(rates) == 0:
         raise ValueError(f"No data returned. Error: {mt5.last_error()}")
     df = pd.DataFrame(rates)
@@ -92,15 +94,15 @@ def _smart_sl(df_slice: pd.DataFrame, direction: str,
         recent = df_slice.iloc[-25:-1]
         buf    = atr * 0.3
         if direction == "BUY":
-            lows   = _find_swing_lows(recent["low"])
-            valid  = [recent["low"].iloc[i] for i in lows if recent["low"].iloc[i] < entry]
+            lows  = _find_swing_lows(recent["low"])
+            valid = [recent["low"].iloc[i] for i in lows if recent["low"].iloc[i] < entry]
             if valid:
                 sl = max(valid) - buf
                 if atr * 0.5 <= (entry - sl) <= atr * 2.5:
                     return round(sl, 2), "structural"
         else:
-            highs  = _find_swing_highs(recent["high"])
-            valid  = [recent["high"].iloc[i] for i in highs if recent["high"].iloc[i] > entry]
+            highs = _find_swing_highs(recent["high"])
+            valid = [recent["high"].iloc[i] for i in highs if recent["high"].iloc[i] > entry]
             if valid:
                 sl = min(valid) + buf
                 if atr * 0.5 <= (sl - entry) <= atr * 2.5:
@@ -111,21 +113,20 @@ def _smart_sl(df_slice: pd.DataFrame, direction: str,
 
 
 # ── Lot size ──────────────────────────────────────────────────────────────────
-def _lot_size(balance: float, sl_dist: float, risk_pct: float) -> float:
-    """Simple fixed risk lot size — no dynamic scaling."""
+def _lot_size(balance: float, sl_dist: float, risk_pct: float, max_lot: float = 0.01) -> float:
     risk_amt  = balance * (risk_pct / 100)
-    sl_points = sl_dist / 0.01
+    sl_points = sl_dist / POINT
     if sl_points <= 0:
         return 0.01
-    lot = risk_amt / (sl_points * CONTRACT_SIZE * 0.01)
-    return max(0.01, min(round(round(lot / 0.01) * 0.01, 2), 10.0))
+    lot = risk_amt / (sl_points * CONTRACT_SIZE * POINT)
+    return max(0.01, min(round(round(lot / 0.01) * 0.01, 2), max_lot))
 
-
-# ── Trade simulation ──────────────────────────────────────────────────────────
+# ── Trade simulation with trailing stop ───────────────────────────────────────
 def _simulate_trade(df: pd.DataFrame, df_slice: pd.DataFrame,
                     entry_idx: int, direction: str,
                     atr: float, balance: float, config: dict) -> dict | None:
     if entry_idx + 1 >= len(df):
+        lot_size = _lot_size(balance, sl_dist, config["risk_pct"], config.get("max_lot_size", 10.0))
         return None
 
     entry_candle = df.iloc[entry_idx + 1]
@@ -141,56 +142,93 @@ def _simulate_trade(df: pd.DataFrame, df_slice: pd.DataFrame,
     lot_size = _lot_size(balance, sl_dist, config["risk_pct"])
     mult     = lot_size * CONTRACT_SIZE
 
+    # Trailing stop config
+    trailing_enabled   = config.get("trailing_enabled", False)
+    trailing_step_pips = config.get("trailing_step_pips", 25)
+    trail_dist         = trailing_step_pips * POINT
+
     result     = None
     exit_price = None
+    current_sl = sl   # tracks the live stop loss level, moves with trailing
     max_bars   = config.get("max_trade_hours_hard", 24)
     soft_bars  = config.get("max_trade_hours", 8)
 
     for j in range(entry_idx + 2, min(entry_idx + max_bars + 2, len(df))):
         c         = df.iloc[j]
         bars_open = j - entry_idx - 1
+        high      = c["high"]
+        low       = c["low"]
+        close     = c["close"]
 
-        # SL / TP check
+        # ── Trailing stop update ───────────────────────────────────────────
+        # Mirrors trade_manager.py: trail_sl moves if in profit direction
+        # Uses candle HIGH for BUY, candle LOW for SELL as the peak reference
+        if trailing_enabled:
+            if direction == "BUY":
+                trail_candidate = round(high - trail_dist, 2)
+                if trail_candidate > current_sl:
+                    current_sl = trail_candidate
+            else:
+                trail_candidate = round(low + trail_dist, 2)
+                if trail_candidate < current_sl or current_sl == sl:
+                    # Only tighten, never widen
+                    if trail_candidate < current_sl:
+                        current_sl = trail_candidate
+
+        # ── SL / TP check ──────────────────────────────────────────────────
         if direction == "BUY":
-            if c["low"] <= sl:
-                result, exit_price = "LOSS", sl; break
-            if c["high"] >= tp:
-                result, exit_price = "WIN", tp; break
+            if low <= current_sl:
+                result, exit_price = "LOSS" if current_sl <= entry_price else "WIN", current_sl
+                break
+            if high >= tp:
+                result, exit_price = "WIN", tp
+                break
         else:
-            if c["high"] >= sl:
-                result, exit_price = "LOSS", sl; break
-            if c["low"] <= tp:
-                result, exit_price = "WIN", tp; break
+            if high >= current_sl:
+                result, exit_price = "LOSS" if current_sl >= entry_price else "WIN", current_sl
+                break
+            if low <= tp:
+                result, exit_price = "WIN", tp
+                break
 
-        # Time exit — soft (close if in profit after N hours)
-        curr     = c["close"]
-        in_profit = (curr > entry_price) if direction == "BUY" else (curr < entry_price)
+        # ── Time exit — soft ───────────────────────────────────────────────
+        in_profit = (close > entry_price) if direction == "BUY" else (close < entry_price)
         if bars_open >= soft_bars and in_profit:
-            result, exit_price = "WIN", curr; break
+            result, exit_price = "WIN", close
+            break
 
-    # Hard timeout
+    # ── Hard timeout ───────────────────────────────────────────────────────
     if result is None:
         last       = df.iloc[min(entry_idx + max_bars + 1, len(df) - 1)]
         exit_price = last["close"]
         raw        = (exit_price - entry_price) if direction == "BUY" else (entry_price - exit_price)
         result     = "WIN" if raw > 0 else "LOSS"
 
-    pnl = (tp_dist if result == "WIN" else -sl_dist) * mult
+    # P&L calculation — if trailing moved SL past entry, a "LOSS" exit
+    # on the trailing SL is actually a win (locked in profit)
+    raw_move = (exit_price - entry_price) if direction == "BUY" else (entry_price - exit_price)
+    pnl      = raw_move * mult
+
+    # Override result label based on actual pnl
+    result = "WIN" if pnl > 0 else "LOSS"
+
     entry_time = df.index[entry_idx + 1]
 
     return {
-        "date":       entry_time.strftime("%Y-%m-%d"),
-        "time":       entry_time.strftime("%H:%M"),
-        "direction":  direction,
-        "entry":      round(entry_price, 2),
-        "exit":       round(exit_price, 2),
-        "sl":         sl,
-        "tp":         round(tp, 2),
-        "lots":       lot_size,
-        "pnl":        round(pnl, 2),
-        "result":     result,
-        "atr":        round(atr, 2),
-        "sl_method":  sl_method,
+        "date":            entry_time.strftime("%Y-%m-%d"),
+        "time":            entry_time.strftime("%H:%M"),
+        "direction":       direction,
+        "entry":           round(entry_price, 2),
+        "exit":            round(exit_price, 2),
+        "sl_initial":      sl,
+        "sl_final":        round(current_sl, 2),
+        "tp":              round(tp, 2),
+        "lots":            lot_size,
+        "pnl":             round(pnl, 2),
+        "result":          result,
+        "atr":             round(atr, 2),
+        "sl_method":       sl_method,
+        "trailing_active": trailing_enabled,
     }
 
 
@@ -219,7 +257,6 @@ def write_best_hours(trades: list, output_path: str = "best_hours.json"):
 def run_simulation(symbol: str, days: int, config: dict,
                    progress_callback=None) -> list:
 
-    # Silence strategy loggers
     for name in ["ema_stack", "rsi_divergence", "bollinger_bands",
                  "vwap", "candlestick", "signal_engine", "regime"]:
         logging.getLogger(name).setLevel(logging.WARNING)
@@ -233,43 +270,48 @@ def run_simulation(symbol: str, days: int, config: dict,
     threshold      = config["vote_threshold"]
     total_bars     = len(df) - MIN_LOOKBACK - 1
 
-    print(f"Simulating {total_bars:,} bars | Risk: {config['risk_pct']}% | Threshold: {threshold}/5")
+    trailing_enabled   = config.get("trailing_enabled", False)
+    trailing_step_pips = config.get("trailing_step_pips", 25)
+
+    print(f"Simulating {total_bars:,} bars | Risk: {config['risk_pct']}% | "
+          f"Threshold: {threshold}/5 | Trailing: {'ON (' + str(trailing_step_pips) + ' pips)' if trailing_enabled else 'OFF'}")
 
     for i in range(MIN_LOOKBACK, len(df) - 1):
         if progress_callback and i % 500 == 0:
             pct = (i - MIN_LOOKBACK) / total_bars * 100
             progress_callback(pct)
 
-        # Cooldown
         if i - last_trade_bar < config["cooldown_bars"]:
             continue
 
-        # Session filter
         if config.get("session_filter", True):
             hour = df.index[i].hour
             if not (0 <= hour < 15 or 20 <= hour <= 23):
                 continue
 
         df_slice = df.iloc[:i + 1]
-
-        # Voting
-        vote = _run_voting(df_slice, threshold)
+        vote     = _run_voting(df_slice, threshold)
         if vote["direction"] == "NEUTRAL":
             continue
 
-        # Performance monitor — reduce risk after bad streak
+        # Performance monitor
         effective_risk = config["risk_pct"]
-        lookback = config.get("perf_lookback", 20)
-        min_wr   = config.get("perf_min_wr", 30.0)
-        reduced  = config.get("perf_reduced_risk", 0.25)
+        lookback       = config.get("perf_lookback", 20)
+        min_wr         = config.get("perf_min_wr", 30.0)
+        reduced        = config.get("perf_reduced_risk", 0.25)
         if len(trades) >= config.get("perf_min_trades", 10):
             recent_trades = trades[-lookback:]
             recent_wr     = sum(1 for t in recent_trades if t["result"] == "WIN") / len(recent_trades) * 100
             if recent_wr < min_wr:
                 effective_risk = reduced
 
-        atr   = df.iloc[i]["atr"]
-        trade_config = {**config, "risk_pct": effective_risk}
+        atr          = df.iloc[i]["atr"]
+        trade_config = {
+            **config,
+            "risk_pct":          effective_risk,
+            "trailing_enabled":  trailing_enabled,
+            "trailing_step_pips": trailing_step_pips,
+        }
         trade = _simulate_trade(df, df_slice, i, vote["direction"], atr, balance, trade_config)
 
         if trade is None:

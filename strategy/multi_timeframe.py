@@ -13,12 +13,6 @@ from config.settings import SYMBOL, MTF_H1, MTF_M15, EMA_TREND, EMA_SLOW
 
 logger = setup_logger("multi_timeframe")
 
-TIMEFRAME_MAP = {
-    5:  mt5.TIMEFRAME_M5,
-    15: mt5.TIMEFRAME_M15,
-    60: mt5.TIMEFRAME_H1,
-}
-
 
 def _ema(series: pd.Series, period: int) -> pd.Series:
     return series.ewm(span=period, adjust=False).mean()
@@ -34,11 +28,13 @@ def _rsi(series: pd.Series, period: int = 14) -> pd.Series:
     return 100 - (100 / (1 + rs))
 
 
-def _fetch(timeframe: int, count: int = 100) -> pd.DataFrame:
-    tf = TIMEFRAME_MAP.get(timeframe)
-    if tf is None:
-        return pd.DataFrame()
-    rates = mt5.copy_rates_from_pos(SYMBOL, tf, 0, count)
+def _fetch(timeframe, count: int = 100) -> pd.DataFrame:
+    """
+    timeframe must be a real MT5 timeframe constant
+    (e.g. mt5.TIMEFRAME_H1, mt5.TIMEFRAME_M15) — passed straight through
+    to MT5, no translation needed.
+    """
+    rates = mt5.copy_rates_from_pos(SYMBOL, timeframe, 0, count)
     if rates is None or len(rates) == 0:
         return pd.DataFrame()
     df = pd.DataFrame(rates)
@@ -136,7 +132,7 @@ def get_htf_bias() -> dict:
     else:
         details.append("❌ M15 momentum not aligned")
 
-    # Condition 4: M15 EMA9 > EMA21
+    # Condition 4: M15 EMA9 vs EMA21
     if m15_ema9 > m15_ema21:
         score += 1
         details.append("✅ M15 EMA9 above EMA21")

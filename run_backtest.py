@@ -19,20 +19,23 @@ from datetime import datetime
 # ── BACKTEST CONFIGURATION ────────────────────────────────────────────────────
 
 CONFIG = {
-    "symbol":           "XAUUSD",
-    "days":             180,
-    "initial_balance":  600,
-    "risk_pct":         1.5,
-    "vote_threshold":   4,
-    "cooldown_bars":    5,
-    "session_filter":   False,
-    "reward_ratio":     2.0,
-    "max_trade_hours":  8,
+    "symbol":               "XAUUSD",
+    "days":                 86,
+    "initial_balance":      500,
+    "risk_pct":             1.5,
+    "vote_threshold":       4,
+    "cooldown_bars":        5,
+    "session_filter":       True,
+    "reward_ratio":         2.0,
+    "max_trade_hours":      24,
     "max_trade_hours_hard": 24,
-    "perf_lookback":    20,
-    "perf_min_trades":  10,
-    "perf_min_wr":      30.0,
-    "perf_reduced_risk": 0.5,
+    "trailing_enabled":     True,
+    "trailing_step_pips":   25,
+    "perf_lookback":        20,
+    "perf_min_trades":      10,
+    "perf_min_wr":          30.0,
+    "perf_reduced_risk":    0.5,
+    "max_lot_size":         0.01,
 }
 
 # ── RUN ───────────────────────────────────────────────────────────────────────

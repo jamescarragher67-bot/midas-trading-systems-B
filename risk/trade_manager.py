@@ -179,7 +179,7 @@ def manage_open_trades():
                 _partial_closed.add(pos.ticket)
 
         # ── Trailing stop ─────────────────────────────────────────────────────
-        if TRAILING_ENABLED and pos.ticket in _partial_closed:
+        if TRAILING_ENABLED:
             trail_dist = TRAILING_STEP_PIPS * point
             if is_buy:
                 trail_sl = round(current - trail_dist, sym_info.digits)
