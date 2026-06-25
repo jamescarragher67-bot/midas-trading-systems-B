@@ -24,7 +24,7 @@ CONFIG = {
     "initial_balance":      500,
     "risk_pct":             1.5,
     "vote_threshold":       4,
-    "cooldown_bars":        5,
+    "cooldown_bars":        48,
     "session_filter":       True,
     "reward_ratio":         2.0,
     "max_trade_hours":      24,
