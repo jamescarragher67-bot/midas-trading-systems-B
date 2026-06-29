@@ -14,7 +14,7 @@ LOG_DIR     = os.path.join(BASE_DIR, "logs")
 TRADES_FILE = os.path.join(BASE_DIR, "trades.json")
 
 PROCESSES = {
-    "Trading Bot": os.path.join(BASE_DIR, "main.py"),
+    "Trading Bot": os.path.join(BASE_DIR, "main_combined.py"),
     "Trade Sync":  os.path.join(BASE_DIR, "trade_sync.py"),
     "Firebase":    os.path.join(BASE_DIR, "firebase_push.py"),
 }
