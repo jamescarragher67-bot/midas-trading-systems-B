@@ -1,4 +1,4 @@
-"""
+﻿"""
 strategy/ema_stack.py
 
 Strategy 1: EMA Stack

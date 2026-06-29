@@ -1,4 +1,4 @@
-"""
+﻿"""
 strategy/candlestick_patterns.py
 
 Strategy 5: Candlestick Patterns

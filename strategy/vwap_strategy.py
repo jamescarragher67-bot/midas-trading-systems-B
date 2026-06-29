@@ -1,4 +1,4 @@
-"""
+﻿"""
 strategy/vwap_strategy.py
 
 Strategy 4: VWAP (Volume Weighted Average Price)

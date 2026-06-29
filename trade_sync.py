@@ -8,11 +8,12 @@ Sends WhatsApp notifications on trade close and hourly balance updates.
 import json
 import os
 import time
-from datetime import datetime, timezone
+from datetime import datetime, timezone, timedelta
 import MetaTrader5 as mt5
 from utils.logger import setup_logger
 from utils.mt5_connection import connect_mt5, disconnect_mt5
 from utils.notifications import send_trade_closed, send_hourly_update
+from config.settings import SYMBOL, MAGIC
 
 logger = setup_logger("trade_sync")
 
@@ -21,8 +22,6 @@ SEEN_FILE      = "seen_tickets.json"
 HEARTBEAT_FILE = "heartbeat.json"
 POSITIONS_FILE = "open_positions.json"
 CHECK_INTERVAL = 30       # seconds between sync cycles
-SYMBOL         = "XAUUSD"
-MAGIC          = 10001
 
 # ── JSON helpers ──────────────────────────────────────────────────────────────
 
@@ -138,8 +137,9 @@ def sync(new_trade_callback):
     seen   = set(load_json(SEEN_FILE, []))
     trades = load_json(TRADES_FILE, [])
 
-    from_date = datetime(2026, 6, 1, tzinfo=timezone.utc)
-    to_date   = datetime(2026, 12, 31, tzinfo=timezone.utc)
+    now       = datetime.now(timezone.utc)
+    from_date = now - timedelta(days=7)
+    to_date   = now
     deals     = mt5.history_deals_get(from_date, to_date)
 
     if not deals:
@@ -171,8 +171,6 @@ def sync(new_trade_callback):
     # ── Match and log ─────────────────────────────────────────────────────────
     new_count = 0
     for exit_d in exit_deals:
-        if exit_d.profit == 0.0:
-            continue
         if str(exit_d.ticket) in seen:
             continue
 
@@ -200,8 +198,8 @@ def sync(new_trade_callback):
             "price_delta": price_delta,
             "lots":        round(exit_d.volume, 2),
             "pnl":         pnl,
-            "rr":          rr,
-            "result":      "WIN" if pnl > 0 else "LOSS",
+            "rr":          rr if rr is not None else 0.0,
+            "result":      "WIN" if pnl > 0 else ("BE" if pnl == 0.0 else "LOSS"),
             "notes":       "Auto-synced",
             "source":      "auto"
         }
@@ -212,8 +210,8 @@ def sync(new_trade_callback):
 
         rr_str = f"{rr:+.2f}R" if rr is not None else "RR n/a"
         logger.info(
-            f"Synced: {direction} | {trade['date']} {trade['time_open']}→{trade['time']} | "
-            f"Entry: {entry_price} Exit: {exit_price} Δ{price_delta} | "
+            f"Synced: {direction} | {trade['date']} {trade['time_open']} to {trade['time']} | "
+            f"Entry: {entry_price} Exit: {exit_price} Delta: {price_delta} | "
             f"P&L: {pnl} | {rr_str} | {trade['result']}"
         )
 

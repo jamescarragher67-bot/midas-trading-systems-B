@@ -16,9 +16,12 @@ import MetaTrader5 as mt5
 from datetime import datetime, timezone, timedelta
 from utils.logger import setup_logger
 from config.settings import (
+    MAGIC, ORDER_DEVIATION,
     TIME_EXIT_ENABLED,
     MAX_TRADE_HOURS,
     MAX_TRADE_HOURS_HARD,
+    TIME_EXIT_MIN_PROFIT_USD,
+    FRIDAY_CLOSE_HOUR,
 )
 
 logger = setup_logger("time_exit")
@@ -38,7 +41,17 @@ def check_time_exits(symbol: str):
 
     now = datetime.now(timezone.utc)
 
+    # Friday close — shut everything before the weekend gap
+    if now.weekday() == 4 and now.hour >= FRIDAY_CLOSE_HOUR:
+        for pos in positions:
+            if pos.magic != MAGIC:
+                continue
+            _close_position(pos, reason=f"Friday close ({now.strftime('%H:%M')} UTC — pre-weekend)")
+        return
+
     for pos in positions:
+        if pos.magic != MAGIC:
+            continue
         open_time = datetime.fromtimestamp(pos.time, tz=timezone.utc)
         hours_open = (now - open_time).total_seconds() / 3600
         current_profit = pos.profit
@@ -48,8 +61,8 @@ def check_time_exits(symbol: str):
             _close_position(pos, reason=f"Hard time exit ({hours_open:.1f}h open, P&L ${current_profit:.2f})")
             continue
 
-        # Soft close — trade open too long AND currently profitable
-        if hours_open >= MAX_TRADE_HOURS and current_profit > 0:
+        # Soft close — trade open too long AND profit meets minimum threshold
+        if hours_open >= MAX_TRADE_HOURS and current_profit >= TIME_EXIT_MIN_PROFIT_USD:
             _close_position(pos, reason=f"Time exit in profit ({hours_open:.1f}h open, P&L +${current_profit:.2f})")
             continue
 
@@ -72,16 +85,16 @@ def _close_position(pos, reason: str):
     order_type  = mt5.ORDER_TYPE_SELL if direction == mt5.ORDER_TYPE_BUY else mt5.ORDER_TYPE_BUY
 
     request = {
-        "action":    mt5.TRADE_ACTION_DEAL,
-        "symbol":    symbol,
-        "volume":    volume,
-        "type":      order_type,
-        "position":  ticket,
-        "price":     close_price,
-        "deviation": 20,
-        "magic":     10001,
-        "comment":   "time_exit",
-        "type_time": mt5.ORDER_TIME_GTC,
+        "action":       mt5.TRADE_ACTION_DEAL,
+        "symbol":       symbol,
+        "volume":       volume,
+        "type":         order_type,
+        "position":     ticket,
+        "price":        close_price,
+        "deviation":    ORDER_DEVIATION,
+        "magic":        MAGIC,
+        "comment":      "time_exit",
+        "type_time":    mt5.ORDER_TIME_GTC,
         "type_filling": mt5.ORDER_FILLING_IOC,
     }
 

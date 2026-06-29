@@ -3,8 +3,10 @@ utils/logger.py
 Centralised logging — logs to both console and a daily log file.
 """
 
+import io
 import logging
 import os
+import sys
 from datetime import datetime
 from config.settings import LOG_LEVEL, LOG_DIR
 
@@ -31,8 +33,9 @@ def setup_logger(name: str) -> logging.Logger:
         datefmt="%Y-%m-%d %H:%M:%S"
     )
 
-    # Console handler
-    console = logging.StreamHandler()
+    # Console handler — wrap stdout in UTF-8 so Unicode chars don't crash on Windows cp1252
+    utf8_stdout = io.TextIOWrapper(sys.stdout.buffer, encoding="utf-8", errors="replace", line_buffering=True)
+    console = logging.StreamHandler(utf8_stdout)
     console.setLevel(level)
     console.setFormatter(formatter)
 

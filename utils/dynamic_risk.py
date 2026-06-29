@@ -5,18 +5,15 @@ Dynamic position sizing — scales risk % as account balance grows.
 Keeps drawdown percentage stable while profits compound faster.
 
 Scaling ladder:
-  $0      - $110k  →  0.5%
-  $110k   - $125k  →  0.75%
-  $125k   - $150k  →  1.0%
-  $150k   - $200k  →  1.25%
-  $200k+           →  1.5%
-
-For small accounts ($500 - $5k demo):
-  $0    - $750    →  0.5%
-  $750  - $1,500  →  0.75%
-  $1,500 - $3,000 →  1.0%
-  $3,000 - $5,000 →  1.25%
-  $5,000+         →  1.5%
+  $0       - $750    →  0.50%
+  $750     - $1,500  →  0.60%
+  $1,500   - $3,000  →  0.70%
+  $3,000   - $5,000  →  0.80%
+  $5,000   - $10,000 →  0.90%
+  $10,000  - $25,000 →  1.00%
+  $25,000  - $50,000 →  1.10%
+  $50,000  - $100,000→  1.25%
+  $100,000+          →  1.50%
 """
 
 from utils.logger import setup_logger
@@ -24,19 +21,17 @@ from config.settings import DYNAMIC_RISK_ENABLED, RISK_PERCENT
 
 logger = setup_logger("dynamic_risk")
 
-# Scaling ladder — (min_balance, max_balance, risk_pct)
+# Scaling ladder — (min_balance, max_balance, risk_pct) — monotonically increasing
 RISK_LADDER = [
-    (0,       750,    0.50),
-    (750,     1500,   0.60),
-    (1500,    3000,   0.70),
-    (3000,    5000,   0.80),
-    (5000,    110000, 0.50),
-    (110000,  120000, 0.52),
-    (120000,  132000, 0.55),
-    (132000,  148000, 0.58),
-    (148000,  168000, 0.61),
-    (168000,  195000, 0.64),
-    (195000,  999999, 0.65),
+    (0,        750,    0.50),
+    (750,      1_500,  0.60),
+    (1_500,    3_000,  0.70),
+    (3_000,    5_000,  0.80),
+    (5_000,    10_000, 0.90),
+    (10_000,   25_000, 1.00),
+    (25_000,   50_000, 1.10),
+    (50_000,   100_000, 1.25),
+    (100_000,  999_999, 1.50),
 ]
 
 

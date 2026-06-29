@@ -25,7 +25,7 @@ def calculate_metrics(trades: list, initial_balance: float = 500.0) -> dict:
     net_pnl    = gross_win - gross_loss
 
     win_rate      = len(wins) / total * 100
-    profit_factor = gross_win / gross_loss if gross_loss > 0 else float("inf")
+    profit_factor = gross_win / gross_loss if gross_loss > 0 else 999.99
     avg_win       = gross_win / len(wins) if wins else 0
     avg_loss      = gross_loss / len(losses) if losses else 0
     expectancy    = net_pnl / total
@@ -55,7 +55,7 @@ def calculate_metrics(trades: list, initial_balance: float = 500.0) -> dict:
     # Sharpe ratio (trade-level, annualized proxy)
     pnls = [t["pnl"] for t in trades]
     if len(pnls) > 1 and np.std(pnls) > 0:
-        sharpe = (np.mean(pnls) / np.std(pnls)) * np.sqrt(252)
+        sharpe = (np.mean(pnls) / np.std(pnls)) * np.sqrt(260)
     else:
         sharpe = 0
 
@@ -137,26 +137,25 @@ def monthly_breakdown(trades: list) -> list:
 
 
 def strategy_contribution(trades: list) -> list:
-    """Analyse how each strategy contributed to trade outcomes."""
-    from backtest.engine import STRATEGIES
-    strategy_names = [s[0] for s in STRATEGIES]
+    """Breakdown of reversal patterns that triggered trades."""
+    from collections import defaultdict
+    patterns = defaultdict(lambda: {"trades": 0, "wins": 0, "pnl": 0.0})
+
+    for t in trades:
+        p = t.get("pattern", "Unknown")
+        patterns[p]["trades"] += 1
+        patterns[p]["pnl"]    += t["pnl"]
+        if t["result"] == "WIN":
+            patterns[p]["wins"] += 1
 
     result = []
-    for name in strategy_names:
-        voted_trades = [t for t in trades if t.get("strategy_votes", {}).get(name, 0) != 0]
-        if not voted_trades:
-            result.append({"strategy": name, "votes": 0, "win_rate": 0, "pnl": 0})
-            continue
-
-        wins     = sum(1 for t in voted_trades if t["result"] == "WIN")
-        win_rate = wins / len(voted_trades) * 100
-        pnl      = sum(t["pnl"] for t in voted_trades)
-
+    for name, d in patterns.items():
+        total = d["trades"]
         result.append({
             "strategy": name,
-            "votes":    len(voted_trades),
-            "win_rate": round(win_rate, 1),
-            "pnl":      round(pnl, 2),
+            "votes":    total,
+            "win_rate": round(d["wins"] / total * 100, 1) if total > 0 else 0,
+            "pnl":      round(d["pnl"], 2),
         })
 
     return sorted(result, key=lambda x: x["win_rate"], reverse=True)

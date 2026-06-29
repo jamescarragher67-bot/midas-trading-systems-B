@@ -7,14 +7,23 @@ Install deps once:
     pip install requests
 """
 
+import sys
 import json
 import time
 import os
 import datetime
 import requests
+from dotenv import load_dotenv
+load_dotenv(os.path.join(os.path.dirname(__file__), "config", ".env"))
+
+# Force UTF-8 output so Unicode chars survive Windows cp1252 terminals/pipes
+if hasattr(sys.stdout, "reconfigure"):
+    sys.stdout.reconfigure(encoding="utf-8", errors="replace")
 
 # ── Firebase config ──────────────────────────────────────────────────────────
-DATABASE_URL = "https://midas-capital-1a92c-default-rtdb.firebaseio.com"
+DATABASE_URL = os.getenv("FIREBASE_DB_URL")
+if not DATABASE_URL:
+    raise SystemExit("ERROR: FIREBASE_DB_URL missing in config/.env")
 
 # Optional: leave empty string "" if your DB rules allow public write.
 # If you add Firebase Auth later, put your ID token here.
@@ -142,19 +151,19 @@ def sync():
             push("stats", stats)
             equity_curve = build_equity_curve(trades)
             push("equity_curve", equity_curve)
-            print(f"  ✓ trades ({len(trades)} records) · stats · equity_curve")
+            print(f"  ok: trades ({len(trades)} records) / stats / equity_curve")
 
         # 2. Open positions
         positions = read_json(POSITIONS_FILE)
         if positions is not None:
             push("open_positions", positions)
-            print(f"  ✓ open_positions")
+            print(f"  ok: open_positions")
 
         # 3. Heartbeat
         heartbeat = read_json(HEARTBEAT_FILE) or {}
         heartbeat["last_push"] = now_iso   # always stamp the last push time
         push("heartbeat", heartbeat)
-        print(f"  ✓ heartbeat")
+        print(f"  ok: heartbeat")
 
         time.sleep(PUSH_INTERVAL)
 

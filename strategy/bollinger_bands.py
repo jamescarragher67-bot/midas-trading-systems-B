@@ -1,4 +1,4 @@
-"""
+﻿"""
 strategy/bollinger_bands.py
 
 Strategy 3: Bollinger Bands

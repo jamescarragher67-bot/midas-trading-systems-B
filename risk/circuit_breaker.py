@@ -73,7 +73,14 @@ class CircuitBreaker:
         if not self._tripped:
             self._tripped     = True
             self._trip_reason = reason
-            logger.warning(f"🚨 CIRCUIT BREAKER TRIPPED: {reason}. Bot paused until midnight UTC.")
+            logger.warning(f"CIRCUIT BREAKER TRIPPED: {reason}. Bot paused until midnight UTC.")
+            try:
+                from utils.notifications import send_circuit_breaker
+                account = mt5.account_info()
+                balance = account.balance if account else 0.0
+                send_circuit_breaker(reason, balance)
+            except Exception as e:
+                logger.warning(f"Could not send circuit breaker alert: {e}")
 
     def is_tripped(self) -> bool:
         if not CIRCUIT_BREAKER_ENABLED:
