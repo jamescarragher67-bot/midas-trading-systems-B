@@ -155,8 +155,13 @@ def _execute_trade(direction: str, atr: float, sl_atr_mult: float,
         return False
 
     lot = risk_amt / (sl_points * pip_val)
+    # Hard cap: 0.01 lots maximum during demo/testing phase
+    MAX_LOT = 0.01
+    raw_lot = lot
     lot = max(sym_info.volume_min,
-              min(round(round(lot / sym_info.volume_step) * sym_info.volume_step, 2), 0.5))
+              min(round(round(lot / sym_info.volume_step) * sym_info.volume_step, 2), MAX_LOT))
+    if raw_lot > MAX_LOT:
+        logger.warning(f"Lot size capped at {MAX_LOT} (formula gave {raw_lot:.4f})")
 
     request = {
         "action":       mt5.TRADE_ACTION_DEAL,
@@ -481,11 +486,16 @@ def run_combined():
         log_sys.warning(f"Circuit breaker: {circuit_breaker.status()}")
         return
 
-    # Time-based exits and trade management (handles trailing, BE, close detection)
+    # Time-based exits and SL/TP management (trailing, BE, partial close).
+    # manage_open_trades() also syncs partial-close tracking but does NOT fire
+    # circuit_breaker or WhatsApp — that is handled exclusively below.
     check_time_exits(settings.SYMBOL)
     manage_open_trades()
 
-    # Detect our own closed trades → write to trades.json
+    # SINGLE SOURCE OF TRUTH for closed-trade recording:
+    # circuit_breaker.record_trade(), send_trade_closed(), and trades.json
+    # are all written here. manage_open_trades() / trade_manager.py does NOT
+    # call _on_trade_closed() — see _check_for_closed_trades() comment there.
     _check_combined_closed_trades()
 
     # Hard stop if combined limit hit

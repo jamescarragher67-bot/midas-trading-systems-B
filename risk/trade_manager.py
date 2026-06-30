@@ -85,9 +85,14 @@ def calculate_lot_size(symbol: str, sl_points: float) -> float:
     if pip_value_per_lot == 0 or sl_points == 0:
         return 0.01
     lot_size = risk_amount / (sl_points * pip_value_per_lot)
-    lot_size = max(sym_info.volume_min, min(lot_size, sym_info.volume_max))
+    # Hard cap: 0.01 lots maximum during demo/testing phase — never rely on broker volume_max alone
+    MAX_LOT = 0.01
+    raw     = lot_size
+    lot_size = max(sym_info.volume_min, min(lot_size, MAX_LOT, sym_info.volume_max))
     step     = sym_info.volume_step
     lot_size = round(round(lot_size / step) * step, 2)
+    if raw > MAX_LOT:
+        logger.warning(f"Lot size capped at {MAX_LOT} (formula gave {raw:.4f})")
     logger.info(f"Lot size: {lot_size} | Risk: ${risk_amount:.2f} | SL pips: {sl_points:.1f} | Balance: ${balance:.2f}")
     return lot_size
 
@@ -316,16 +321,23 @@ def _modify_sl(pos, new_sl: float, sym_info):
 _known_open_tickets = set()
 
 def _check_for_closed_trades():
-    """Detect when a position closes and record result to circuit breaker."""
+    """Sync partial-close tracking when positions close.
+
+    IMPORTANT: circuit_breaker.record_trade(), send_trade_closed(), and
+    trades.json writes are handled exclusively by _check_combined_closed_trades()
+    in main_combined.py. This function only cleans up _partial_closed so that
+    the partial-close flag is removed for positions that are now gone.
+    _on_trade_closed() is intentionally NOT called here to prevent double-firing.
+    """
     global _known_open_tickets
     positions = mt5.positions_get(symbol=SYMBOL) or []
     current_tickets = {p.ticket for p in positions if p.magic == MAGIC}
 
     closed = _known_open_tickets - current_tickets
     for ticket in closed:
-        _on_trade_closed(ticket)
-        _partial_closed.discard(ticket)
-    _save_partial_closed(_partial_closed)
+        _partial_closed.discard(ticket)   # clean up partial-close flag only
+    if closed:
+        _save_partial_closed(_partial_closed)
 
     _known_open_tickets = current_tickets
 
