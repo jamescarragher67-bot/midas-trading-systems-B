@@ -19,9 +19,10 @@ def spread_ok() -> bool:
     """Returns True if current spread is within acceptable limits."""
     if not SPREAD_FILTER_ENABLED:
         return True
+    mt5.symbol_select(SYMBOL, True)
     sym_info = mt5.symbol_info(SYMBOL)
     if not sym_info:
-        logger.warning("spread_ok: could not get symbol info — blocking trade")
+        logger.warning(f"spread_ok: could not get symbol info — MT5 error: {mt5.last_error()} — blocking trade")
         return False
     spread = sym_info.spread
     if spread > MAX_SPREAD_POINTS:

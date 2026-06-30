@@ -100,6 +100,17 @@ _known_tickets         = {}   # ticket -> {"bot": "BOT1"|"BOT2"}
 TRADES_FILE = "trades.json"
 
 
+def _reconnect() -> bool:
+    """Attempt up to 3 reconnects with exponential back-off. Returns True on success."""
+    for attempt in range(1, 4):
+        time.sleep(10 * attempt)
+        if connect_mt5():
+            log_sys.info(f"MT5 reconnected (attempt {attempt})")
+            return True
+        log_sys.warning(f"Reconnect attempt {attempt} failed: {mt5.last_error()}")
+    return False
+
+
 # ═════════════════════════════════════════════════════════════════════════════
 # EXECUTION — shared by both bots
 # ═════════════════════════════════════════════════════════════════════════════
@@ -173,9 +184,9 @@ def _execute_trade(direction: str, atr: float, sl_atr_mult: float,
         _known_tickets[result.order] = {"bot": bot_label}
         return True
     else:
-        code    = result.retcode if result else "None"
-        comment = result.comment if result else "None"
-        logger.error(f"Order FAILED | retcode={code} | {comment}")
+        code     = result.retcode if result else "None"
+        err_msg  = result.comment if result else "None"
+        logger.error(f"Order FAILED | retcode={code} | {err_msg}")
         _log_retcode_hint(result.retcode if result else 0, logger)
         return False
 
@@ -303,7 +314,8 @@ def _get_bot1_signal() -> dict | None:
     mt5.symbol_select(settings.SYMBOL, True)
     rates = mt5.copy_rates_from_pos(settings.SYMBOL, mt5.TIMEFRAME_M5, 0, 300)
     if rates is None or len(rates) < 70:
-        log1.warning("Insufficient M5 bars for Bot 1")
+        n = len(rates) if rates is not None else 0
+        log1.warning(f"Insufficient M5 bars for Bot 1 — got {n}/70 required | MT5 error: {mt5.last_error()}")
         return None
     df = pd.DataFrame(rates)
     df["time"] = pd.to_datetime(df["time"], unit="s")
@@ -367,7 +379,8 @@ def _get_bot2_signal() -> dict | None:
     mt5.symbol_select(settings.SYMBOL, True)
     rates = mt5.copy_rates_from_pos(settings.SYMBOL, mt5.TIMEFRAME_M5, 0, 300)
     if rates is None or len(rates) < 110:
-        log2.warning("Insufficient M5 bars for Bot 2")
+        n = len(rates) if rates is not None else 0
+        log2.warning(f"Insufficient M5 bars for Bot 2 — got {n}/110 required | MT5 error: {mt5.last_error()}")
         return None
     df = pd.DataFrame(rates)
     df["time"] = pd.to_datetime(df["time"], unit="s")
@@ -552,19 +565,21 @@ def main():
 
     try:
         while True:
+            # Proactive health check — MT5 drops return None silently, never raise exceptions,
+            # so we must check every cycle rather than waiting for an exception to trigger reconnect.
+            if mt5.terminal_info() is None:
+                log_sys.warning(f"MT5 connection lost (error {mt5.last_error()}) — reconnecting...")
+                if not _reconnect():
+                    log_sys.error("Could not reconnect after 3 attempts — exiting")
+                    break
+
             try:
                 run_combined()
             except Exception as e:
                 log_sys.error(f"Loop error: {e}", exc_info=True)
                 if not mt5.terminal_info():
-                    log_sys.warning("MT5 connection lost — reconnecting...")
-                    for attempt in range(1, 4):
-                        time.sleep(10 * attempt)
-                        if connect_mt5():
-                            log_sys.info(f"MT5 reconnected (attempt {attempt})")
-                            break
-                        log_sys.warning(f"Reconnect attempt {attempt} failed")
-                    else:
+                    log_sys.warning("MT5 connection lost after exception — reconnecting...")
+                    if not _reconnect():
                         log_sys.error("Could not reconnect after 3 attempts — exiting")
                         break
             time.sleep(settings.LOOP_INTERVAL_SECONDS)

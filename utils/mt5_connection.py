@@ -27,7 +27,16 @@ def connect_mt5() -> bool:
 
     # Make sure the symbol is available
     if not mt5.symbol_select(SYMBOL, True):
-        logger.error(f"Symbol {SYMBOL} not found in Market Watch.")
+        logger.error(f"Symbol {SYMBOL} not found in Market Watch — MT5 error: {mt5.last_error()}")
+        logger.error(f"Check symbol name exactly (e.g. XAUUSD vs XAUUSD.a vs XAUUSDm)")
+        mt5.shutdown()
+        return False
+
+    # Verify symbol actually returns data (catches name mismatches and permission issues)
+    sym = mt5.symbol_info(SYMBOL)
+    if sym is None:
+        logger.error(f"symbol_info({SYMBOL}) returned None after select — MT5 error: {mt5.last_error()}")
+        logger.error(f"Possible causes: symbol name mismatch, not in Market Watch, broker permissions")
         mt5.shutdown()
         return False
 
@@ -36,6 +45,7 @@ def connect_mt5() -> bool:
     logger.info(f"Connected to: {info.name}")
     logger.info(f"Account: {account.login} | Balance: {account.balance} {account.currency}")
     logger.info(f"Server: {account.server}")
+    logger.info(f"Symbol: {SYMBOL} | Digits={sym.digits} | Point={sym.point} | Spread={sym.spread}pts")
 
     return True
 

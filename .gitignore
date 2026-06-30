@@ -6,5 +6,6 @@ logs/
 seen_tickets.json
 heartbeat.json
 open_positions.json
+trades.json
 *.log
 .vscode/
