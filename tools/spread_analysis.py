@@ -14,7 +14,7 @@ import sys
 import os
 
 # Allow imports from project root
-sys.path.insert(0, os.path.dirname(__file__))
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 import MetaTrader5 as mt5
 import pandas as pd

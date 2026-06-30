@@ -22,7 +22,7 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-LOG_FILE   = Path(__file__).parent / "logs" / f"{datetime.now().strftime('%Y-%m-%d')}.log"
+LOG_FILE   = Path(__file__).parent.parent / "logs" / f"{datetime.now().strftime('%Y-%m-%d')}.log"
 HTML_FILE  = Path(__file__).parent / "midas_dashboard_local.html"
 SYMBOL     = "XAUUSD"
 REFRESH_S  = 30

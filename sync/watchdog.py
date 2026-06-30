@@ -10,15 +10,18 @@ Usage:
 
 import subprocess
 import sys
+import os
 import time
+from pathlib import Path
 from datetime import datetime
+
+_ROOT = Path(__file__).resolve().parent.parent
 
 RESTART_DELAY  = 10    # seconds to wait before restarting
 MAX_RESTARTS   = 20    # max restarts per session before giving up
-LOG_FILE       = "logs/watchdog.log"
+LOG_FILE       = str(_ROOT / "logs" / "watchdog.log")
 
-import os
-os.makedirs("logs", exist_ok=True)
+os.makedirs(_ROOT / "logs", exist_ok=True)
 
 
 def log(message: str):
@@ -31,7 +34,7 @@ def log(message: str):
 
 def start_bot():
     return subprocess.Popen(
-        [sys.executable, "main.py"],
+        [sys.executable, str(_ROOT / "main_combined.py")],
         stdout=None,
         stderr=None,
     )

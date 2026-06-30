@@ -7,8 +7,16 @@ Sends WhatsApp notifications on trade close and hourly balance updates.
 
 import json
 import os
+import sys
 import time
+from pathlib import Path
 from datetime import datetime, timezone, timedelta
+
+# Resolve project root so imports from utils/ and config/ work regardless of CWD
+_ROOT = Path(__file__).resolve().parent.parent
+sys.path.insert(0, str(_ROOT))
+os.chdir(_ROOT)
+
 import MetaTrader5 as mt5
 from utils.logger import setup_logger
 from utils.mt5_connection import connect_mt5, disconnect_mt5
@@ -17,10 +25,10 @@ from config.settings import SYMBOL, MAGIC
 
 logger = setup_logger("trade_sync")
 
-TRADES_FILE    = "trades.json"
-SEEN_FILE      = "seen_tickets.json"
-HEARTBEAT_FILE = "heartbeat.json"
-POSITIONS_FILE = "open_positions.json"
+TRADES_FILE    = str(_ROOT / "trades.json")
+SEEN_FILE      = str(_ROOT / "seen_tickets.json")
+HEARTBEAT_FILE = str(_ROOT / "heartbeat.json")
+POSITIONS_FILE = str(_ROOT / "open_positions.json")
 CHECK_INTERVAL = 30       # seconds between sync cycles
 
 # ── JSON helpers ──────────────────────────────────────────────────────────────

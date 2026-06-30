@@ -19,7 +19,7 @@ import subprocess
 import getpass
 from pathlib import Path
 
-ENV_PATH = Path(__file__).parent / ".env"
+ENV_PATH = Path(__file__).resolve().parent.parent / "config" / ".env"
 REQUIRED_PY_VERSION = (3, 10)
 
 BANNER = """
@@ -45,7 +45,7 @@ def check_python_version():
 
 
 def install_requirements():
-    req_file = Path(__file__).parent / "requirements.txt"
+    req_file = Path(__file__).resolve().parent.parent / "requirements.txt"
     if not req_file.exists():
         print("[WARN] requirements.txt not found — skipping dependency install")
         return

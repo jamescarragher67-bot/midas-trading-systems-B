@@ -10,19 +10,28 @@ MIDAS is an automated algorithmic trading bot for XAUUSD (Gold) scalping on Meta
 
 ```bash
 # Run the trading bot
-python main.py
+python main_combined.py
 
 # GUI launcher (manages processes, views logs)
-python midas_launcher.py
+python dashboard/midas_launcher.py
 
-# Run 86-day backtest (outputs backtest_report.html)
-python run_backtest.py
+# Run 100-day backtest (outputs backtest_report.html)
+python tools/run_backtest.py
 
 # Live HTML dashboard (auto-refreshes every 30s)
-python midas_dashboard_local.py
+python dashboard/midas_dashboard_local.py
+
+# One-shot diagnostic snapshot (what both bots see right now)
+python tools/check_current_signal.py
+
+# 30-day spread analysis by UTC hour
+python tools/spread_analysis.py
 
 # Initial setup wizard (validates MT5 credentials)
-python setup_midas.py
+python tools/setup_midas.py
+
+# Watchdog (auto-restarts bot on crash)
+python sync/watchdog.py
 
 # Install dependencies
 pip install -r requirements.txt
@@ -96,9 +105,19 @@ After any logic change, re-run `python run_backtest.py` to validate.
 
 | File | Role |
 |------|------|
+| `main_combined.py` | Entry point — Bot 1 + Bot 2 combined live loop |
 | `config/settings.py` | All tunable parameters and profiles |
-| `strategy/signal_engine.py` | Filter chain + voting orchestration |
-| `strategy/voting_engine.py` | Vote aggregation and threshold |
 | `risk/trade_manager.py` | Sizing, execution, BE/partial/trailing |
-| `backtest/engine.py` | Bar-by-bar simulation (mirrors live logic) |
+| `risk/circuit_breaker.py` | Loss streak / daily drawdown guard |
+| `utils/snapshot_logger.py` | 15-min background signal snapshots → `logs/signal_snapshots.log` |
 | `utils/logger.py` | `setup_logger("name")` used by all modules; writes to `logs/YYYY-MM-DD.log` |
+| `backtest/engine.py` | Bar-by-bar simulation (mirrors live logic) |
+| `dashboard/midas_launcher.py` | GUI process manager + live log viewer |
+| `dashboard/midas_dashboard_local.py` | Auto-refresh HTML dashboard |
+| `sync/firebase_push.py` | Pushes trades/positions/heartbeat to Firebase |
+| `sync/trade_sync.py` | Syncs closed trades and sends WhatsApp alerts |
+| `sync/watchdog.py` | Monitors main_combined.py, auto-restarts on crash |
+| `tools/check_current_signal.py` | Live diagnostic snapshot (run on demand) |
+| `tools/run_backtest.py` | 100-day backtest runner |
+| `tools/spread_analysis.py` | 30-day spread distribution by UTC hour |
+| `tools/setup_midas.py` | Machine setup wizard (.env creation) |

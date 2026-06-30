@@ -120,19 +120,19 @@ The setup wizard prompts for MT5 credentials, WhatsApp (CallMeBot) API key, and 
 python main_combined.py
 
 # GUI launcher (process manager + live log viewer)
-python midas_launcher.py
+python dashboard/midas_launcher.py
 
 # 100-day backtest
-python run_backtest.py
+python tools/run_backtest.py
 
 # Live dashboard (auto-refresh every 30s)
-python midas_dashboard_local.py
+python dashboard/midas_dashboard_local.py
 
 # One-shot diagnostic snapshot (what both bots see right now)
-python check_current_signal.py
+python tools/check_current_signal.py
 
 # 30-day spread analysis by UTC hour
-python spread_analysis.py
+python tools/spread_analysis.py
 ```
 
 ---
@@ -192,8 +192,19 @@ MT5 credentials and API keys are loaded from `config/.env` — never hardcoded.
 ├── backtest/
 │   ├── engine.py             — Bar-by-bar backtest simulation
 │   └── report.py             — HTML report generator
-├── check_current_signal.py   — Live diagnostic snapshot (run on demand)
-└── spread_analysis.py        — 30-day spread distribution analysis
+├── dashboard/
+│   ├── midas_launcher.py     — GUI process manager + live log viewer
+│   └── midas_dashboard_local.py — Auto-refresh HTML dashboard
+├── sync/
+│   ├── firebase_push.py      — Pushes trades/positions/heartbeat to Firebase
+│   ├── trade_sync.py         — Syncs closed trades, sends WhatsApp alerts
+│   └── watchdog.py           — Monitors bot, auto-restarts on crash
+└── tools/
+    ├── check_current_signal.py — Live diagnostic snapshot (run on demand)
+    ├── run_backtest.py         — 100-day backtest runner
+    ├── spread_analysis.py      — 30-day spread distribution by UTC hour
+    ├── setup_midas.py          — Machine setup wizard (.env creation)
+    └── generate_preview.py     — Generates social_preview.png
 ```
 
 ---

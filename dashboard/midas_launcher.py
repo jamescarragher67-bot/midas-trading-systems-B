@@ -8,15 +8,15 @@ from tkinter import scrolledtext, messagebox
 import subprocess, threading, os, sys, json, time
 from datetime import datetime, timezone, date
 
-# ── Paths ──────────────────────────────────────────────────────────────────────
-BASE_DIR    = os.path.dirname(os.path.abspath(__file__))
+# ── Paths — BASE_DIR is the project root, one level up from dashboard/ ────────
+BASE_DIR    = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 LOG_DIR     = os.path.join(BASE_DIR, "logs")
 TRADES_FILE = os.path.join(BASE_DIR, "trades.json")
 
 PROCESSES = {
     "Trading Bot": os.path.join(BASE_DIR, "main_combined.py"),
-    "Trade Sync":  os.path.join(BASE_DIR, "trade_sync.py"),
-    "Firebase":    os.path.join(BASE_DIR, "firebase_push.py"),
+    "Trade Sync":  os.path.join(BASE_DIR, "sync", "trade_sync.py"),
+    "Firebase":    os.path.join(BASE_DIR, "sync", "firebase_push.py"),
 }
 
 # Mirrors config/settings.py — update here if settings change

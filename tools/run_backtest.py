@@ -13,6 +13,11 @@ Output:
 
 import os
 import sys
+from pathlib import Path
+
+# Resolve project root so backtest/ and config/ imports work from tools/
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
+
 import MetaTrader5 as mt5
 
 CONFIG = {

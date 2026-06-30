@@ -3,11 +3,12 @@ generate_preview.py — One-shot script to produce social_preview.png (1280×640
 Run once then delete. Output: social_preview.png in project root.
 """
 import math
+from pathlib import Path
 from PIL import Image, ImageDraw, ImageFont
 import os
 
 W, H = 1280, 640
-OUT  = "social_preview.png"
+OUT  = str(Path(__file__).resolve().parent.parent / "social_preview.png")
 
 # ── Palette ────────────────────────────────────────────────────────────────────
 BG_TOP    = (6,  6,  14)       # near-black navy

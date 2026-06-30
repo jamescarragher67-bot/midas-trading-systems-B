@@ -14,7 +14,7 @@ import os
 import datetime
 import requests
 from dotenv import load_dotenv
-load_dotenv(os.path.join(os.path.dirname(__file__), "config", ".env"))
+load_dotenv(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "config", ".env"))
 
 # Force UTF-8 output so Unicode chars survive Windows cp1252 terminals/pipes
 if hasattr(sys.stdout, "reconfigure"):
