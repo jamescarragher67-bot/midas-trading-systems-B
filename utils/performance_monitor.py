@@ -34,8 +34,8 @@ from config.settings import (
 
 logger = setup_logger("performance_monitor")
 
-TRADES_FILE    = "trades.json"
-STATE_FILE     = "monitor_state.json"
+TRADES_FILE    = "jasons/trades.json"
+STATE_FILE     = "jasons/monitor_state.json"
 
 
 def _load_recent_trades(n: int) -> list:

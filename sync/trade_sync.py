@@ -25,10 +25,10 @@ from config.settings import SYMBOL, MAGIC
 
 logger = setup_logger("trade_sync")
 
-TRADES_FILE    = str(_ROOT / "trades.json")
-SEEN_FILE      = str(_ROOT / "seen_tickets.json")
-HEARTBEAT_FILE = str(_ROOT / "heartbeat.json")
-POSITIONS_FILE = str(_ROOT / "open_positions.json")
+TRADES_FILE    = str(_ROOT / "jasons" / "trades.json")
+SEEN_FILE      = str(_ROOT / "jasons" / "seen_tickets.json")
+HEARTBEAT_FILE = str(_ROOT / "jasons" / "heartbeat.json")
+POSITIONS_FILE = str(_ROOT / "jasons" / "open_positions.json")
 CHECK_INTERVAL = 30       # seconds between sync cycles
 
 # ── JSON helpers ──────────────────────────────────────────────────────────────

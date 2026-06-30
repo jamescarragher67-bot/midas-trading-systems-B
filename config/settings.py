@@ -52,7 +52,7 @@ ALLOWED_SESSIONS = [
 ]
 HOUR_FILTER_ENABLED = False
 MIN_HOUR_WIN_RATE   = 40.0
-BEST_HOURS_FILE     = "best_hours.json"
+BEST_HOURS_FILE     = "jasons/best_hours.json"
 
 # ── Spread / volatility filters ──────────────────────────────────────────
 SPREAD_FILTER_ENABLED     = True

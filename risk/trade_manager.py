@@ -32,7 +32,7 @@ from config.settings import (
 logger = setup_logger("trade_manager")
 
 # Track which positions have had partial close applied — persisted across restarts
-_PARTIAL_CLOSED_FILE = "partial_closed.json"
+_PARTIAL_CLOSED_FILE = "jasons/partial_closed.json"
 
 
 def _load_partial_closed() -> set:

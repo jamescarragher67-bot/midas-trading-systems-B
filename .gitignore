@@ -3,6 +3,12 @@
 __pycache__/
 *.pyc
 logs/
+jasons/seen_tickets.json
+jasons/heartbeat.json
+jasons/open_positions.json
+jasons/trades.json
+jasons/monitor_state.json
+jasons/partial_closed.json
 seen_tickets.json
 heartbeat.json
 open_positions.json

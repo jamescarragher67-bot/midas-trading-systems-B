@@ -23,6 +23,7 @@ Switch to live: update MT5_LOGIN / MT5_PASSWORD / MT5_SERVER in config/.env
 """
 
 import json
+import os
 import time
 from datetime import datetime, timezone, timedelta
 
@@ -98,7 +99,7 @@ _combined_date         = None
 _summary_date          = None
 _known_tickets         = {}   # ticket -> {"bot": "BOT1"|"BOT2"}
 
-TRADES_FILE = "trades.json"
+TRADES_FILE = "jasons/trades.json"
 
 
 def _reconnect() -> bool:
@@ -551,6 +552,7 @@ def run_combined():
 # ═════════════════════════════════════════════════════════════════════════════
 
 def main():
+    os.makedirs("jasons", exist_ok=True)
     log_sys.info("=" * 60)
     log_sys.info("   MIDAS COMBINED — Starting")
     log_sys.info("   Bot 1: M5 EMA21 pullback | Bot 2: B->C mean reversion")

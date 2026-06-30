@@ -231,7 +231,7 @@ def _simulate_trade(df: pd.DataFrame, df_slice: pd.DataFrame,
 
 # ── Best hours export ─────────────────────────────────────────────────────────
 
-def write_best_hours(trades: list, output_path: str = "best_hours.json"):
+def write_best_hours(trades: list, output_path: str = "jasons/best_hours.json"):
     from collections import defaultdict
     hourly = defaultdict(lambda: {"wins": 0, "total": 0})
     for t in trades:

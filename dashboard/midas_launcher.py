@@ -11,7 +11,7 @@ from datetime import datetime, timezone, date
 # ── Paths — BASE_DIR is the project root, one level up from dashboard/ ────────
 BASE_DIR    = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 LOG_DIR     = os.path.join(BASE_DIR, "logs")
-TRADES_FILE = os.path.join(BASE_DIR, "trades.json")
+TRADES_FILE = os.path.join(BASE_DIR, "jasons", "trades.json")
 
 PROCESSES = {
     "Trading Bot": os.path.join(BASE_DIR, "main_combined.py"),

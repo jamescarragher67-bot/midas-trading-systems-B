@@ -133,7 +133,7 @@ def main():
         generate_html_report(metrics, monthly, strategy, hourly, trades, CONFIG, output)
 
         from backtest.engine import write_best_hours
-        write_best_hours(trades, "best_hours.json")
+        write_best_hours(trades, str(Path(__file__).resolve().parent.parent / "jasons" / "best_hours.json"))
 
         print(f"\nReport: {os.path.abspath(output)}")
         print("Open backtest_report.html in Chrome.")

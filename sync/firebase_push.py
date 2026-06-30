@@ -30,10 +30,10 @@ if not DATABASE_URL:
 AUTH_TOKEN = ""
 
 # ── File paths ────────────────────────────────────────────────────────────────
-BASE_DIR        = os.path.dirname(os.path.abspath(__file__))
-TRADES_FILE     = os.path.join(BASE_DIR, "trades.json")
-POSITIONS_FILE  = os.path.join(BASE_DIR, "open_positions.json")
-HEARTBEAT_FILE  = os.path.join(BASE_DIR, "heartbeat.json")
+BASE_DIR        = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+TRADES_FILE     = os.path.join(BASE_DIR, "jasons", "trades.json")
+POSITIONS_FILE  = os.path.join(BASE_DIR, "jasons", "open_positions.json")
+HEARTBEAT_FILE  = os.path.join(BASE_DIR, "jasons", "heartbeat.json")
 
 PUSH_INTERVAL   = 30   # seconds
 
