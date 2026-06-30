@@ -219,7 +219,7 @@ def write_env(values: dict):
     ENV_PATH.parent.mkdir(parents=True, exist_ok=True)
 
     if ENV_PATH.exists():
-        backup = ENV_PATH.with_suffix(".env.bak")
+        backup = ENV_PATH.parent / ".env.bak"
         import shutil
         shutil.copy2(ENV_PATH, backup)
         print(f"\n[INFO] Existing .env backed up to {backup.name}")
