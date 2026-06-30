@@ -44,6 +44,7 @@ from strategy.volatility_metrics  import get_volatility_fingerprint
 from strategy.regime_classifier   import classify_regime
 from strategy.transition_detector import detect_transition
 from strategy.volatility_signal_engine import get_signal
+from utils.snapshot_logger import start as start_snapshot_logger
 from config import settings
 
 # ── Loggers — same daily file, different name prefix ─────────────────────────
@@ -562,6 +563,10 @@ def main():
     log_sys.info(f"Scanning every {settings.LOOP_INTERVAL_SECONDS}s | Max {MAX_COMBINED_TRADES} trades/day combined")
     log_sys.info(f"Bot 1 spread limit: 15pts | Bot 2 spread limit: 20pts")
     log_sys.info(f"Circuit breaker: {settings.MAX_CONSECUTIVE_LOSSES} losses OR {settings.MAX_DAILY_LOSS_PCT}% daily loss")
+
+    # Start background snapshot logger (every 15 min → logs/signal_snapshots.log)
+    start_snapshot_logger()
+    log_sys.info("Signal snapshot logger started (15-min interval → logs/signal_snapshots.log)")
 
     try:
         while True:

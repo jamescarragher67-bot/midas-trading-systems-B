@@ -192,6 +192,33 @@ def main():
     row("Close (last closed):", f"{close_c:.2f}")
     row("Alignment:",           alignment)
     row("Close > EMA50:",       yn(close_c > ema50))
+    spacer()
+
+    # Proximity: how far each gap is from alignment
+    gap9_21  = ema9  - ema21          # positive → already above for BUY
+    gap21_50 = ema21 - ema50          # positive → already above for BUY
+
+    def _gap_label(gap: float, label_above: str) -> str:
+        if gap > 0:
+            return f"+{gap:.2f} pts  (✓ {label_above})"
+        return f"{gap:.2f} pts  (✗ need +{abs(gap):.2f} to reach {label_above})"
+
+    print(f"  {'─' * 58}")
+    print(f"  PROXIMITY TO FIRE")
+    row("EMA9 vs EMA21:",    _gap_label(gap9_21,  "BUY-aligned"))
+    row("EMA21 vs EMA50:",   _gap_label(gap21_50, "BUY-aligned"))
+    row("Close vs EMA50:",   f"{close_c - ema50:+.2f} pts  ({'✓ above' if close_c > ema50 else '✗ below'})")
+    if ema9 > ema21 > ema50:
+        row("→ BUY stack:",  "FULLY ALIGNED — waiting for M5 entry trigger")
+    elif ema9 < ema21 < ema50:
+        row("→ SELL stack:", "FULLY ALIGNED — waiting for M5 entry trigger")
+    else:
+        blockers = []
+        if ema9 <= ema21:
+            blockers.append(f"EMA9 needs +{ema21 - ema9 + 0.01:.2f} to clear EMA21 (BUY)")
+        if ema21 <= ema50:
+            blockers.append(f"EMA21 needs +{ema50 - ema21 + 0.01:.2f} to clear EMA50 (BUY)")
+        row("→ BUY blockers:", "  |  ".join(blockers) if blockers else "none")
 
     # ══════════════════════════════════════════════════════════════════════════
     # 4. BOT 1 — VOTER 2: ATR EXPANSION
@@ -216,6 +243,23 @@ def main():
     row("Threshold (×1.2):", f"{atr_thresh:.3f}")
     row("ATR > threshold?",  yn(atr_val >= atr_thresh))
     row("Last 3 bars net:", f"{last3_net:+.3f}  ({'BUY direction' if last3_net > 0 else 'SELL direction' if last3_net < 0 else 'FLAT'})")
+    spacer()
+
+    # Proximity: % of the way to the expansion threshold
+    atr_pct     = atr_val / atr_thresh * 100 if atr_thresh > 0 else 0.0
+    atr_gap     = atr_thresh - atr_val
+    bar_width   = 30
+    filled      = min(bar_width, int(atr_pct / 100 * bar_width))
+    prog_bar    = "█" * filled + "░" * (bar_width - filled)
+
+    print(f"  {'─' * 58}")
+    print(f"  PROXIMITY TO FIRE")
+    row("Progress:",         f"[{prog_bar}] {atr_pct:.1f}%")
+    if atr_val >= atr_thresh:
+        row("→ THRESHOLD MET:", f"ATR is {atr_val - atr_thresh:.3f} pts ABOVE threshold — direction via net candles")
+    else:
+        row("→ Still needs:",   f"+{atr_gap:.3f} pts of ATR expansion to fire")
+        row("  Last 3 net:",    f"{last3_net:+.3f} pts — {'would vote BUY' if last3_net > 0 else 'would vote SELL' if last3_net < 0 else 'FLAT = no signal'} if threshold crossed now")
 
     # ══════════════════════════════════════════════════════════════════════════
     # 5. BOT 1 — VOTER 3: PREV DAY STRUCTURE
@@ -249,8 +293,37 @@ def main():
     row("Prev Day Low  (PDL):", f"{pdl:.2f}" if not np.isnan(pdl) else "N/A")
     row("Prev Day Range:",    f"{pdr:.2f}" if not np.isnan(pdr) else "N/A")
     row("Current price:",     f"{current_close:.2f}")
-    row("Dist from PDH:",     f"{dist_from_pdh:+.2f}  ({'ABOVE' if dist_from_pdh > 0 else 'below'})" if not np.isnan(dist_from_pdh) else "N/A")
-    row("Dist from PDL:",     f"{dist_from_pdl:+.2f}  ({'above' if dist_from_pdl > 0 else 'BELOW'})" if not np.isnan(dist_from_pdl) else "N/A")
+    if not np.isnan(dist_from_pdh):
+        pdh_tag = "ABOVE ✓ — BUY signal" if dist_from_pdh > 0 else f"below  — need +{abs(dist_from_pdh):.2f} to break out"
+        row("Dist from PDH:", f"{dist_from_pdh:+.2f}  ({pdh_tag})")
+    else:
+        row("Dist from PDH:", "N/A")
+    if not np.isnan(dist_from_pdl):
+        pdl_tag = f"above  — need -{dist_from_pdl:.2f} to break down" if dist_from_pdl > 0 else "BELOW ✓ — SELL signal"
+        row("Dist from PDL:", f"{dist_from_pdl:+.2f}  ({pdl_tag})")
+    else:
+        row("Dist from PDL:", "N/A")
+    spacer()
+
+    print(f"  {'─' * 58}")
+    print(f"  PROXIMITY TO FIRE")
+    if not np.isnan(pdh) and not np.isnan(pdl):
+        pd_range = pdh - pdl
+        pct_from_pdl = (current_close - pdl) / pd_range * 100 if pd_range > 0 else 50.0
+        bar_w  = 30
+        filled = min(bar_w, max(0, int(pct_from_pdl / 100 * bar_w)))
+        bar    = "░" * filled + "▓" * (bar_w - filled)   # left=PDL, right=PDH
+        row("Price in PD range:", f"[PDL{bar}PDH]  {pct_from_pdl:.0f}% from PDL")
+        if dist_from_pdh > 0:
+            row("→ BUY ACTIVE:",  f"Price {dist_from_pdh:+.2f} pts above PDH")
+        else:
+            row("→ BUY trigger:", f"need price to rise {abs(dist_from_pdh):.2f} pts to PDH ({pdh:.2f})")
+        if dist_from_pdl < 0:
+            row("→ SELL ACTIVE:", f"Price {dist_from_pdl:+.2f} pts below PDL")
+        else:
+            row("→ SELL trigger:", f"need price to fall {dist_from_pdl:.2f} pts to PDL ({pdl:.2f})")
+    else:
+        row("Proximity:", "N/A — insufficient prior-day data")
 
     # ══════════════════════════════════════════════════════════════════════════
     # 6. BOT 1 — COMBINED DAILY BIAS
@@ -337,6 +410,53 @@ def main():
         print(f"    C check: atr_ratio({atr_r:.3f})>1.50={atr_r>1.50} AND vov_ratio({vov_r:.3f})>1.30={vov_r>1.30}")
         print(f"    A check: atr<0.80={atr_r<0.80} AND std<0.80={std_r<0.80} AND hl<0.75={hl_comp<0.75}")
         print(f"    B check: atr in [0.80,1.50]={0.80<=atr_r<=1.50} AND std in [0.80,1.50]={0.80<=std_r<=1.50}")
+
+    # ── Regime proximity: how far each metric is from the next threshold ──────
+    spacer()
+    print(f"  {'─' * 58}")
+    print(f"  PROXIMITY TO NEXT REGIME")
+    spacer()
+
+    def _pct_bar(val: float, threshold: float, direction: str = "up") -> str:
+        """direction='up' means we need val to rise to threshold."""
+        if direction == "up":
+            pct = min(100.0, val / threshold * 100) if threshold > 0 else 0.0
+        else:
+            pct = min(100.0, (1 - val / threshold) * 100 + 100) if threshold > 0 else 0.0
+        bw = 20
+        f  = min(bw, int(pct / 100 * bw))
+        return f"[{'█' * f}{'░' * (bw - f)}] {pct:.0f}%"
+
+    if regime in ("A", "UNKNOWN"):
+        print("  → To reach Regime B (need atr_r ≥ 0.80 AND std_r ≥ 0.80):")
+        row("  ATR ratio  0.80 target:", f"{atr_r:.3f}  {_pct_bar(atr_r, 0.80)}  gap={0.80 - atr_r:+.3f}")
+        row("  StdDev ratio 0.80 target:", f"{std_r:.3f}  {_pct_bar(std_r, 0.80)}  gap={0.80 - std_r:+.3f}")
+        row("  H/L comp  ≥0.75 target:", f"{hl_comp:.3f}  {_pct_bar(hl_comp, 0.75)}  gap={0.75 - hl_comp:+.3f}")
+        bottleneck = min([(atr_r/0.80, "ATR ratio"), (std_r/0.80, "StdDev ratio"), (hl_comp/0.75, "H/L comp")], key=lambda x: x[0])
+        spacer()
+        row("  Binding constraint:", f"{bottleneck[1]} — furthest from its B-threshold")
+        spacer()
+        print("  → To reach Regime C directly (need atr_r > 1.50 AND vov_r > 1.30):")
+        row("  ATR ratio  1.50 target:", f"{atr_r:.3f}  {_pct_bar(atr_r, 1.50)}  gap={1.50 - atr_r:+.3f}")
+        row("  VoV ratio  1.30 target:", f"{vov_r:.3f}  {_pct_bar(vov_r, 1.30)}  gap={1.30 - vov_r:+.3f}")
+
+    elif regime == "B":
+        print("  → Already in Regime B (expansion). Watching for C:")
+        row("  ATR ratio → C (>1.50):", f"{atr_r:.3f}  {_pct_bar(atr_r, 1.50)}  gap={1.50 - atr_r:+.3f}")
+        row("  VoV ratio → C (>1.30):", f"{vov_r:.3f}  {_pct_bar(vov_r, 1.30)}  gap={1.30 - vov_r:+.3f}")
+        row("  Wick ratio (B→C entry, >0.60):", f"{wick_r:.3f}  {_pct_bar(wick_r, 0.60)}  gap={0.60 - wick_r:+.3f}")
+        spacer()
+        if atr_r > 1.30 and vov_r > 1.10:
+            print("  ⚡  Approaching C territory — watch for B→C transition signal.")
+        else:
+            print("  ℹ️   Solidly in B; C transition not imminent.")
+
+    elif regime == "C":
+        print("  → In Regime C (exhaustion). Watching for C→A cooling:")
+        row("  ATR ratio → below 1.20:", f"{atr_r:.3f}  gap={atr_r - 1.20:+.3f}")
+        row("  VoV ratio → below 1.30:", f"{vov_r:.3f}  gap={vov_r - 1.30:+.3f}")
+        if atr_r < 1.35:
+            print("  ⚡  ATR dropping toward 1.20 cooling threshold — C→A may be near.")
 
     # ══════════════════════════════════════════════════════════════════════════
     # 8. BOT 2 — REGIME HISTORY & TRANSITION DETECTOR
