@@ -98,6 +98,7 @@ _combined_trades_today = 0
 _combined_date         = None
 _summary_date          = None
 _known_tickets         = {}   # ticket -> {"bot": "BOT1"|"BOT2"}
+_trade_in_progress     = False   # global lock: True from order submission until MT5 confirms/rejects
 
 TRADES_FILE = "jasons/trades.json"
 
@@ -124,9 +125,33 @@ def _execute_trade(direction: str, atr: float, sl_atr_mult: float,
     Place a market order. SL = entry ± ATR × sl_atr_mult. TP = SL dist × RR.
     Returns True on successful fill.
     """
-    global _combined_trades_today, _known_tickets
+    global _combined_trades_today, _known_tickets, _trade_in_progress
 
+    # ── Part 2: Trade lock — blocks the window between submission and MT5 confirmation ──
+    if _trade_in_progress:
+        log_sys.warning(
+            f"[COMBINED] Trade blocked — duplicate prevention active "
+            f"(lock held, {bot_label} {direction} rejected)"
+        )
+        return False
+
+    # ── Part 3: MT5-side deduplication — second line of defence ──────────────────
     symbol   = settings.SYMBOL
+    existing = mt5.positions_get(symbol=symbol) or []
+    cutoff   = datetime.now(timezone.utc) - timedelta(seconds=60)
+    for pos in existing:
+        if pos.magic != settings.MAGIC:
+            continue
+        pos_dir   = "BUY" if pos.type == mt5.ORDER_TYPE_BUY else "SELL"
+        pos_open  = datetime.fromtimestamp(pos.time, tz=timezone.utc)
+        if pos_dir == direction and pos_open >= cutoff:
+            log_sys.warning(
+                f"[COMBINED] Trade blocked — duplicate prevention active "
+                f"(open {pos_dir} ticket={pos.ticket} opened {int((datetime.now(timezone.utc) - pos_open).total_seconds())}s ago, "
+                f"{bot_label} {direction} rejected)"
+            )
+            return False
+
     sym_info = mt5.symbol_info(symbol)
     tick     = mt5.symbol_info_tick(symbol)
     account  = mt5.account_info()
@@ -180,7 +205,11 @@ def _execute_trade(direction: str, atr: float, sl_atr_mult: float,
     }
 
     logger.info(f"Sending {direction} {lot} lots | SL={sl:.2f} TP={tp:.2f} | ATR={atr:.2f}")
-    result = mt5.order_send(request)
+    _trade_in_progress = True
+    try:
+        result = mt5.order_send(request)
+    finally:
+        _trade_in_progress = False
 
     if result and result.retcode == mt5.TRADE_RETCODE_DONE:
         logger.info(
