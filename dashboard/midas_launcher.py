@@ -22,7 +22,7 @@ PROCESSES = {
 # Mirrors config/settings.py — update here if settings change
 _MAX_CONSECUTIVE_LOSSES = 4
 _MAX_DAILY_LOSS_PCT     = 5.0
-_MAX_TRADES_PER_DAY     = 15
+_MAX_TRADES_PER_DAY     = 6
 
 # ── Palette — Black + Midas Gold ──────────────────────────────────────────────
 BG       = "#000000"
@@ -378,7 +378,7 @@ class MidasLauncher(tk.Tk):
     # ══════════════════════════════════════════════════════════════════════════
 
     def _tick_clock(self):
-        self.clock_lbl.config(text=datetime.utcnow().strftime("%a %d %b  %H:%M:%S UTC"))
+        self.clock_lbl.config(text=datetime.now(timezone.utc).strftime("%a %d %b  %H:%M:%S UTC"))
         self.after(1000, self._tick_clock)
 
     # ══════════════════════════════════════════════════════════════════════════

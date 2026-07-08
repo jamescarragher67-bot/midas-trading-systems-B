@@ -99,6 +99,7 @@ _combined_date         = None
 _summary_date          = None
 _known_tickets         = {}   # ticket -> {"bot": "BOT1"|"BOT2"}
 _trade_in_progress     = False   # global lock: True from order submission until MT5 confirms/rejects
+_last_any_trade_time   = None    # (datetime, direction) — cross-bot same-direction guard
 
 TRADES_FILE = "jasons/trades.json"
 
@@ -115,6 +116,61 @@ def _reconnect() -> bool:
 
 
 # ═════════════════════════════════════════════════════════════════════════════
+# WEEKEND CLOSE — force-close all Midas positions before market close
+# ═════════════════════════════════════════════════════════════════════════════
+
+def _weekend_close_all():
+    """
+    Force-close every open Midas position.
+    Called when: Friday >= FRIDAY_CLOSE_HOUR UTC, or any Saturday/Sunday cycle.
+    """
+    positions = mt5.positions_get(symbol=settings.SYMBOL) or []
+    midas_pos = [p for p in positions if p.magic == settings.MAGIC]
+
+    if not midas_pos:
+        log_sys.debug("[COMBINED] Weekend close: no open Midas positions")
+        return
+
+    log_sys.info(
+        f"[COMBINED] Weekend close triggered — force closing "
+        f"{len(midas_pos)} open position(s) before market close"
+    )
+
+    for pos in midas_pos:
+        direction  = "BUY" if pos.type == mt5.ORDER_TYPE_BUY else "SELL"
+        close_type = mt5.ORDER_TYPE_SELL if pos.type == mt5.ORDER_TYPE_BUY else mt5.ORDER_TYPE_BUY
+        tick = mt5.symbol_info_tick(settings.SYMBOL)
+        if not tick:
+            log_sys.error(f"[COMBINED] Weekend close: no tick data for ticket {pos.ticket}")
+            continue
+        price = tick.bid if pos.type == mt5.ORDER_TYPE_BUY else tick.ask
+        request = {
+            "action":       mt5.TRADE_ACTION_DEAL,
+            "symbol":       settings.SYMBOL,
+            "volume":       pos.volume,
+            "type":         close_type,
+            "position":     pos.ticket,
+            "price":        price,
+            "deviation":    settings.ORDER_DEVIATION,
+            "magic":        settings.MAGIC,
+            "comment":      "MIDAS_WEEKEND_CLOSE",
+            "type_time":    mt5.ORDER_TIME_GTC,
+            "type_filling": mt5.ORDER_FILLING_IOC,
+        }
+        result = mt5.order_send(request)
+        if result and result.retcode == mt5.TRADE_RETCODE_DONE:
+            log_sys.info(
+                f"[COMBINED] Weekend close: ticket {pos.ticket} "
+                f"{direction} closed @ {result.price:.2f}"
+            )
+        else:
+            code = result.retcode if result else "None"
+            log_sys.error(
+                f"[COMBINED] Weekend close FAILED: ticket {pos.ticket} retcode={code}"
+            )
+
+
+# ═════════════════════════════════════════════════════════════════════════════
 # EXECUTION — shared by both bots
 # ═════════════════════════════════════════════════════════════════════════════
 
@@ -125,7 +181,26 @@ def _execute_trade(direction: str, atr: float, sl_atr_mult: float,
     Place a market order. SL = entry ± ATR × sl_atr_mult. TP = SL dist × RR.
     Returns True on successful fill.
     """
-    global _combined_trades_today, _known_tickets, _trade_in_progress
+    global _combined_trades_today, _known_tickets, _trade_in_progress, _last_any_trade_time
+
+    # Log every attempt so we can reconstruct races from logs
+    log_sys.info(
+        f"[COMBINED] Trade attempt: {bot_label} {direction} | ATR={atr:.2f} | "
+        f"sl_mult={sl_atr_mult} | trades_today={_combined_trades_today}/{MAX_COMBINED_TRADES}"
+    )
+
+    # ── Cross-bot same-direction guard (in-memory — avoids MT5 propagation gap) ──
+    # The positions_get() dedup check below can miss a position opened <2s ago
+    # because MT5 hasn't reflected it yet.  This in-memory check is authoritative.
+    if _last_any_trade_time is not None:
+        since = (datetime.now(timezone.utc) - _last_any_trade_time[0]).total_seconds()
+        if since < 30 and _last_any_trade_time[1] == direction:
+            log_sys.warning(
+                f"[COMBINED] Trade blocked — cross-bot same-direction guard "
+                f"(last {_last_any_trade_time[1]} was {since:.0f}s ago, "
+                f"{bot_label} {direction} rejected)"
+            )
+            return False
 
     # ── Part 2: Trade lock — blocks the window between submission and MT5 confirmation ──
     if _trade_in_progress:
@@ -216,7 +291,8 @@ def _execute_trade(direction: str, atr: float, sl_atr_mult: float,
             f"FILLED | Ticket={result.order} | {direction} {lot} lots @ {result.price:.2f}"
         )
         send_trade_opened(direction, result.price, sl, tp, lot)
-        _combined_trades_today += 1
+        _combined_trades_today   += 1
+        _last_any_trade_time      = (datetime.now(timezone.utc), direction)
         _known_tickets[result.order] = {"bot": bot_label}
         return True
     else:
@@ -528,6 +604,22 @@ def run_combined():
     # call _on_trade_closed() — see _check_for_closed_trades() comment there.
     _check_combined_closed_trades()
 
+    # ── Friday cutoff + weekend close ─────────────────────────────────────────
+    # Settings: FRIDAY_CUTOFF_HOUR=20 (no new trades), FRIDAY_CLOSE_HOUR=21 (force-close)
+    is_friday  = (now.weekday() == 4)   # Monday=0 … Friday=4
+    is_weekend = (now.weekday() in (5, 6))
+
+    if is_weekend or (is_friday and now.hour >= settings.FRIDAY_CLOSE_HOUR):
+        _weekend_close_all()
+        return
+
+    if is_friday and now.hour >= settings.FRIDAY_CUTOFF_HOUR:
+        log_sys.info(
+            f"[COMBINED] Friday cutoff — no new trades after "
+            f"{settings.FRIDAY_CUTOFF_HOUR:02d}:00 UTC (close hour: {settings.FRIDAY_CLOSE_HOUR:02d}:00 UTC)"
+        )
+        return
+
     # Hard stop if combined limit hit
     if _combined_trades_today >= MAX_COMBINED_TRADES:
         log_sys.debug(f"Combined daily limit ({MAX_COMBINED_TRADES}) reached")
@@ -535,6 +627,7 @@ def run_combined():
 
     # ── Bot 1 ─────────────────────────────────────────────────────────────────
     sig1 = _get_bot1_signal()
+    traded_this_cycle = False
     if sig1:
         ok = _execute_trade(
             direction    = sig1["direction"],
@@ -548,9 +641,12 @@ def run_combined():
         )
         if ok:
             _b1_last_trade_time = now
+            traded_this_cycle   = True
 
-    # ── Bot 2 ─────────────────────────────────────────────────────────────────
-    if _combined_trades_today < MAX_COMBINED_TRADES:
+    # ── Bot 2 — skipped if Bot 1 already traded this cycle ───────────────────
+    # Prevents cross-bot pairs within the same 30-second window.  The in-memory
+    # same-direction guard in _execute_trade() is the belt; this is the suspenders.
+    if not traded_this_cycle and _combined_trades_today < MAX_COMBINED_TRADES:
         sig2 = _get_bot2_signal()
         if sig2:
             ok = _execute_trade(
