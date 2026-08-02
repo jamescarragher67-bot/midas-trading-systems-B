@@ -1,7 +1,7 @@
 """
 tools/preflight_check.py  —  MIDAS Pre-launch Go/No-Go Checker
 
-Run this BEFORE launching main_combined.py on launch day:
+Run this BEFORE launching main.py on launch day:
     python tools/preflight_check.py
 
 Every check prints PASS, WARN, or FAIL.
@@ -37,7 +37,7 @@ import MetaTrader5 as mt5
 # ── Constants ────────────────────────────────────────────────────────────────
 DEMO_LOGIN     = 108470975
 DEMO_SERVER    = "MetaQuotes-Demo"
-SYMBOL         = "XAUUSD"
+SYMBOL         = "XAUUSD.a"
 SPREAD_MAX_PTS = 20
 
 JASONS_DIR  = ROOT / "jasons"

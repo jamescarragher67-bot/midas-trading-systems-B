@@ -1,5 +1,8 @@
 .env
 .env.bak
+.env.*.bak
+*.env.bak
+config/.env*
 __pycache__/
 *.pyc
 logs/

@@ -34,7 +34,7 @@ def log(message: str):
 
 def start_bot():
     return subprocess.Popen(
-        [sys.executable, str(_ROOT / "main_combined.py")],
+        [sys.executable, str(_ROOT / "main.py")],
         stdout=None,
         stderr=None,
     )
