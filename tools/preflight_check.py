@@ -2,23 +2,33 @@
 tools/preflight_check.py  —  MIDAS Pre-launch Go/No-Go Checker
 
 Run this BEFORE launching main.py on launch day:
-    python tools/preflight_check.py
+    python tools/preflight_check.py                    # checks config/settings.py (production, $50K)
+    python tools/preflight_check.py --config diagnostic  # checks config/settings_diagnostic.py ($5K FundedNext test)
 
 Every check prints PASS, WARN, or FAIL.
   PASS  = green, no action needed
   WARN  = review carefully (acceptable on demo, must be resolved on launch day)
   FAIL  = stop and fix before touching live capital
 
-Launch day credential swap — 3-line edit in config/.env:
+Reads MT5 login/password/server/symbol/spread-limit from whichever config
+module is selected, instead of hardcoding one account's env var names or
+one symbol - a diagnostic-account run and a production-account run need
+different credentials (MT5_LOGIN vs MT5_DIAGNOSTIC_LOGIN, see
+config/.env.example) and this must check whichever one is actually active,
+not assume production.
+
+Launch day credential swap — edit in config/.env:
     MT5_LOGIN=<live account number>
     MT5_PASSWORD=<live password>
     MT5_SERVER=Pepperstone-Live  (or Pepperstone-Edge-Live — confirm with broker)
 """
 
+import argparse
 import sys
 import os
 import json
 import time
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
@@ -28,19 +38,38 @@ os.chdir(ROOT)
 if hasattr(sys.stdout, "reconfigure"):
     sys.stdout.reconfigure(encoding="utf-8", errors="replace")
 
-from dotenv import load_dotenv
-load_dotenv(ROOT / "config" / ".env")
-
 import requests
 import MetaTrader5 as mt5
+
+_parser = argparse.ArgumentParser(description="MIDAS pre-launch checker")
+_parser.add_argument("--config", choices=["production", "diagnostic"], default="production",
+                      help="Which config to check: production (config/settings.py, $50K) "
+                           "or diagnostic (config/settings_diagnostic.py, $5K FundedNext test).")
+_args, _ = _parser.parse_known_args()
+
+if _args.config == "diagnostic":
+    try:
+        from config import settings_diagnostic as cfg
+    except SystemExit as e:
+        print(f"\n  Cannot check diagnostic config: {e}\n")
+        sys.exit(1)
+else:
+    try:
+        from config import settings as cfg
+    except SystemExit as e:
+        print(f"\n  Cannot check production config: {e}\n")
+        sys.exit(1)
 
 # ── Constants ────────────────────────────────────────────────────────────────
 DEMO_LOGIN     = 108470975
 DEMO_SERVER    = "MetaQuotes-Demo"
-SYMBOL         = "XAUUSD.a"
-SPREAD_MAX_PTS = 20
+SYMBOL         = cfg.SYMBOL
+SPREAD_MAX_PTS = cfg.MAX_SPREAD_POINTS
+CFG_LOGIN      = cfg.MT5_LOGIN
+CFG_PASSWORD   = cfg.MT5_PASSWORD
+CFG_SERVER     = cfg.MT5_SERVER
 
-JASONS_DIR  = ROOT / "jasons"
+JASONS_DIR  = ROOT / ("jasons_diagnostic" if _args.config == "diagnostic" else "jasons")
 JSON_FILES  = [
     "trades.json",
     "seen_tickets.json",
@@ -48,7 +77,13 @@ JSON_FILES  = [
     "open_positions.json",
 ]
 
-FIREBASE_URL = os.getenv("FIREBASE_DB_URL", "")
+# Diagnostic mode uses FIREBASE_DB_URL_DIAGNOSTIC if set, else falls back to
+# FIREBASE_DB_URL (matching sync/firebase_push.py --config diagnostic, which
+# additionally namespaces pushes under "diagnostic/" in the fallback case).
+if _args.config == "diagnostic":
+    FIREBASE_URL = os.getenv("FIREBASE_DB_URL_DIAGNOSTIC") or os.getenv("FIREBASE_DB_URL", "")
+else:
+    FIREBASE_URL = os.getenv("FIREBASE_DB_URL", "")
 WA_PHONE     = os.getenv("WHATSAPP_PHONE", "")
 WA_KEY       = os.getenv("CALLMEBOT_API_KEY", "")
 
@@ -82,13 +117,10 @@ def warned(label, detail=""):
 # ─────────────────────────────────────────────────────────────────────────────
 def check_mt5_connection():
     try:
-        login    = int(os.getenv("MT5_LOGIN", "0"))
-        password = os.getenv("MT5_PASSWORD", "")
-        server   = os.getenv("MT5_SERVER", "")
-        kwargs   = {}
-        if login:    kwargs["login"]    = login
-        if password: kwargs["password"] = password
-        if server:   kwargs["server"]   = server
+        kwargs = {}
+        if CFG_LOGIN:    kwargs["login"]    = CFG_LOGIN
+        if CFG_PASSWORD: kwargs["password"] = CFG_PASSWORD
+        if CFG_SERVER:   kwargs["server"]   = CFG_SERVER
         if mt5.initialize(**kwargs):
             passed("MT5 connection")
             return True
@@ -115,7 +147,8 @@ def check_account():
 
     detail = f"#{login} | {server} | {mode} | Balance ${bal:,.2f}"
 
-    if login == DEMO_LOGIN or server == DEMO_SERVER:
+    # trade_mode 0 = demo per MT5; the login/server match keeps the old MetaQuotes-demo check.
+    if acct.trade_mode == 0 or login == DEMO_LOGIN or server == DEMO_SERVER:
         warned("Account: DEMO credentials active", detail)
         warned("  Launch day action", "Update MT5_LOGIN / MT5_PASSWORD / MT5_SERVER in config/.env")
     else:
@@ -238,38 +271,60 @@ def check_json_files():
 # CHECK 8 — Circuit breaker state
 # ─────────────────────────────────────────────────────────────────────────────
 def check_circuit_breaker():
-    try:
-        from risk.circuit_breaker import circuit_breaker
-        if circuit_breaker.is_tripped():
-            failed("Circuit breaker",
-                   f"TRIPPED: {circuit_breaker._trip_reason} -- "
-                   "will auto-reset at midnight UTC")
-            return False
-        losses = circuit_breaker._consecutive_losses
-        daily  = circuit_breaker._daily_loss
-        passed("Circuit breaker",
-               f"clean | {losses} consec losses | ${daily:.2f} daily loss")
-        return True
-    except Exception as e:
-        failed("Circuit breaker", str(e))
+    """
+    Limits come from the selected config module. Trip state is in-memory and
+    per-process, so it is always clean at launch — the only thing worth
+    checking here is that the breaker is enabled and what its limits are.
+    """
+    if not cfg.CIRCUIT_BREAKER_ENABLED:
+        failed("Circuit breaker", "CIRCUIT_BREAKER_ENABLED is False in the selected config")
         return False
+    passed("Circuit breaker",
+           f"enabled | {cfg.MAX_CONSECUTIVE_LOSSES} consecutive losses OR "
+           f"{cfg.MAX_DAILY_LOSS_PCT}% daily loss | state starts clean per process")
+    return True
 
 
 # ─────────────────────────────────────────────────────────────────────────────
-# CHECK 9 — Dashboard HTML hardcoded account (informational)
+# CHECK 9 — News feed (Finnhub economic calendar)
 # ─────────────────────────────────────────────────────────────────────────────
-def check_dashboard_html():
-    html_path = ROOT / "dashboard" / "midas_dashboard_local.html"
-    if not html_path.exists():
-        warned("Dashboard HTML", "File not found")
-        return
-    content = html_path.read_text(encoding="utf-8", errors="replace")
-    if str(DEMO_LOGIN) in content:
-        warned("Dashboard HTML has hardcoded demo account",
-               f"Update line containing '{DEMO_LOGIN}' in dashboard/midas_dashboard_local.html "
-               "after credential swap")
-    else:
-        passed("Dashboard HTML", "No hardcoded demo account found")
+def check_news_feed():
+    """
+    utils/news_filter.py FAILS CLOSED: a missing key or a dead feed blocks
+    every trade, silently, forever. So this is a FAIL, not a WARN.
+    Same request shape as the live filter (2h back, 24h ahead, US high-impact).
+    """
+    key = getattr(cfg, "FINNHUB_API_KEY", None)
+    if not key:
+        failed("News feed", "FINNHUB_API_KEY missing in config/.env -- bot would fail closed and never trade")
+        return False
+    now = datetime.now(timezone.utc)
+    params = {
+        "from":  (now - timedelta(hours=2)).strftime("%Y-%m-%d"),
+        "to":    (now + timedelta(hours=24)).strftime("%Y-%m-%d"),
+        "token": key,
+    }
+    try:
+        resp = requests.get("https://finnhub.io/api/v1/calendar/economic", params=params, timeout=10)
+    except requests.exceptions.RequestException as e:
+        failed("News feed", f"network error -- {e}")
+        return False
+    if resp.status_code != 200:
+        failed("News feed", f"HTTP {resp.status_code} -- {resp.text[:80]}")
+        return False
+    try:
+        data = resp.json()
+    except ValueError:
+        failed("News feed", "response was not JSON")
+        return False
+    events = data.get("economicCalendar") if isinstance(data, dict) else None
+    if not isinstance(events, list):
+        failed("News feed", "unexpected response shape (no economicCalendar list)")
+        return False
+    high_us = [e for e in events
+               if str(e.get("impact", "")).lower() == "high" and e.get("country") == "US"]
+    passed("News feed", f"{len(high_us)} high-impact US events in next 24h ({len(events)} total)")
+    return True
 
 
 # ─────────────────────────────────────────────────────────────────────────────
@@ -278,7 +333,8 @@ def check_dashboard_html():
 def main():
     print()
     print("=" * 72)
-    print("   MIDAS PREFLIGHT CHECK")
+    print(f"   MIDAS PREFLIGHT CHECK — config: {_args.config.upper()}"
+          f"{'  ($50K production)' if _args.config == 'production' else '  ($5K FundedNext diagnostic)'}")
     print("=" * 72)
     print()
 
@@ -292,16 +348,14 @@ def main():
     print()
     check_whatsapp()
     check_firebase()
+    check_news_feed()
 
     print()
-    print("  JSON files (jasons/):")
+    print(f"  JSON files ({JASONS_DIR.name}/):")
     check_json_files()
 
     print()
     check_circuit_breaker()
-
-    print()
-    check_dashboard_html()
 
     if mt5_ok:
         mt5.shutdown()

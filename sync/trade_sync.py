@@ -3,8 +3,16 @@ trade_sync.py
 Runs alongside main.py — syncs closed trades, open positions, and heartbeat.
 Correctly matches entry and exit deals via position_id for accurate RR logging.
 Sends WhatsApp notifications on trade close and hourly balance updates.
+
+--config production (default) uses config/settings.py, MAGIC 20001, and
+jasons/ — completely unaffected by anything below; this is the existing
+behavior main.py's production run depends on.
+--config diagnostic uses config/settings_diagnostic.py, MAGIC 20002, and
+jasons_diagnostic/, so the $5K diagnostic account's trade records can
+never mix with or overwrite the production account's.
 """
 
+import argparse
 import json
 import os
 import sys
@@ -21,14 +29,34 @@ import MetaTrader5 as mt5
 from utils.logger import setup_logger
 from utils.mt5_connection import connect_mt5, disconnect_mt5
 from utils.notifications import send_trade_closed, send_hourly_update
-from config.settings import SYMBOL, MAGIC
+
+_parser = argparse.ArgumentParser(description="MIDAS trade sync daemon")
+_parser.add_argument("--config", choices=["production", "diagnostic"], default="production",
+                      help="production (default, config/settings.py, jasons/) or "
+                           "diagnostic (config/settings_diagnostic.py, jasons_diagnostic/)")
+_args, _ = _parser.parse_known_args()
+
+if _args.config == "diagnostic":
+    from config import settings_diagnostic as _cfg
+    _JASONS_DIR = "jasons_diagnostic"
+else:
+    from config import settings as _cfg
+    _JASONS_DIR = "jasons"
+
+SYMBOL       = _cfg.SYMBOL
+MAGIC        = _cfg.MAGIC
+_MT5_LOGIN   = _cfg.MT5_LOGIN
+_MT5_PASSWORD = _cfg.MT5_PASSWORD
+_MT5_SERVER  = _cfg.MT5_SERVER
 
 logger = setup_logger("trade_sync")
 
-TRADES_FILE    = str(_ROOT / "jasons" / "trades.json")
-SEEN_FILE      = str(_ROOT / "jasons" / "seen_tickets.json")
-HEARTBEAT_FILE = str(_ROOT / "jasons" / "heartbeat.json")
-POSITIONS_FILE = str(_ROOT / "jasons" / "open_positions.json")
+os.makedirs(str(_ROOT / _JASONS_DIR), exist_ok=True)
+
+TRADES_FILE    = str(_ROOT / _JASONS_DIR / "trades.json")
+SEEN_FILE      = str(_ROOT / _JASONS_DIR / "seen_tickets.json")
+HEARTBEAT_FILE = str(_ROOT / _JASONS_DIR / "heartbeat.json")
+POSITIONS_FILE = str(_ROOT / _JASONS_DIR / "open_positions.json")
 CHECK_INTERVAL = 30       # seconds between sync cycles
 
 # ── JSON helpers ──────────────────────────────────────────────────────────────
@@ -268,11 +296,11 @@ def on_trade_closed(trade: dict, balance: float):
 # ── Entry point ───────────────────────────────────────────────────────────────
 
 def main():
-    logger.info("========== Trade Sync Starting ==========")
-    if not connect_mt5():
+    logger.info(f"========== Trade Sync Starting ({_args.config}) ==========")
+    if not connect_mt5(login=_MT5_LOGIN, password=_MT5_PASSWORD, server=_MT5_SERVER, symbol=SYMBOL):
         return
 
-    logger.info(f"Watching {SYMBOL} every {CHECK_INTERVAL}s...")
+    logger.info(f"Watching {SYMBOL} every {CHECK_INTERVAL}s... [{_JASONS_DIR}/]")
 
     last_hourly = datetime.now(timezone.utc).replace(minute=0, second=0, microsecond=0)
     trades      = load_json(TRADES_FILE, [])

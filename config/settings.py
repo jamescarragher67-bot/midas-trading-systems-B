@@ -46,11 +46,27 @@ ALLOWED_SESSIONS = [
     {"start": "00:00", "end": "14:59"},   # Asian + London + NY morning
     {"start": "20:00", "end": "23:59"},   # NY PM + evening
 ]
+# Derived: every UTC hour inside ALLOWED_SESSIONS. main.py and
+# backtest/lsc_engine.py both read THIS, so live and backtest cannot drift.
+SESSION_HOURS = {
+    h
+    for s in ALLOWED_SESSIONS
+    for h in range(int(s["start"][:2]), int(s["end"][:2]) + 1)
+}
 
 # ── Spread filter — LSC backtests used an 18pt assumption; 20pt live gives ──
 # a small buffer without drifting far from what was actually validated.
 SPREAD_FILTER_ENABLED = True
 MAX_SPREAD_POINTS     = 20
+
+# ── News filter — fail-closed blackout before/after high-impact US events. ──
+# XAU is priced in USD, so US macro events move gold. NEWS_WINDOW_MINS is
+# applied to both sides (±). Module: utils/news_filter.py.
+# Requires FINNHUB_API_KEY in .env. If the key is missing or the feed fails,
+# the filter blocks trades (prop-firm-safe default).
+NEWS_FILTER_ENABLED = True
+NEWS_WINDOW_MINS    = 30
+FINNHUB_API_KEY     = os.getenv("FINNHUB_API_KEY")
 
 # ── LSC strategy parameters (strategy/lsc_m15.py) ────────────────────────
 CLOSE_BEYOND_ATR_MULT = 0.2
@@ -60,8 +76,20 @@ COOLDOWN_BARS         = 3      # 45 minutes = 3 x M15 bars
 MAX_TRADES_PER_DAY    = 4
 ATR_PERIOD            = 14
 
-# ── Risk — locked at the Stage 4 validated setting ───────────────────────
-RISK_PERCENT = 1.0
+# ── Risk — recalibrated 2026-09-01 for the real deployment target ───────
+# research/tools/risk_calibrator.py --account-size 50000 --leverage 10 --total-wall-pct 6
+# ($50,000 balance, 1:10 leverage, single 6% trailing-drawdown wall).
+# 1000-shuffle Monte Carlo on the full available XAUUSD.a M15 history
+# (percent-return recompounding method): 0.045% is the highest risk-per-
+# trade where BOTH the worst-5th-percentile drawdown (3.7%) and the
+# absolute worst single shuffle out of 1000 (5.2%) clear the 6% wall with
+# real margin, with only 13.9% of trades hitting the broker's 0.01-lot
+# floor (checked explicitly - not a lot-floor-dominated number).
+# SUPERSEDES the earlier 0.065% figure, which was calibrated against a
+# different account (leverage 1:50, 10% wall) - do not revert to it, that
+# wall/leverage combination no longer applies. Do not change this value
+# without re-running the calibrator for whatever account is actually live.
+RISK_PERCENT = 0.045
 
 # Margin-safe position sizing: NEVER let the risk% formula alone decide lot
 # size. Tonight proved (M5, M15, and H1 all independently) that naive
@@ -83,6 +111,12 @@ MAX_TRADE_HOURS_HARD = 24   # M15: 96 bars = 1 day, matches backtest/lsc_engine.
 # but still force-flat before the weekend gap for safety.
 FRIDAY_CUTOFF_HOUR = 20   # UTC — no new trades on Friday after this hour
 FRIDAY_CLOSE_HOUR  = 21   # UTC — force-close all positions on Friday after this hour
+
+# ── MT5 reconnect (main.py) — never gives up; wait doubles per failed ──────
+# attempt from MIN up to MAX seconds. Watchdog restart policy lives in
+# sync/watchdog.py, which deliberately does not import this module.
+RECONNECT_DELAY_MIN = 10
+RECONNECT_DELAY_MAX = 300
 
 # ── Circuit breaker ───────────────────────────────────────────────────────
 CIRCUIT_BREAKER_ENABLED = True

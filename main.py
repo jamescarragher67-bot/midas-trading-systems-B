@@ -22,8 +22,10 @@ import pandas as pd
 
 from utils.logger import setup_logger
 from utils.mt5_connection import connect_mt5, disconnect_mt5
-from utils.notifications import send_bot_started, send_bot_stopped
-from utils.filters import spread_ok
+from utils.notifications import (
+    send_bot_started, send_bot_stopped, send_connection_lost, send_connection_restored,
+)
+from utils.filters import spread_ok, news_ok
 from risk.trade_manager import execute_trade, manage_open_trades
 from risk.circuit_breaker import circuit_breaker
 from strategy.lsc_m15 import precompute, check_entry
@@ -40,15 +42,30 @@ _last_bar_time   = None
 _bar_index       = 0   # monotonic counter standing in for the backtest's integer bar index
 
 
-def _reconnect() -> bool:
-    """Attempt up to 3 reconnects with exponential back-off. Returns True on success."""
-    for attempt in range(1, 4):
-        time.sleep(10 * attempt)
+def _reconnect():
+    """
+    Retry the MT5 connection until it succeeds. Never gives up: the wait
+    doubles from RECONNECT_DELAY_MIN up to RECONNECT_DELAY_MAX between
+    attempts, and one WhatsApp alert marks the start of the outage and one
+    marks recovery. The old 3-attempts-then-exit policy left the box silent
+    after a few minutes of terminal/network trouble.
+    """
+    delay   = settings.RECONNECT_DELAY_MIN
+    started = time.time()
+    attempt = 0
+    while True:
+        attempt += 1
+        time.sleep(delay)
         if connect_mt5():
-            log.info(f"MT5 reconnected (attempt {attempt})")
-            return True
-        log.warning(f"Reconnect attempt {attempt} failed: {mt5.last_error()}")
-    return False
+            outage = time.time() - started
+            log.info(f"MT5 reconnected (attempt {attempt}, {outage:.0f}s outage)")
+            send_connection_restored(attempt, outage)
+            return
+        error = str(mt5.last_error())
+        delay = min(delay * 2, settings.RECONNECT_DELAY_MAX)
+        log.warning(f"Reconnect attempt {attempt} failed: {error} — next attempt in {delay}s")
+        if attempt == 1:
+            send_connection_lost(error, delay)
 
 
 def _weekend_close_all():
@@ -120,10 +137,13 @@ def _get_signal() -> dict | None:
 
     if _trades_today >= settings.MAX_TRADES_PER_DAY:
         return None
-    if now.hour not in {h for h in range(0, 15)} | {20, 21, 22, 23}:
+    if now.hour not in settings.SESSION_HOURS:
         return None
     if not spread_ok():
         log.debug("Spread filter blocked")
+        return None
+    if not news_ok():
+        # news_ok() logs the blocking event itself.
         return None
 
     mt5.symbol_select(settings.SYMBOL, True)
@@ -220,9 +240,7 @@ def main():
         while True:
             if mt5.terminal_info() is None:
                 log.warning(f"MT5 connection lost (error {mt5.last_error()}) — reconnecting...")
-                if not _reconnect():
-                    log.error("Could not reconnect after 3 attempts — exiting")
-                    break
+                _reconnect()
 
             try:
                 run()
@@ -230,9 +248,7 @@ def main():
                 log.error(f"Loop error: {e}", exc_info=True)
                 if not mt5.terminal_info():
                     log.warning("MT5 connection lost after exception — reconnecting...")
-                    if not _reconnect():
-                        log.error("Could not reconnect after 3 attempts — exiting")
-                        break
+                    _reconnect()
             time.sleep(settings.LOOP_INTERVAL_SECONDS)
 
     except KeyboardInterrupt:

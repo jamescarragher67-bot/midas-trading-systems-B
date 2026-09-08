@@ -11,11 +11,12 @@ Resets at midnight UTC.
 import MetaTrader5 as mt5
 from datetime import datetime, timezone
 from utils.logger import setup_logger
-from config.settings import (
-    CIRCUIT_BREAKER_ENABLED,
-    MAX_CONSECUTIVE_LOSSES,
-    MAX_DAILY_LOSS_PCT,
-)
+
+# Limits come from config/settings.py (single source of truth). Only main.py's
+# production process ever instantiates this breaker; tools/preflight_check.py
+# reads the limits from its selected config directly and no longer imports
+# this module, so the diagnostic-only preflight path is unaffected.
+from config.settings import CIRCUIT_BREAKER_ENABLED, MAX_CONSECUTIVE_LOSSES, MAX_DAILY_LOSS_PCT
 
 logger = setup_logger("circuit_breaker")
 

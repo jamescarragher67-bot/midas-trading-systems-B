@@ -10,10 +10,23 @@ Setup:
   5. Set WHATSAPP_ENABLED = True
 """
 
+import os
 import requests
+from pathlib import Path
 from urllib.parse import quote
+from dotenv import load_dotenv
 from utils.logger import setup_logger
-from config.settings import WHATSAPP_ENABLED, WHATSAPP_PHONE, WHATSAPP_API_KEY
+
+# Read WHATSAPP_PHONE/CALLMEBOT_API_KEY directly from .env rather than via
+# config.settings - both config/settings.py and config/settings_diagnostic.py
+# read the SAME env vars for these (WhatsApp is account-agnostic infra), so
+# going through config.settings here would needlessly import it (and its
+# MT5_LOGIN fail-fast check) as a side effect of anything that just wants to
+# send a notification, breaking diagnostic-only setups.
+load_dotenv(Path(__file__).resolve().parent.parent / "config" / ".env")
+WHATSAPP_ENABLED  = True
+WHATSAPP_PHONE    = os.getenv("WHATSAPP_PHONE")
+WHATSAPP_API_KEY  = os.getenv("CALLMEBOT_API_KEY")
 
 logger = setup_logger("notifications")
 
@@ -132,6 +145,31 @@ def send_circuit_breaker(reason: str, balance: float):
         f"⛔ Reason:   {reason}\n"
         f"🏦 Balance:  ${balance:.2f}\n"
         f"🕛 Paused until midnight UTC"
+    )
+
+# ── Resilience ────────────────────────────────────────────────────────────────
+
+def send_watchdog_restart(process: str, exit_code, restart_no: int, delay_s: int):
+    _send(
+        f"⚠️ MIDAS WATCHDOG\n"
+        f"{'─' * 20}\n"
+        f"🔁 {process} exited (code {exit_code})\n"
+        f"#️⃣ Restart #{restart_no} in {delay_s}s"
+    )
+
+def send_connection_lost(error: str, retry_in_s: int):
+    _send(
+        f"📡 MIDAS — MT5 CONNECTION LOST\n"
+        f"{'─' * 20}\n"
+        f"⛔ {error}\n"
+        f"🔁 Retrying with back-off (next in {retry_in_s}s), no give-up"
+    )
+
+def send_connection_restored(attempts: int, outage_s: float):
+    _send(
+        f"📡 MIDAS — MT5 RECONNECTED\n"
+        f"{'─' * 20}\n"
+        f"✅ After {attempts} attempt(s), {outage_s / 60:.1f} min outage"
     )
 
 # ── Bot status ────────────────────────────────────────────────────────────────

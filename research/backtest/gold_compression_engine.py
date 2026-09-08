@@ -1,30 +1,30 @@
 """
-backtest/lsc_engine.py - Liquidity-Sweep Continuation (M15) backtest harness
+backtest/gold_compression_engine.py - Compression Breakout (M5) backtest harness
 
-Calls strategy/lsc_m15.py's actual precompute/check_entry directly - no
-separate approximation. Mechanics (next-bar-open entry, SL/TP hit
-detection, margin-safe lot capping, spread cost) carried forward from
-backtest/bot1_tournament_engine.py, the harness LSC was actually
-validated with tonight, simplified down to a single strategy instead of
-a generic multi-strategy dispatcher.
+Mirrors backtest/lsc_engine.py's mechanics exactly (next-bar-open entry,
+SL/TP hit detection, margin-safe lot capping, spread cost) - same standard
+LSC was validated with - retuned for M5 instead of M15:
+  - BARS_PER_DAY / MAX_HOLD_BARS: 288 (M5) not 96 (M15)
+  - TIMEFRAME: M5 not M15
+SESSION_HOURS is kept IDENTICAL to LSC's (00:00-14:59 + 20:00-23:59 UTC) -
+that's an account/liquidity-window choice, not something specific to LSC's
+signal, so there's no reason to re-derive it for a different M5 signal on
+the same instrument.
 
-Entry price = next bar's open (avoids lookahead). Position sizing: 1.5%
-(now 1.0%, see config/settings.py)-of-balance risk formula, HARD-CAPPED
-at a margin-safe lot ceiling - naive risk-formula sizing alone was proven
-tonight (at multiple timeframes) to occasionally demand more margin than
-the account has. Never let the risk% formula decide lot size unchecked.
+Calls strategy/gold_compression_breakout.py's actual precompute/check_entry
+directly - no separate approximation, same discipline as lsc_engine.py.
 """
 
 import MetaTrader5 as mt5
 import pandas as pd
-from strategy.lsc_m15 import precompute, check_entry
-from config.settings import SESSION_HOURS   # same set main.py trades on
+from research.strategy.gold_compression_breakout import precompute, check_entry
 
 POINT         = 0.01
 CONTRACT_SIZE = 100
-BARS_PER_DAY  = 96     # M15: used for both "days" lookups and the 1-day hold cap
+SESSION_HOURS = set(range(0, 15)) | {20, 21, 22, 23}
+BARS_PER_DAY  = 288    # M5: 24h x 12 five-min bars/hour
 MAX_HOLD_BARS = BARS_PER_DAY
-MIN_LOOKBACK  = 100    # warmup bars before the loop starts
+MIN_LOOKBACK  = 100    # warmup bars before the loop starts (>= ATR_MA_PERIOD + RANGE_LOOKBACK)
 
 
 def compute_atr14(df: pd.DataFrame, period: int = 14) -> pd.Series:
@@ -42,29 +42,14 @@ def get_symbol_specs(symbol: str) -> tuple[float, float]:
     return float(info.point), float(info.trade_contract_size)
 
 
-def fetch_data(symbol: str, days: int, date_from=None, date_to=None) -> pd.DataFrame:
-    mt5.symbol_select(symbol, True)
-    if date_from is not None and date_to is not None:
-        rates = mt5.copy_rates_range(symbol, mt5.TIMEFRAME_M15, date_from, date_to)
-        if rates is None or len(rates) == 0:
-            # copy_rates_range silently fails ("Invalid params") on very large
-            # multi-year spans - fall back to fetching all available history
-            # by count, then filter to the requested window in pandas.
-            rates_all = mt5.copy_rates_from_pos(symbol, mt5.TIMEFRAME_M15, 0, 75000)
-            if rates_all is not None and len(rates_all) > 0:
-                df_all = pd.DataFrame(rates_all)
-                df_all["time"] = pd.to_datetime(df_all["time"], unit="s")
-                mask = (df_all["time"] >= date_from) & (df_all["time"] <= date_to)
-                df_all = df_all[mask]
-                if len(df_all) > 0:
-                    df_all.set_index("time", inplace=True)
-                    return df_all
-            rates = None
-    else:
-        num_bars = min(days * BARS_PER_DAY, 75000)
-        rates = mt5.copy_rates_from_pos(symbol, mt5.TIMEFRAME_M15, 0, num_bars)
+def fetch_data(symbol: str, max_bars: int) -> pd.DataFrame:
+    if not mt5.initialize():
+        raise RuntimeError(f"MT5 initialize failed: {mt5.last_error()}")
+    if not mt5.symbol_select(symbol, True):
+        raise RuntimeError(f"symbol_select({symbol}) failed: {mt5.last_error()}")
+    rates = mt5.copy_rates_from_pos(symbol, mt5.TIMEFRAME_M5, 0, max_bars)
     if rates is None or len(rates) == 0:
-        raise ValueError(f"No data returned: {mt5.last_error()}")
+        raise RuntimeError(f"No data returned for {symbol}: {mt5.last_error()}")
     df = pd.DataFrame(rates)
     df["time"] = pd.to_datetime(df["time"], unit="s")
     df.set_index("time", inplace=True)
@@ -128,26 +113,24 @@ def _simulate_trade(df: pd.DataFrame, entry_idx: int, direction: str,
         "sl": round(sl, 2), "tp": round(tp, 2), "lots": lot_size,
         "spread_cost": round(spread_cost, 2), "pnl": round(pnl, 2), "result": result,
         "balance_after": round(balance + pnl, 2),
+        "margin_capped": False,   # set correctly below once lot capping is resolved against a live cap
     }
 
 
-def run_lsc_simulation(symbol: str, days: int, config: dict,
-                       date_from=None, date_to=None,
-                       progress_callback=None) -> list:
-    df = fetch_data(symbol, days, date_from, date_to)
-    df["atr"] = compute_atr14(df)
-    df = precompute(df)
-    point, contract_size = get_symbol_specs(symbol)
-
+def run_simulation(symbol: str, df: pd.DataFrame, config: dict,
+                    point: float, contract_size: float,
+                    progress_callback=None) -> list:
+    """df must already have 'atr' and the compression/squeeze columns from
+    strategy.gold_compression_breakout.precompute()."""
     trades         = []
     balance        = config["initial_balance"]
     total_bars     = len(df) - MIN_LOOKBACK - 1
     current_date   = None
     trades_today   = 0
-    last_trade_bar = -config.get("cooldown_bars", 3)
+    last_trade_bar = -config.get("cooldown_bars", 9)
 
     for i in range(MIN_LOOKBACK, len(df) - 1):
-        if progress_callback and i % 2000 == 0:
+        if progress_callback and i % 5000 == 0:
             progress_callback((i - MIN_LOOKBACK) / total_bars * 100)
 
         bar_time = df.index[i]
@@ -161,7 +144,7 @@ def run_lsc_simulation(symbol: str, days: int, config: dict,
             continue
 
         direction, _, sl, tp = check_entry(df, i, last_trade_bar, trades_today,
-                                           config.get("cooldown_bars", 3),
+                                           config.get("cooldown_bars", 9),
                                            config.get("max_trades_per_day", 4))
         if direction == "NEUTRAL":
             continue

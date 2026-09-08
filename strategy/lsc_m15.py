@@ -20,11 +20,16 @@ path runs in both live trading and backtesting - see backtest/lsc_engine.py.
 
 import pandas as pd
 
-CLOSE_BEYOND_ATR_MULT = 0.2   # how far past the prior level the close must be, to confirm
-SL_BUFFER_ATR_MULT    = 0.3
-REWARD_RATIO          = 2.0
-COOLDOWN_BARS          = 3     # 45 minutes = 3 x M15 bars
-MAX_TRADES_PER_DAY     = 4
+# Strategy parameters live in config/settings.py — the single source of truth
+# for live trading AND the backtest harness. Imported rather than duplicated
+# so an edit there can never silently diverge from what this code runs.
+from config.settings import (
+    CLOSE_BEYOND_ATR_MULT,   # how far past the prior level the close must be, to confirm
+    SL_BUFFER_ATR_MULT,
+    REWARD_RATIO,
+    COOLDOWN_BARS,           # 45 minutes = 3 x M15 bars
+    MAX_TRADES_PER_DAY,
+)
 
 
 def compute_prior_session_range(df: pd.DataFrame):

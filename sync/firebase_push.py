@@ -3,10 +3,20 @@ firebase_push.py  —  Midas Capital · Firebase sync daemon
 Reads trades.json, open_positions.json, heartbeat.json every 30 s
 and pushes them to Firebase Realtime Database.
 
+--config production (default): reads jasons/, pushes to FIREBASE_DB_URL at
+its normal root paths (trades, stats, equity_curve, ...) — unaffected by
+anything below.
+--config diagnostic: reads jasons_diagnostic/, and pushes are namespaced
+under a "diagnostic/" root node so they can never land on the same
+Firebase keys as production even if FIREBASE_DB_URL_DIAGNOSTIC isn't set
+(same database, different path). If FIREBASE_DB_URL_DIAGNOSTIC IS set in
+.env, diagnostic pushes go to that separate database/project entirely.
+
 Install deps once:
     pip install requests
 """
 
+import argparse
 import sys
 import json
 import time
@@ -20,10 +30,24 @@ load_dotenv(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file_
 if hasattr(sys.stdout, "reconfigure"):
     sys.stdout.reconfigure(encoding="utf-8", errors="replace")
 
+_parser = argparse.ArgumentParser(description="MIDAS Firebase sync daemon")
+_parser.add_argument("--config", choices=["production", "diagnostic"], default="production",
+                      help="production (default, jasons/, FIREBASE_DB_URL) or "
+                           "diagnostic (jasons_diagnostic/, namespaced under diagnostic/, "
+                           "or FIREBASE_DB_URL_DIAGNOSTIC if set)")
+_args, _ = _parser.parse_known_args()
+_IS_DIAGNOSTIC = _args.config == "diagnostic"
+
 # ── Firebase config ──────────────────────────────────────────────────────────
-DATABASE_URL = os.getenv("FIREBASE_DB_URL")
+if _IS_DIAGNOSTIC:
+    DATABASE_URL = os.getenv("FIREBASE_DB_URL_DIAGNOSTIC") or os.getenv("FIREBASE_DB_URL")
+    PUSH_PREFIX  = "" if os.getenv("FIREBASE_DB_URL_DIAGNOSTIC") else "diagnostic/"
+else:
+    DATABASE_URL = os.getenv("FIREBASE_DB_URL")
+    PUSH_PREFIX  = ""
 if not DATABASE_URL:
-    raise SystemExit("ERROR: FIREBASE_DB_URL missing in config/.env")
+    raise SystemExit("ERROR: FIREBASE_DB_URL missing in config/.env"
+                      + (" (or FIREBASE_DB_URL_DIAGNOSTIC, for --config diagnostic)" if _IS_DIAGNOSTIC else ""))
 
 # Optional: leave empty string "" if your DB rules allow public write.
 # If you add Firebase Auth later, put your ID token here.
@@ -31,18 +55,21 @@ AUTH_TOKEN = ""
 
 # ── File paths ────────────────────────────────────────────────────────────────
 BASE_DIR        = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-TRADES_FILE     = os.path.join(BASE_DIR, "jasons", "trades.json")
-POSITIONS_FILE  = os.path.join(BASE_DIR, "jasons", "open_positions.json")
-HEARTBEAT_FILE  = os.path.join(BASE_DIR, "jasons", "heartbeat.json")
+_JASONS_DIR     = "jasons_diagnostic" if _IS_DIAGNOSTIC else "jasons"
+TRADES_FILE     = os.path.join(BASE_DIR, _JASONS_DIR, "trades.json")
+POSITIONS_FILE  = os.path.join(BASE_DIR, _JASONS_DIR, "open_positions.json")
+HEARTBEAT_FILE  = os.path.join(BASE_DIR, _JASONS_DIR, "heartbeat.json")
 
 PUSH_INTERVAL   = 30   # seconds
 
 # ── Helpers ───────────────────────────────────────────────────────────────────
 
 def fb_url(path: str) -> str:
-    """Build a Firebase REST URL for the given path."""
+    """Build a Firebase REST URL for the given path. PUSH_PREFIX namespaces
+    every diagnostic push under diagnostic/ so it can never land on the
+    same keys as production, even on a shared database."""
     suffix = f"?auth={AUTH_TOKEN}" if AUTH_TOKEN else ""
-    return f"{DATABASE_URL}/{path}.json{suffix}"
+    return f"{DATABASE_URL}/{PUSH_PREFIX}{path}.json{suffix}"
 
 
 def read_json(filepath: str):
@@ -137,7 +164,8 @@ def build_equity_curve(trades: list) -> list:
 # ── Main loop ─────────────────────────────────────────────────────────────────
 
 def sync():
-    print(f"[INFO] Starting Midas Capital Firebase sync (every {PUSH_INTERVAL}s) …")
+    print(f"[INFO] Starting Midas Capital Firebase sync ({_args.config}, every {PUSH_INTERVAL}s) …")
+    print(f"[INFO] Reading from {_JASONS_DIR}/, pushing to {DATABASE_URL}/{PUSH_PREFIX}")
 
     while True:
         now_iso = datetime.datetime.utcnow().isoformat() + "Z"

@@ -1,0 +1,3 @@
+# Research / backtest / tournament tooling. Not needed on the 24/7 box.
+-r ../requirements.txt
+numpy

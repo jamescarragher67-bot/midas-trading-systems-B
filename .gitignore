@@ -3,6 +3,7 @@
 .env.*.bak
 *.env.bak
 config/.env*
+!config/.env.example
 __pycache__/
 *.pyc
 logs/

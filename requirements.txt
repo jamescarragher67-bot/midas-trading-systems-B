@@ -1,4 +1,6 @@
+# Live path only: main.py, sync/, tools/preflight_check.py.
+# Research/backtest tooling has its own list in research/requirements.txt.
 MetaTrader5
 pandas
-numpy
-schedule
+python-dotenv
+requests
