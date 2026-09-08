@@ -1,0 +1,8 @@
+# LSC validation run — 2026-09-08
+# Source: Pepperstone MT5 demo terminal, XAUUSD.a M15, 90,000 bars frozen 2022-11-11 08:15 -> 2026-09-08 13:45 UTC
+# Harness: research/tools/risk_calibrator.py run_backtest loop (INITIAL_BALANCE=50000, LEVERAGE_ASSUMED=10) and backtest/lsc_engine.py run_lsc_simulation on the same frozen bars
+# Spread assumption 18 points, 25% margin budget, 6% trailing-drawdown wall (see config/settings.py RISK_PERCENT comment)
+# md5 = hash of the full trade list; identical before and after the 2026-09-08 refactors
+[calibrator $50K/1:10/0.045%] trades=2649 PF=1.0800 WR=38.80% net=$3119.68 maxDD=6.00% final=$53119.68 md5=b3b7a777f7eaf86512bec8cd2a4e3a01
+[calibrator $50K/1:10/1.0% (fidelity)] trades=2649 PF=1.1600 WR=38.80% net=$113889.49 maxDD=53.60% final=$163889.49 md5=8ccc15480ba0f82c56aec811f56b45ea
+[lsc_engine $50K/0.045%] trades=2649 PF=1.0800 WR=38.80% net=$3118.84 maxDD=6.00% final=$53118.84 md5=d674e0df27a1873594614fe2a09e27c5
