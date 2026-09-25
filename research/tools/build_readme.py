@@ -37,16 +37,17 @@ assert val_files, "no research/lsc_validation_*.txt found"
 VAL = val_files[-1]
 VAL_DATE = re.search(r"(\d{4}-\d{2}-\d{2})", VAL.name).group(1)
 val_text = VAL.read_text(encoding="utf-8")
+# The validation line for the risk% that is actually live. If settings.RISK_PERCENT
+# changes without a matching line in the newest validation file, this fails loudly.
 m = re.search(
-    r"\[calibrator \$50K/1:10/0\.045%\] trades=(\d+) PF=([\d.]+) WR=([\d.]+)% "
+    rf"\[calibrator \$50K/1:10/{re.escape(str(S.RISK_PERCENT))}%\] trades=(\d+) PF=([\d.]+) WR=([\d.]+)% "
     r"net=\$([-\d.]+) maxDD=([\d.]+)% final=\$([-\d.]+)", val_text)
-assert m, f"could not parse the $50K/1:10/0.045% line in {VAL.name}"
+assert m, (f"no [calibrator $50K/1:10/{S.RISK_PERCENT}%] line in {VAL.name} - "
+           "settings.RISK_PERCENT changed without re-running the frozen-bar validation")
 TRADES, PF, WR, NET, MAXDD, FINAL = int(m[1]), float(m[2]), float(m[3]), float(m[4]), float(m[5]), float(m[6])
 bars = re.search(r"([\d,]+) bars frozen (\S+ \S+) -> (\S+ \S+) UTC", val_text)
 assert bars, "bars/date-range line missing"
 BARS, D_FROM, D_TO = bars[1], bars[2], bars[3]
-assert abs(S.RISK_PERCENT - 0.045) < 1e-9, \
-    "validation file is for 0.045% but settings.RISK_PERCENT changed - rerun the backtest"
 
 # ── Live file tree: walked from disk, described here, cross-checked both ways ──
 DESC = {
@@ -69,6 +70,7 @@ DESC = {
     "utils/notifications.py":        "WhatsApp (CallMeBot) alerts",
     "utils/logger.py":               "Per-process rotating log file + console",
     "sync/watchdog.py":              "Supervisor: starts and restarts the three live processes",
+    "sync/start_watchdog.bat":       "Launches the watchdog under the real python.exe, not a PATH shim",
     "sync/trade_sync.py":            "Writes jasons/ state files, hourly WhatsApp summary",
     "sync/firebase_push.py":         "Pushes jasons/ state to Firebase for remote monitoring",
     "tools/preflight_check.py":      "Go / no-go checker run before launch",
@@ -141,8 +143,10 @@ reproduce the same trade list; the hash is checked after every refactor.
 | Final balance | ${FINAL:,.2f} |
 
 Read that PF for what it is: a thin, positive edge at a risk setting chosen so
-the worst of 1000 shuffled sequences stays inside the drawdown wall, not a
-money machine. Full output: `research/{VAL.name}`.
+the worst of 1000 month-block reorderings of the trade history (each month's
+internal sequence preserved) stays inside the drawdown wall, not a money
+machine. Full output: `research/{VAL.name}`; the calibration sweep behind the
+risk figure is `research/lsc_risk_calibration_2026-09-15.txt`.
 
 ---
 

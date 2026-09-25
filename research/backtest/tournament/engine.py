@@ -77,10 +77,14 @@ def fetch_data(symbol: str, timeframe_mt5: int, date_from, date_to) -> pd.DataFr
     return df
 
 
-def _lot_size(balance: float, sl_dist: float, risk_pct: float, price: float,
-              max_lot: float) -> float:
+def _lot_size_flags(balance: float, sl_dist: float, risk_pct: float, price: float,
+                    max_lot: float):
+    """Returns (lot, floor_clamped, margin_capped). Same arithmetic as before;
+    the two flags mirror research/tools/risk_calibrator.py's reporting
+    (floor_clamped = the 0.01 minimum forced the lot UP, i.e. more risk than
+    risk_pct intends; margin_capped = the margin budget forced it DOWN)."""
     if sl_dist <= 0:
-        return 0.0
+        return 0.0, False, False
     risk_amt  = balance * (risk_pct / 100)
     sl_points = sl_dist / POINT
     raw_lot   = risk_amt / (sl_points * CONTRACT_SIZE * POINT)
@@ -90,11 +94,20 @@ def _lot_size(balance: float, sl_dist: float, risk_pct: float, price: float,
 
     lot = min(raw_lot, margin_safe_max_lot, max_lot)
     lot = max(lot, 0.01)
-    return round(round(lot / 0.01) * 0.01, 2)
+    return round(round(lot / 0.01) * 0.01, 2), raw_lot < 0.01, raw_lot > margin_safe_max_lot
+
+
+def _lot_size(balance: float, sl_dist: float, risk_pct: float, price: float,
+              max_lot: float) -> float:
+    return _lot_size_flags(balance, sl_dist, risk_pct, price, max_lot)[0]
 
 
 def _simulate_fixed(df, entry_idx, direction, sl, tp, balance, risk_pct,
-                     spread_points, max_lot, max_hold_bars):
+                     spread_points, max_lot, max_hold_bars, check_exit=None):
+    """check_exit (optional, tournament 2): strategy.check_exit(df, j, direction)
+    -> bool, evaluated on each bar's close AFTER the SL/TP scan of that bar; a
+    True fills at the NEXT bar's open (same no-lookahead convention as entries).
+    Strategies without it behave exactly as before."""
     if entry_idx + 1 >= len(df):
         return None
     entry_candle = df.iloc[entry_idx + 1]
@@ -103,28 +116,35 @@ def _simulate_fixed(df, entry_idx, direction, sl, tp, balance, risk_pct,
     if sl_dist <= 0:
         return None
 
-    lot_size = _lot_size(balance, sl_dist, risk_pct, entry_price, max_lot)
+    lot_size, floor_clamped, margin_capped = _lot_size_flags(balance, sl_dist, risk_pct, entry_price, max_lot)
     mult     = lot_size * CONTRACT_SIZE
     spread_cost = spread_points * POINT * mult
 
-    result, exit_price = None, None
+    result, exit_price, exit_reason = None, None, None
     for j in range(entry_idx + 2, min(entry_idx + max_hold_bars + 2, len(df))):
         c = df.iloc[j]
         high, low = float(c["high"]), float(c["low"])
         if direction == "BUY":
             if low <= sl:
-                result, exit_price = "LOSS", sl; break
+                result, exit_price, exit_reason = "LOSS", sl, "SL"; break
             if high >= tp:
-                result, exit_price = "WIN", tp; break
+                result, exit_price, exit_reason = "WIN", tp, "TP"; break
         else:
             if high >= sl:
-                result, exit_price = "LOSS", sl; break
+                result, exit_price, exit_reason = "LOSS", sl, "SL"; break
             if low <= tp:
-                result, exit_price = "WIN", tp; break
+                result, exit_price, exit_reason = "WIN", tp, "TP"; break
+        if check_exit is not None and check_exit(df, j, direction):
+            if j + 1 < len(df):
+                exit_price = float(df.iloc[j + 1]["open"])
+            else:
+                exit_price = float(c["close"])
+            result, exit_reason = "SIGNAL", "SIGNAL"
+            break
 
     if result is None:
         last = df.iloc[min(entry_idx + max_hold_bars + 1, len(df) - 1)]
-        exit_price = float(last["close"])
+        exit_price, exit_reason = float(last["close"]), "TIME"
 
     raw_move = (exit_price - entry_price) if direction == "BUY" else (entry_price - exit_price)
     pnl    = raw_move * mult - spread_cost
@@ -135,7 +155,8 @@ def _simulate_fixed(df, entry_idx, direction, sl, tp, balance, risk_pct,
         "direction": direction, "entry": round(entry_price, 2), "exit": round(exit_price, 2),
         "sl": round(sl, 2), "tp": round(tp, 2), "lots": lot_size,
         "spread_cost": round(spread_cost, 2), "pnl": round(pnl, 2), "result": result,
-        "balance_after": round(balance + pnl, 2),
+        "balance_after": round(balance + pnl, 2), "exit_reason": exit_reason,
+        "floor_clamped": floor_clamped, "margin_capped": margin_capped,
     }
 
 
@@ -149,7 +170,7 @@ def _simulate_trailing(df, entry_idx, direction, initial_sl, balance, risk_pct,
     if sl_dist <= 0:
         return None
 
-    lot_size = _lot_size(balance, sl_dist, risk_pct, entry_price, max_lot)
+    lot_size, floor_clamped, margin_capped = _lot_size_flags(balance, sl_dist, risk_pct, entry_price, max_lot)
     mult     = lot_size * CONTRACT_SIZE
     spread_cost = spread_points * POINT * mult
 
@@ -187,20 +208,31 @@ def _simulate_trailing(df, entry_idx, direction, initial_sl, balance, risk_pct,
         "sl": round(stop, 2), "tp": None, "lots": lot_size,
         "spread_cost": round(spread_cost, 2), "pnl": round(pnl, 2), "result": result,
         "balance_after": round(balance + pnl, 2), "exit_idx": j,
+        "floor_clamped": floor_clamped, "margin_capped": margin_capped,
     }
 
 
-def run_backtest(symbol: str, strategy, date_from, date_to,
-                  risk_pct: float = DEFAULT_RISK_PERCENT,
-                  spread_points: int = DEFAULT_SPREAD_POINTS,
-                  initial_balance: float = DEFAULT_INITIAL_BALANCE,
-                  max_lot: float = DEFAULT_MAX_LOT,
-                  min_lookback: int = 100) -> list:
-    df = fetch_data(symbol, strategy.TIMEFRAME_MT5, date_from, date_to)
+def prepare(df: pd.DataFrame, strategy) -> pd.DataFrame:
+    """ATR14 + the strategy's own indicator columns. Split out of run_backtest
+    (2026-09-16, tournament 2) so a frozen bar set can be prepared ONCE on its
+    full history and then replayed over date windows with fully warmed
+    indicators, instead of re-fetching and re-warming per window."""
+    df = df.copy()
+    df["atr"] = compute_atr14(df)
+    return strategy.precompute(df)
+
+
+def run_prepared(df: pd.DataFrame, strategy,
+                 risk_pct: float = DEFAULT_RISK_PERCENT,
+                 spread_points: int = DEFAULT_SPREAD_POINTS,
+                 initial_balance: float = DEFAULT_INITIAL_BALANCE,
+                 max_lot: float = DEFAULT_MAX_LOT,
+                 min_lookback: int = 100) -> list:
+    """The bar loop, on an already-prepared frame. Identical mechanics to the
+    original run_backtest (which now just fetches, prepares and calls this)."""
     if len(df) < min_lookback + 10:
         return []
-    df["atr"] = compute_atr14(df)
-    df = strategy.precompute(df)
+    check_exit = getattr(strategy, "check_exit", None)
 
     trades = []
     balance = initial_balance
@@ -230,7 +262,8 @@ def run_backtest(symbol: str, strategy, date_from, date_to,
 
         if tp is not None:
             trade = _simulate_fixed(df, i, direction, sl, tp, balance, risk_pct,
-                                     spread_points, max_lot, strategy.MAX_HOLD_BARS)
+                                     spread_points, max_lot, strategy.MAX_HOLD_BARS,
+                                     check_exit=check_exit)
         else:
             trade = _simulate_trailing(df, i, direction, sl, balance, risk_pct,
                                         spread_points, max_lot, strategy.MAX_HOLD_BARS,
@@ -246,3 +279,17 @@ def run_backtest(symbol: str, strategy, date_from, date_to,
         trades_today += 1
 
     return trades
+
+
+def run_backtest(symbol: str, strategy, date_from, date_to,
+                  risk_pct: float = DEFAULT_RISK_PERCENT,
+                  spread_points: int = DEFAULT_SPREAD_POINTS,
+                  initial_balance: float = DEFAULT_INITIAL_BALANCE,
+                  max_lot: float = DEFAULT_MAX_LOT,
+                  min_lookback: int = 100) -> list:
+    df = fetch_data(symbol, strategy.TIMEFRAME_MT5, date_from, date_to)
+    if len(df) < min_lookback + 10:
+        return []
+    return run_prepared(prepare(df, strategy), strategy, risk_pct=risk_pct,
+                        spread_points=spread_points, initial_balance=initial_balance,
+                        max_lot=max_lot, min_lookback=min_lookback)

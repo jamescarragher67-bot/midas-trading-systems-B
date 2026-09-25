@@ -1,0 +1,36 @@
+====================================================================================================
+5-GATE LIVE-VS-BACKTEST REPLAY - GBPJPY.a
+====================================================================================================
+bars 99999 | 2025-05-14 10:45:00 -> 2026-09-16 13:50:00 | digits=3 point=0.001 contract=100000.0
+session hours used (bar's own timestamp, never wall clock): [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 20, 21, 22, 23]
+5-gate engine has NO daily trade cap (confirmed absent from backtest/engine.py, unlike LSC) - the only stateful live gate is cooldown (5 bars).
+
+Ground truth (full-history vectorised backtest, whole dataset): 275 raw signals, 275 converted to trades (0 dropped for sl_dist<=0)
+
+1) BAR-FETCH WINDOW SWEEP (correct cooldown handling), decision bars [95799:99799] (2026-08-26 21:55:00 -> 2026-09-15 21:05:00) - direction-sequence match vs ground truth on that same range:
+  N=  300  live_signals=  21  gt_signals=  19  only_live=  2  only_gt=  0  dir_mismatch=  0  sl_dist_flip=  0  diff  [28s]
+  N=  400  live_signals=  19  gt_signals=  19  only_live=  0  only_gt=  0  dir_mismatch=  0  sl_dist_flip=  0  MATCH  [29s]
+  N=  500  live_signals=  19  gt_signals=  19  only_live=  0  only_gt=  0  dir_mismatch=  0  sl_dist_flip=  0  MATCH  [29s]
+  N=  600  live_signals=  19  gt_signals=  19  only_live=  0  only_gt=  0  dir_mismatch=  0  sl_dist_flip=  0  MATCH  [30s]
+  N=  800  live_signals=  19  gt_signals=  19  only_live=  0  only_gt=  0  dir_mismatch=  0  sl_dist_flip=  0  MATCH  [30s]
+  N= 1000  live_signals=  19  gt_signals=  19  only_live=  0  only_gt=  0  dir_mismatch=  0  sl_dist_flip=  0  MATCH  [30s]
+  -> smallest N with an exact direction-sequence match: 400 bars (~2.0 days of M5 at this instrument's bar density, 204 bars/day)
+  -> RECOMMENDED live BARS_TO_FETCH (with the same kind of safety margin LSC's 150->300 fix used): 600
+
+2) COOLDOWN COORDINATE HANDLING at N=600, decision bars [79799:99998] (2026-06-10 03:00:00 -> 2026-09-16 13:50:00) - correct vs deliberately naive (LSC-bug-class) implementation:
+  correct   live_signals=  61  gt_signals=  61  only_live=  0  only_gt=  0  dir_mismatch=  0  MATCH  [150s]
+  naive     live_signals=   1  gt_signals=  61  only_live=  0  only_gt= 60  dir_mismatch=  0  BROKEN  [7s]
+    (confirms the mixed-coordinate bug class would have broken this engine too, exactly as it did main.py for LSC)
+
+3) FULL PROOF at recommended settings (N=600, correct cooldown, session on bar's own timestamp), same decision-bar range as section 2:
+  backtest entries: 61 | live-replayed entries: 61 | sequence identical (direction): True
+
+4) SL/TP FIDELITY (separate finding: backtest sizes stops off the REAL next-bar open, a live bot can only estimate with the last closed bar's close):
+  matched signals compared: 61 | signal-existence flips (sl_dist<=0 boundary): 0
+  |SL_live - SL_backtest| in ATR units: median 0.0000  p90 0.0207  max 0.1317
+  smart_sl branch (structural vs atr) flipped between live-estimate and real-open: 0/61 (0.0%)
+  CONCLUSION: direction is entry-price-independent and unaffected; SL/TP levels a live bot would actually use differ from the backtest's idealised (real-open) levels by a small, quantified amount - this is a genuine gap between what was validated and what live trading can achieve, not a bug to fix in this engine's code.
+
+GBPJPY.a instrument-specific check: digits=3, point=0.001, contract=100000.0 read live from mt5.symbol_info via the frozen pickle (not hardcoded); smart_sl and all trade fields round at `digits`.
+
+Saved research/five_gate_replay_GBPJPY.a_2026-09-16.txt

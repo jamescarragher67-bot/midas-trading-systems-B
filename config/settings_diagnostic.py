@@ -12,8 +12,11 @@ percent of balance uncontrolled. This account is expected to breach
 quickly. No resets planned — a breach here is an expected test outcome,
 not an incident.
 
-Completely separate from config/settings.py (the real $50,000 / 0.045%
-deployment config - see its own header). Uses its own MT5_DIAGNOSTIC_*
+Completely separate from config/settings.py (the real $50,000 deployment
+config, RISK_PERCENT 0.015% since the 2026-09-15 recalibration - see its
+own header). Nothing on the live path imports this file; main.py,
+risk/trade_manager.py and risk/circuit_breaker.py read config/settings.py
+only, so values here can never leak into production sizing. Uses its own MT5_DIAGNOSTIC_*
 env vars specifically so both accounts' credentials can sit in the same
 config/.env without one overwriting the other, and its own MAGIC number
 so trade tracking / circuit breaker state never conflate the two accounts.
@@ -88,11 +91,14 @@ COOLDOWN_BARS         = 3
 MAX_TRADES_PER_DAY    = 4
 ATR_PERIOD            = 14
 
-# ── Risk — carried over from the real $50K/0.045% calibration, NOT a ────
-# fresh number for $5K. At this account size the 0.01-lot floor decides
-# actual risk regardless of what's dialed in here (see module docstring) -
-# this value exists so the diagnostic exercises the real position-sizing
-# code path, not because 0.045% means anything protective at $5,000.
+# ── Risk — a stale copy of the SUPERSEDED $50K figure, deliberately left ──
+# as-is. The live config (config/settings.py) moved to 0.015% on
+# 2026-09-15 after recalibrating against month-block-reordered tail risk;
+# this file is isolated from the live path and was NOT recalibrated. At
+# $5K the 0.01-lot floor decides actual risk regardless of what's dialed
+# in here (see module docstring) - this value exists only so the
+# diagnostic exercises the real position-sizing code path, not because
+# any risk% means anything protective at $5,000.
 RISK_PERCENT = 0.045
 
 MARGIN_SAFETY_BUDGET_PCT = 0.25

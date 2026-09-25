@@ -1,0 +1,48 @@
+====================================================================================================
+TOURNAMENT 2 - ROUND 1: IN-SAMPLE, all 5 candidates, 1.0% common-footing risk
+====================================================================================================
+Frozen bars: 90000 | 2022-11-17 02:15:00 -> 2026-09-09 11:00:00 UTC | OHLC md5 2d6ae28eb0d5797b68bcc45feaf24ddd
+IS window: 2022-11-17 02:15:00 .. 2024-12-31 (50106 bars)   OOS window: 2025-01-01 .. 2026-09-09 11:00:00 (39894 bars)
+Account $50,000 | leverage 1:10 | margin budget 25% | spread 18pt | specs point/contract/vmin/vmax/vstep = (0.01, 100.0, 0.01, 50.0, 0.01)
+Score = min(PF,10) / (1 + maxDD%/20); LOW_SAMPLE below 20 trades. Framework: hold cap 96 bars (MA crossover 960), cooldown 3, max 4 trades/day, no session filter.
+
+[1_ma_cross] Moving Average Crossover (EMA20/60 + EMA100 filter)
+  sl0.5atr                             742 tr | WR  36.5% | PF  0.89 | net $ -4,143.11 | maxDD  11.2% | score  0.5705 | B/S 369/373 | cap-days 32/404 |  | exits SL=471 TP=271  [4s]
+  sl1.0atr                             742 tr | WR  33.3% | PF  0.91 | net $ -6,508.00 | maxDD  18.3% | score  0.4752 | B/S 369/373 | cap-days 32/404 |  | exits SIGNAL=5 SL=490 TP=247  [4s]
+  -> candidate ranked on: sl0.5atr (score 0.5705)
+
+[2_ha_reversal] Heikin-Ashi Reversal + Stochastic(14,7,3)
+  stoch_level30                       1212 tr | WR  36.5% | PF  1.01 | net $  2,376.85 | maxDD  22.2% | score  0.4787 | B/S 596/616 | cap-days 104/498 |  | exits SL=759 TIME=37 TP=416  [8s]
+  stoch_kd_cross                      1504 tr | WR  35.0% | PF  0.95 | net $ -8,814.01 | maxDD  34.1% | score  0.3512 | B/S 708/796 | cap-days 184/533 |  | exits SL=974 TIME=23 TP=507  [8s]
+  -> candidate ranked on: stoch_level30 (score 0.4787)
+
+[3_bb_squeeze] Bollinger Band Squeeze -> SMA20 close-through
+  base                                1253 tr | WR  34.1% | PF  0.84 | net $-15,981.67 | maxDD  33.5% | score   0.314 | B/S 625/628 | cap-days 162/476 |  | exits SL=824 TIME=6 TP=423  [5s]
+  -> candidate ranked on: base (score 0.314)
+
+[4_nr_breakout] Narrow Range Breakout (NR4 / NR7)
+  nr4                                 2184 tr | WR  34.3% | PF  0.92 | net $-11,829.49 | maxDD  26.5% | score  0.3957 | B/S 1192/992 | cap-days 546/546 |  | exits SL=1434 TIME=2 TP=748  [2s]
+  nr7                                 2184 tr | WR  33.4% | PF  0.87 | net $-16,293.18 | maxDD  35.6% | score  0.3129 | B/S 1171/1013 | cap-days 546/546 |  | exits SL=1454 TIME=3 TP=727  [2s]
+  -> candidate ranked on: nr4 (score 0.3957)
+
+[5_rsi2] 2-Period RSI, as the source states (BUY >90 / SELL <10)
+  cross_nofilter                      2180 tr | WR  36.1% | PF  0.86 | net $-11,758.66 | maxDD  27.5% | score  0.3621 | B/S 1192/988 | cap-days 545/545 |  | exits SL=1393 TP=787  [2s]
+  cross_ema200                        2155 tr | WR  35.9% | PF  0.85 | net $-13,090.98 | maxDD  27.3% | score  0.3594 | B/S 1205/950 | cap-days 523/545 |  | exits SL=1381 TP=774  [3s]
+  level_nofilter                      2180 tr | WR  36.0% | PF  0.86 | net $-11,437.45 | maxDD  27.1% | score  0.3652 | B/S 1204/976 | cap-days 545/545 |  | exits SL=1396 TP=784  [2s]
+  level_ema200                        2171 tr | WR  36.5% | PF  0.87 | net $-11,245.83 | maxDD  25.4% | score  0.3833 | B/S 1239/932 | cap-days 537/545 |  | exits SL=1378 TP=793  [3s]
+  -> candidate ranked on: level_ema200 (score 0.3833)
+
+DIAGNOSTIC (not a candidate, not ranked):
+  5_rsi2 (true Connors orientation, DIAGNOSTIC ONLY)  1893 tr | WR  37.1% | PF  0.92 | net $ -6,518.70 | maxDD  17.4% | score   0.492 | B/S 1031/862 | cap-days 359/540 |  | exits SL=1190 TP=703
+
+ROUND 1 RANKING (best sub-variant per candidate, in-sample):
+  #1 1_ma_cross       sl0.5atr         score  0.5705  PF  0.89  maxDD  11.2%  trades   742  net $ -4,143.11  -> ADVANCES
+  #2 2_ha_reversal    stoch_level30    score  0.4787  PF  1.01  maxDD  22.2%  trades  1212  net $  2,376.85  -> ADVANCES
+  #3 4_nr_breakout    nr4              score  0.3957  PF  0.92  maxDD  26.5%  trades  2184  net $-11,829.49  -> ADVANCES
+  #4 5_rsi2           level_ema200     score  0.3833  PF  0.87  maxDD  25.4%  trades  2171  net $-11,245.83  -> ELIMINATED
+  #5 3_bb_squeeze     base             score   0.314  PF  0.84  maxDD  33.5%  trades  1253  net $-15,981.67  -> ELIMINATED
+
+Survivors to Round 2 (OOS): ['1_ma_cross', '2_ha_reversal', '4_nr_breakout']
+Dropped: ['5_rsi2', '3_bb_squeeze']
+Saved research\tournament2_is_results.json
+Saved research\tournament2_is_trades.json

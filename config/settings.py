@@ -76,20 +76,32 @@ COOLDOWN_BARS         = 3      # 45 minutes = 3 x M15 bars
 MAX_TRADES_PER_DAY    = 4
 ATR_PERIOD            = 14
 
-# ── Risk — recalibrated 2026-09-01 for the real deployment target ───────
-# research/tools/risk_calibrator.py --account-size 50000 --leverage 10 --total-wall-pct 6
+# ── Risk — recalibrated 2026-09-15 against month-block-reordered tail risk ──
+# research/tools/risk_calibrator.py --account-size 50000 --leverage 10 --total-wall-pct 6 --bars <frozen 90k bars>
 # ($50,000 balance, 1:10 leverage, single 6% trailing-drawdown wall).
-# 1000-shuffle Monte Carlo on the full available XAUUSD.a M15 history
-# (percent-return recompounding method): 0.045% is the highest risk-per-
-# trade where BOTH the worst-5th-percentile drawdown (3.7%) and the
-# absolute worst single shuffle out of 1000 (5.2%) clear the 6% wall with
-# real margin, with only 13.9% of trades hitting the broker's 0.01-lot
-# floor (checked explicitly - not a lot-floor-dominated number).
-# SUPERSEDES the earlier 0.065% figure, which was calibrated against a
-# different account (leverage 1:50, 10% wall) - do not revert to it, that
-# wall/leverage combination no longer applies. Do not change this value
-# without re-running the calibrator for whatever account is actually live.
-RISK_PERCENT = 0.045
+# CALIBRATION BASIS: 1000-path MONTH-BLOCK REORDERING Monte Carlo
+# (research/backtest/monte_carlo.monte_carlo_block_reorder_pct): the trade
+# history is cut into calendar-month blocks, the block order is shuffled
+# with each month's internal trade sequence preserved, and percent returns
+# are recompounded - checked on 5 seeds, decision taken on the worst seed.
+# 0.015% is the highest tested level where, on EVERY seed, the 95th-pct
+# max drawdown (<= 3.92%) clears the 4.2% target AND the absolute worst
+# path (<= 5.66%) clears the 5.7% target; the real historical order draws
+# down 2.4%. 0.0175% fails the absolute-worst target on one seed (6.05%,
+# over the wall itself). Full sweep: research/lsc_risk_calibration_2026-09-15.txt.
+# SUPERSEDES the 0.045% figure set on 2026-09-01. That figure was
+# calibrated against an individual-trade shuffle - an insufficiently
+# realistic risk model: it destroys LSC's real month-level loss clustering
+# and understated the tail roughly 2x. Under month-block reordering 0.045%
+# breaches the 6% wall in 8.6% of paths (95th-pct 6.36%, worst 9.14%),
+# and the actual historical order reached 5.99%. Do not revert to it.
+# KNOWN LIMIT: at $50K the broker's 0.01-lot floor binds on ~43% of trades
+# at this level (the formula wants less than 0.01 lot), so realised risk on
+# those trades is set by the floor (up to ~0.29%). The drawdown figures
+# above already include that effect; a larger account would let the risk%
+# actually govern sizing. Do not change this value without re-running the
+# calibrator for whatever account is actually live.
+RISK_PERCENT = 0.015
 
 # Margin-safe position sizing: NEVER let the risk% formula alone decide lot
 # size. Tonight proved (M5, M15, and H1 all independently) that naive

@@ -1,0 +1,144 @@
+# LSC risk recalibration - 2026-09-15
+# Command: python research/tools/risk_calibrator.py --account-size 50000 --leverage 10 --total-wall-pct 6 --bars xauusd_m15_frozen.pkl
+# Bars: the same 90,000-bar freeze as research/lsc_rolling_month_2026-09-15.txt (2022-11-17 02:15 -> 2026-09-09 11:00 UTC)
+# Tail metric: month-block reordering (research/backtest/monte_carlo.monte_carlo_block_reorder_pct), 1000 paths per seed, seeds 42/1/7/99/123, decision on the worst seed.
+# Supersedes the 2026-09-01 calibration (0.045%), which used an individual-trade shuffle that understated the tail ~2x.
+
+======================================================================
+LSC RISK CALIBRATOR - frozen bars from C:/Users/jimmy/AppData/Local/Temp/claude/d--MIDAS-TRADING-BOT-midas-trading-systems-B-main/4867b97b-29ee-40c1-aff8-818243bdb206/scratchpad/xauusd_m15_frozen.pkl
+======================================================================
+Bars: 90000 | 2022-11-17 02:15:00  ->  2026-09-09 11:00:00
+Account size: $50,000  |  Leverage: 10.0:1  |  Total-loss wall: 6.0%  (target 95th-pct: 4.2%, target abs-worst and real order: 5.7%)
+point=0.01 contract_size=100.0 vol_min=0.01 vol_max=50.0 vol_step=0.01
+Margin-safe cap: leverage=10.0:1, 25% equity budget
+
+----------------------------------------------------------------------
+FIDELITY CHECK (1.0% risk) - two separate comparisons:
+  (a) code-drift check: trailing ~2200 trades vs. lsc_m15.py's
+      documented ~1100/~1100 halves, PF 1.23 early / 1.21 recent
+  (b) full-set early/recent halves - EXPECTED to diverge from (a)
+      once older data is included; see module docstring for why
+----------------------------------------------------------------------
+  Total trades (full 90000-bar set): 2643
+  Overall PF (full set):  1.18   Win rate: 39.0%
+  (a) Trailing 2200 trades: early-half PF 1.31 (documented ~1100, PF 1.23) | recent-half PF 1.22 (documented ~1100, PF 1.21)
+  (b) Full-set halves:    1321 trades PF 0.95 (early) | 1322 trades PF 1.25 (recent)
+  Margin-capped trades: 1870 / 2643
+
+Code-drift check passed (trailing-trades subset matches documented
+PF ballpark) - strategy code and recent data are consistent with the
+Aug 2 2026 validation. Calibrating on the full set. Proceeding.
+
+Order-invariance check (PF/expectancy unchanged across 5 random shuffles): PASS
+
+======================================================================
+MONTE CARLO SWEEP - 1000 month-block reorderings per risk level, $50,000 start
+======================================================================
+Decision metric: MONTH-BLOCK REORDERING (calendar-month blocks shuffled,
+each month's internal trade sequence preserved, percent-return
+recompounding). The individual-trade shuffle every earlier calibration
+used is printed alongside as 'trade-shuffle' for comparison only - it
+understates the tail (see module docstring). 'histDD' is the real
+historical order's max drawdown at that risk level.
+
+  risk=   0.1%  trades= 2643  PF= 1.08  histDD=12.9%  medianDD=  8.5%  95thDD=12.79% (max-seed 12.88%)  worstDD=18.25% (max-seed 18.25%)  breach=96.1%  floorClamped=  76/2643  finalBal=$56,842
+  risk= 0.075%  trades= 2643  PF= 1.08  histDD= 9.8%  medianDD= 6.65%  95thDD=10.02% (max-seed 10.12%)  worstDD=14.03% (max-seed 14.03%)  breach=68.2%  floorClamped= 134/2643  finalBal=$54,714
+  risk= 0.065%  trades= 2643  PF= 1.07  histDD= 8.5%  medianDD= 5.93%  95thDD= 8.76% (max-seed  8.97%)  worstDD=12.77% (max-seed 12.77%)  breach=47.3%  floorClamped= 185/2643  finalBal=$53,733
+  risk=  0.06%  trades= 2643  PF= 1.07  histDD= 7.9%  medianDD= 5.64%  95thDD= 8.29% (max-seed  8.52%)  worstDD= 12.1% (max-seed  12.1%)  breach=38.0%  floorClamped= 234/2643  finalBal=$53,538
+  risk=  0.05%  trades= 2643  PF= 1.08  histDD= 6.6%  medianDD= 4.79%  95thDD= 7.05% (max-seed  7.18%)  worstDD=10.58% (max-seed 10.58%)  breach=16.2%  floorClamped= 311/2643  finalBal=$53,319
+  risk= 0.045%  trades= 2643  PF= 1.08  histDD= 6.0%  medianDD= 4.27%  95thDD= 6.36% (max-seed  6.39%)  worstDD= 9.14% (max-seed  9.14%)  breach= 8.6%  floorClamped= 366/2643  finalBal=$53,373
+  risk=  0.04%  trades= 2643  PF= 1.08  histDD= 5.2%  medianDD= 3.96%  95thDD= 5.92% (max-seed  5.92%)  worstDD= 8.38% (max-seed  8.42%)  breach= 4.3%  floorClamped= 433/2643  finalBal=$53,002
+  risk= 0.035%  trades= 2643  PF= 1.08  histDD= 4.5%  medianDD= 3.67%  95thDD= 5.52% (max-seed  5.52%)  worstDD= 7.99% (max-seed  7.99%)  breach= 2.4%  floorClamped= 502/2643  finalBal=$52,783
+  risk=  0.03%  trades= 2643  PF= 1.09  histDD= 4.2%  medianDD= 3.34%  95thDD= 5.03% (max-seed  5.03%)  worstDD= 7.23% (max-seed  7.53%)  breach= 1.2%  floorClamped= 599/2643  finalBal=$52,710
+  risk=0.0275%  trades= 2643  PF=  1.1  histDD= 3.8%  medianDD= 3.13%  95thDD= 4.72% (max-seed  4.76%)  worstDD= 6.55% (max-seed   7.0%)  breach= 0.3%  floorClamped= 665/2643  finalBal=$52,769
+  risk= 0.025%  trades= 2643  PF=  1.1  histDD= 3.5%  medianDD= 3.09%  95thDD= 4.59% (max-seed  4.63%)  worstDD=  6.3% (max-seed  6.86%)  breach= 0.3%  floorClamped= 740/2643  finalBal=$52,608
+  risk=0.0225%  trades= 2643  PF= 1.11  histDD= 3.2%  medianDD= 2.99%  95thDD= 4.43% (max-seed  4.48%)  worstDD= 6.14% (max-seed  6.67%)  breach= 0.1%  floorClamped= 807/2643  finalBal=$52,618
+  risk=  0.02%  trades= 2643  PF= 1.11  histDD= 2.8%  medianDD=  2.9%  95thDD= 4.31% (max-seed  4.31%)  worstDD= 5.81% (max-seed  6.36%)  breach= 0.0%  floorClamped= 892/2643  finalBal=$52,579
+  risk=0.0175%  trades= 2643  PF= 1.12  histDD= 2.5%  medianDD= 2.74%  95thDD= 4.09% (max-seed  4.09%)  worstDD= 5.42% (max-seed  6.05%)  breach= 0.0%  floorClamped=1011/2643  finalBal=$52,698
+  risk= 0.015%  trades= 2643  PF= 1.13  histDD= 2.4%  medianDD= 2.65%  95thDD= 3.92% (max-seed  3.92%)  worstDD= 5.16% (max-seed  5.66%)  breach= 0.0%  floorClamped=1150/2643  finalBal=$52,712
+  risk=  0.01%  trades= 2643  PF= 1.15  histDD= 2.4%  medianDD= 2.56%  95thDD= 3.81% (max-seed  3.81%)  worstDD= 4.99% (max-seed  5.43%)  breach= 0.0%  floorClamped=1544/2643  finalBal=$52,735
+  risk=0.0075%  trades= 2643  PF= 1.16  histDD= 2.4%  medianDD= 2.54%  95thDD= 3.77% (max-seed  3.77%)  worstDD=  4.9% (max-seed  5.28%)  breach= 0.0%  floorClamped=1808/2643  finalBal=$52,747
+  risk= 0.005%  trades= 2643  PF= 1.17  histDD= 2.4%  medianDD= 2.51%  95thDD= 3.72% (max-seed  3.72%)  worstDD= 4.81% (max-seed  5.11%)  breach= 0.0%  floorClamped=2105/2643  finalBal=$52,795
+
+======================================================================================================================================================
+  Risk% Trades  WinRate     PF  Expect$  HistDD%  MeanDD%  MedDD%  95thDD%  99thDD%  WorstDD%  95thMax  WorstMax  Breach%  tsh95th  tshWorst      Floor  FinalBal$
+    0.1   2643    39.0%   1.08     2.59     12.9     8.82     8.5    12.79    14.87     18.25    12.88     18.25     96.1      7.3      11.4    76/2643     56,842
+  0.075   2643    39.0%   1.08     1.78      9.8     6.91    6.65    10.02    11.82     14.03    10.12     14.03     68.2      5.8       8.6   134/2643     54,714
+  0.065   2643    39.0%   1.07     1.41      8.5     6.17    5.93     8.76    10.59     12.77     8.97     12.77     47.3      5.3       7.7   185/2643     53,733
+   0.06   2643    39.0%   1.07     1.34      7.9     5.82    5.64     8.29    10.14      12.1     8.52      12.1     38.0      4.9       7.3   234/2643     53,538
+   0.05   2643    39.0%   1.08     1.26      6.6     4.96    4.79     7.05     8.63     10.58     7.18     10.58     16.2      4.2       6.2   311/2643     53,319
+  0.045   2643    39.0%   1.08     1.28      6.0     4.44    4.27     6.36     7.85      9.14     6.39      9.14      8.6      3.7       5.3   366/2643     53,373
+   0.04   2643    39.0%   1.08     1.14      5.2     4.11    3.96     5.92     7.04      8.38     5.92      8.42      4.3      3.4       5.0   433/2643     53,002
+  0.035   2643    39.0%   1.08     1.05      4.5     3.83    3.67     5.52     6.59      7.99     5.52      7.99      2.4      3.2       4.6   502/2643     52,783
+   0.03   2643    39.0%   1.09     1.03      4.2     3.52    3.34     5.03     6.02      7.23     5.03      7.53      1.2      2.9       4.2   599/2643     52,710
+ 0.0275   2643    39.0%    1.1     1.05      3.8     3.29    3.13     4.72     5.53      6.55     4.76       7.0      0.3      2.7       4.0   665/2643     52,769
+  0.025   2643    39.0%    1.1     0.99      3.5     3.23    3.09     4.59     5.53       6.3     4.63      6.86      0.3      2.7       3.9   740/2643     52,608
+ 0.0225   2643    39.0%   1.11     0.99      3.2     3.11    2.99     4.43     5.26      6.14     4.48      6.67      0.1      2.5       3.7   807/2643     52,618
+   0.02   2643    39.0%   1.11     0.98      2.8      3.0     2.9     4.31     4.98      5.81     4.31      6.36      0.0      2.4       3.6   892/2643     52,579
+ 0.0175   2643    39.0%   1.12     1.02      2.5     2.83    2.74     4.09     4.72      5.42     4.09      6.05      0.0      2.2       3.6  1011/2643     52,698
+  0.015   2643    39.0%   1.13     1.03      2.4     2.75    2.65     3.92     4.53      5.16     3.92      5.66      0.0      2.2       3.4  1150/2643     52,712
+   0.01   2643    39.0%   1.15     1.03      2.4     2.65    2.56     3.81     4.34      4.99     3.81      5.43      0.0      2.0       3.3  1544/2643     52,735
+ 0.0075   2643    39.0%   1.16     1.04      2.4     2.63    2.54     3.77     4.25       4.9     3.77      5.28      0.0      2.0       3.2  1808/2643     52,747
+  0.005   2643    39.0%   1.17     1.06      2.4      2.6    2.51     3.72     4.22      4.81     3.72      5.11      0.0      2.0       3.0  2105/2643     52,795
+======================================================================================================================================================
+HistDD = real historical order. MeanDD..WorstDD, Breach% = month-block reordering, seed 42.
+95thMax/WorstMax = worst of those two statistics over seeds (42, 1, 7, 99, 123) - the DECISION columns.
+tsh95th/tshWorst = individual-trade shuffle (superseded 2026-09-15, comparison only).
+Floor = trades forced UP to the broker's minimum lot.
+
+----------------------------------------------------------------------
+RECOMMENDATION - highest tested risk% where, on EVERY seed, the month-block-
+reordered 95th-pct DD <= 4.2% AND the absolute worst reordering (1-in-1000) <= 5.7%,
+and the real historical order's DD <= 5.7%
+(every tested tail case must clear the 6.0% hard wall with real
+margin, not just the median - a breach at any probability ends the
+account, so the rare 1-in-1000 case and the one ordering that actually
+happened both matter)
+----------------------------------------------------------------------
+Recommended: 0.015% risk per trade
+  -> 95th-pct block-reordered DD: 3.92% on seed 42, 3.92% worst over seeds  (target <= 4.2%, hard wall 6.0%)
+  -> absolute worst reordering (1-in-1000): 5.16% on seed 42, 5.66% worst over seeds  (target <= 5.7%)
+  -> real historical order: 2.4%  (target <= 5.7%)
+  -> paths breaching the 6.0% wall: 0.0%
+  -> mean / median DD: 2.75% / 2.65%
+  -> PF 1.13, expectancy $1.03/trade, 2643 trades
+
+----------------------------------------------------------------------
+LOT-SIZE FEASIBILITY CHECK - $50,000 account, broker minimum lot 0.01
+----------------------------------------------------------------------
+floor_clamped = risk% formula wanted LESS than the broker's minimum
+tradable lot, so the position was forced UP to that minimum - meaning
+the account risked MORE than the intended risk% on that trade. If this
+happens on most/all trades at the recommended risk%, the account is too
+small for that risk% to actually mean anything: it's really trading at
+whatever risk% the 0.01-lot floor imposes, not the calibrated number.
+  risk=   0.1%  floor_clamped=   76/2643   worst actual risk on a clamped trade: 0.278%  <-- floor binds on some trades
+  risk= 0.075%  floor_clamped=  134/2643   worst actual risk on a clamped trade: 0.284%  <-- floor binds on some trades
+  risk= 0.065%  floor_clamped=  185/2643   worst actual risk on a clamped trade: 0.287%  <-- floor binds on some trades
+  risk=  0.06%  floor_clamped=  234/2643   worst actual risk on a clamped trade: 0.289%  <-- floor binds on some trades
+  risk=  0.05%  floor_clamped=  311/2643   worst actual risk on a clamped trade: 0.289%  <-- floor binds on some trades
+  risk= 0.045%  floor_clamped=  366/2643   worst actual risk on a clamped trade: 0.289%  <-- floor binds on some trades
+  risk=  0.04%  floor_clamped=  433/2643   worst actual risk on a clamped trade: 0.289%  <-- floor binds on some trades
+  risk= 0.035%  floor_clamped=  502/2643   worst actual risk on a clamped trade: 0.290%  <-- floor binds on some trades
+  risk=  0.03%  floor_clamped=  599/2643   worst actual risk on a clamped trade: 0.290%  <-- floor binds on some trades
+  risk=0.0275%  floor_clamped=  665/2643   worst actual risk on a clamped trade: 0.289%  <-- floor binds on some trades
+  risk= 0.025%  floor_clamped=  740/2643   worst actual risk on a clamped trade: 0.290%  <-- floor binds on some trades
+  risk=0.0225%  floor_clamped=  807/2643   worst actual risk on a clamped trade: 0.289%  <-- floor binds on some trades
+  risk=  0.02%  floor_clamped=  892/2643   worst actual risk on a clamped trade: 0.289%  <-- floor binds on some trades
+  risk=0.0175%  floor_clamped= 1011/2643   worst actual risk on a clamped trade: 0.289%  <-- floor binds on some trades
+  risk= 0.015%  floor_clamped= 1150/2643   worst actual risk on a clamped trade: 0.289%  <-- floor binds on some trades
+  risk=  0.01%  floor_clamped= 1544/2643   worst actual risk on a clamped trade: 0.289%  <-- floor binds on some trades
+  risk=0.0075%  floor_clamped= 1808/2643   worst actual risk on a clamped trade: 0.288%  <-- floor binds on some trades
+  risk= 0.005%  floor_clamped= 2105/2643   worst actual risk on a clamped trade: 0.288%  <-- floor binds on some trades
+
+At the recommended 0.015% risk level: 1150/2643 trades (43.5%) hit the 0.01-lot floor.
+Floor binds on a meaningful minority of trades (43.5%) - the effective realized risk on those trades runs above the 0.015%
+target (up to 0.289%), which partially undermines the calibration. Worth a larger account tier if avoidable.
+
+----------------------------------------------------------------------
+DOLLAR SANITY CHECK - $50,000 ACCOUNT
+----------------------------------------------------------------------
+  $50,000 account @ 0.015% risk: $7.50 risked/trade | worst-5%-case DD ~$1,960.00 | absolute-worst-shuffle DD ~$2,580.00
+  (minimum lot 0.01 at this account size actually risks up to $144.40 on a floor-clamped trade)
+
+Done.

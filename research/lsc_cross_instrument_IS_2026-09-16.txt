@@ -1,0 +1,57 @@
+==============================================================================================================
+LSC CROSS-INSTRUMENT SCREEN - IS - strategy/lsc_m15.py unmodified, via risk_calibrator.run_backtest
+==============================================================================================================
+$50,000 | 1:10 | margin budget 25% | risk 0.1% | cooldown 3 | cap 4/day | session hours [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 20, 21, 22, 23] | hold 96 bars
+window IS: history .. 2024-12-31 | static quote->USD rates {'JPY': 0.006450572488308337, 'EUR': 1.15456, 'MXN': 0.05835075103251654, 'ZAR': 0.06145518503541662, 'GBP': 1.3470900000000001, 'CAD': 0.7178441703874923}
+Edge gate for OOS: PF > 1.05 on >= 100 trades AND no distortion flag.
+
+AUDJPY.a       AUDJPY                1694 tr | PF  0.93 | WR  37.6% | DD   9.8% | net $    -3,804* | B/S 979/715 (PF 0.955/0.903) | cap 388/609d | floor 0.0% | margin 3.7% | spread 14.0pt = 11.5% of SL | HY PF [22-H2:0.637  23-H1:1.265  23-H2:0.957  24-H1:0.82  24-H2:0.946] | cap-bound 63.7% of days  [4s]
+AUDUSD.a       AUDUSD                1693 tr | PF  0.81 | WR  35.6% | DD  22.4% | net $   -10,236  | B/S 871/822 (PF 0.708/0.939) | cap 383/610d | floor 0.0% | margin 4.5% | spread 11.0pt = 12.5% of SL | HY PF [22-H2:0.904  23-H1:0.867  23-H2:0.75  24-H1:0.946  24-H2:0.642] | cap-bound 62.8% of days  [5s]
+BTCUSD.a       BTCUSD                1337 tr | PF  0.79 | WR  35.2% | DD  19.1% | net $    -8,834  | B/S 752/585 (PF 0.755/0.834) | cap 286/595d | floor 0.1% | margin 0.1% | spread 2000.0pt = 6.5% of SL | HY PF [23-H1:0.627  23-H2:0.639  24-H1:0.891  24-H2:0.88] | clean  [5s]
+Copper.a       Copper                1837 tr | PF  0.58 | WR  33.8% | DD  51.7% | net $   -25,248  | B/S 900/937 (PF 0.599/0.566) | cap 415/659d | floor 0.0% | margin 0.1% | spread 30.0pt = 27.7% of SL | HY PF [22-H1:0.734  22-H2:0.71  23-H1:0.476  23-H2:0.531  24-H1:0.64  24-H2:0.507] | SPREAD 27.7% of SL; cap-bound 63.0% of days  [4s]
+ETHUSD.a       ETHUSD                1072 tr | PF  0.92 | WR  40.5% | DD   7.4% | net $    -2,961  | B/S 634/438 (PF 0.958/0.865) | cap 233/445d | floor 0.0% | margin 0.0% | spread 300.0pt = 15.4% of SL | HY PF [23-H2:0.786  24-H1:0.961  24-H2:0.935] | cap-bound 52.4% of days  [3s]
+EURJPY.a       EURJPY                1698 tr | PF  0.89 | WR  36.4% | DD  14.3% | net $    -6,197* | B/S 996/702 (PF 0.894/0.881) | cap 389/609d | floor 0.0% | margin 11.4% | spread 18.0pt = 10.9% of SL | HY PF [22-H2:1.104  23-H1:0.825  23-H2:0.849  24-H1:0.815  24-H2:0.947] | cap-bound 63.9% of days  [4s]
+EURUSD.a       EURUSD                1640 tr | PF  0.82 | WR  35.9% | DD  20.2% | net $    -8,842  | B/S 855/785 (PF 0.789/0.862) | cap 364/611d | floor 0.0% | margin 20.2% | spread 10.0pt = 11.5% of SL | HY PF [22-H2:1.02  23-H1:0.74  23-H2:0.982  24-H1:0.607  24-H2:0.85] | cap-bound 59.6% of days  [5s]
+GBPJPY.a       GBPJPY                1641 tr | PF  0.99 | WR  36.7% | DD   8.8% | net $      -765* | B/S 979/662 (PF 0.944/1.047) | cap 368/607d | floor 0.0% | margin 8.1% | spread 13.0pt = 6.3% of SL | HY PF [22-H2:0.968  23-H1:0.843  23-H2:1.295  24-H1:0.83  24-H2:1.088] | cap-bound 60.6% of days  [4s]
+GBPUSD.a       GBPUSD                1633 tr | PF  0.78 | WR  33.4% | DD  25.1% | net $   -10,968  | B/S 849/784 (PF 0.674/0.911) | cap 368/611d | floor 0.0% | margin 17.5% | spread 10.0pt = 8.9% of SL | HY PF [22-H2:0.904  23-H1:0.83  23-H2:0.78  24-H1:0.711  24-H2:0.697] | cap-bound 60.2% of days  [5s]
+GER40.a        GER40 (DAX)            630 tr | PF  0.86 | WR  32.9% | DD   7.7% | net $    -2,939* | B/S 392/238 (PF 0.818/0.933) | cap 142/211d | floor 0.0% | margin 5.6% | spread 15.0pt = 5.6% of SL | HY PF [24-H1:0.802  24-H2:0.904] | cap-bound 67.3% of days  [1s]
+NAS100.a       NAS100                 238 tr | PF  1.13 | WR  40.3% | DD   2.1% | net $       952  | B/S 168/70 (PF 1.03/1.421) | cap 49/100d | floor 0.8% | margin 1.7% | spread 13.0pt = 3.5% of SL | HY PF [24-H2:1.133] | clean  [1s]
+NatGas.a       Natural Gas           1824 tr | PF  0.64 | WR  35.2% | DD  42.2% | net $   -20,906  | B/S 891/933 (PF 0.682/0.597) | cap 399/655d | floor 0.8% | margin 0.0% | spread 4.0pt = 15.3% of SL | HY PF [22-H1:0.736  22-H2:0.906  23-H1:0.533  23-H2:0.582  24-H1:0.692  24-H2:0.515] | cap-bound 60.9% of days  [6s]
+SpotCrude.a    WTI / USOIL           1830 tr | PF  0.85 | WR  35.6% | DD  18.0% | net $    -8,699  | B/S 983/847 (PF 0.771/0.95) | cap 410/656d | floor 0.0% | margin 0.1% | spread 25.0pt = 8.4% of SL | HY PF [22-H1:1.074  22-H2:0.932  23-H1:0.693  23-H2:1.005  24-H1:0.807  24-H2:0.827] | cap-bound 62.5% of days  [5s]
+USDCAD.a       USDCAD                1660 tr | PF  0.72 | WR  32.8% | DD  29.8% | net $   -14,227* | B/S 853/807 (PF 0.727/0.707) | cap 367/610d | floor 0.0% | margin 27.9% | spread 11.0pt = 12.8% of SL | HY PF [22-H2:0.916  23-H1:0.713  23-H2:0.749  24-H1:0.68  24-H2:0.544] | cap-bound 60.2% of days  [5s]
+USDJPY.a       USDJPY                1678 tr | PF  0.96 | WR  38.0% | DD  12.4% | net $    -1,982* | B/S 1020/658 (PF 0.973/0.95) | cap 381/612d | floor 0.0% | margin 11.7% | spread 12.0pt = 7.1% of SL | HY PF [22-H2:1.563  23-H1:0.752  23-H2:0.943  24-H1:0.9  24-H2:0.967] | cap-bound 62.3% of days  [5s]
+USDMXN.a       USDMXN                1573 tr | PF  0.45 | WR  33.6% | DD  55.1% | net $   -27,467* | B/S 643/930 (PF 0.562/0.39) | cap 352/603d | floor 0.1% | margin 10.3% | spread 849.0pt = 35.7% of SL | HY PF [22-H2:0.529  23-H1:0.358  23-H2:0.393  24-H1:0.511  24-H2:0.569] | SPREAD 35.7% of SL; cap-bound 58.4% of days  [5s]
+USDZAR.a       USDZAR                1655 tr | PF  0.65 | WR  36.0% | DD  39.7% | net $   -19,616* | B/S 802/853 (PF 0.702/0.607) | cap 380/615d | floor 0.0% | margin 2.2% | spread 800.0pt = 25.7% of SL | HY PF [22-H2:0.634  23-H1:0.874  23-H2:0.787  24-H1:0.487  24-H2:0.476] | SPREAD 25.7% of SL; cap-bound 61.8% of days  [5s]
+XAGUSD.a       XAGUSD.a              1811 tr | PF  0.39 | WR  32.6% | DD  68.2% | net $   -34,066  | B/S 908/903 (PF 0.406/0.366) | cap 415/663d | floor 5.3% | margin 0.0% | spread 36.0pt = 43.9% of SL | HY PF [22-H1:0.263  22-H2:0.471  23-H1:0.344  23-H2:0.312  24-H1:0.311  24-H2:0.571] | SPREAD 43.9% of SL; cap-bound 62.6% of days  [5s]
+XAUUSD.a       XAUUSD.a (baseline)   1709 tr | PF   1.0 | WR  37.8% | DD  12.7% | net $        -5  | B/S 937/772 (PF 1.131/0.859) | cap 389/652d | floor 0.1% | margin 1.3% | spread 18.0pt = 4.8% of SL | HY PF [22-H1:0.564  22-H2:1.128  23-H1:0.74  23-H2:0.969  24-H1:0.956  24-H2:1.3] | cap-bound 59.7% of days  [5s]
+XPTUSD.a       Platinum / XPTUSD     1576 tr | PF  0.15 | WR  24.9% | DD  88.1% | net $   -44,032  | B/S 839/737 (PF 0.157/0.142) | cap 359/569d | floor 3.9% | margin 0.0% | spread 307.0pt = 101.7% of SL | HY PF [22-H2:0.15  23-H1:0.175  23-H2:0.129  24-H1:0.141  24-H2:0.132] | SPREAD 101.7% of SL; cap-bound 63.1% of days  [4s]
+
+RANKING BY IN-SAMPLE PF (all instruments together):
+   # symbol         trades     PF    WR%    DD%   score flags
+   1 NAS100.a          238   1.13   40.3    2.1  1.0226 -   -> ADVANCES TO OOS
+   2 XAUUSD.a         1709    1.0   37.8   12.7  0.6116 cap-bound 59.7% of days
+   3 GBPJPY.a         1641   0.99   36.7    8.8  0.6875 cap-bound 60.6% of days
+   4 USDJPY.a         1678   0.96   38.0   12.4  0.5926 cap-bound 62.3% of days
+   5 AUDJPY.a         1694   0.93   37.6    9.8  0.6242 cap-bound 63.7% of days
+   6 ETHUSD.a         1072   0.92   40.5    7.4  0.6715 cap-bound 52.4% of days
+   7 EURJPY.a         1698   0.89   36.4   14.3   0.519 cap-bound 63.9% of days
+   8 GER40.a           630   0.86   32.9    7.7  0.6209 cap-bound 67.3% of days
+   9 SpotCrude.a      1830   0.85   35.6   18.0  0.4474 cap-bound 62.5% of days
+  10 EURUSD.a         1640   0.82   35.9   20.2   0.408 cap-bound 59.6% of days
+  11 AUDUSD.a         1693   0.81   35.6   22.4  0.3821 cap-bound 62.8% of days
+  12 BTCUSD.a         1337   0.79   35.2   19.1  0.4041 -
+  13 GBPUSD.a         1633   0.78   33.4   25.1  0.3459 cap-bound 60.2% of days
+  14 USDCAD.a         1660   0.72   32.8   29.8  0.2892 cap-bound 60.2% of days
+  15 USDZAR.a         1655   0.65   36.0   39.7  0.2178 SPREAD 25.7% of SL; cap-bound 61.8% of days
+  16 NatGas.a         1824   0.64   35.2   42.2  0.2058 cap-bound 60.9% of days
+  17 Copper.a         1837   0.58   33.8   51.7  0.1618 SPREAD 27.7% of SL; cap-bound 63.0% of days
+  18 USDMXN.a         1573   0.45   33.6   55.1  0.1198 SPREAD 35.7% of SL; cap-bound 58.4% of days
+  19 XAGUSD.a         1811   0.39   32.6   68.2  0.0884 SPREAD 43.9% of SL; cap-bound 62.6% of days
+  20 XPTUSD.a         1576   0.15   24.9   88.1  0.0278 SPREAD 101.7% of SL; cap-bound 63.1% of days
+
+Advancing to OOS (PF > 1.05, >= 100 trades, no HARD flag): ['NAS100.a']
+* = quote currency converted to USD at a static freeze-time rate (PF/WR unaffected; DD/net approximate)
+  BTCUSD.a: 264 weekend trades included above (no weekend gate in the backtest engine); weekday-only: {'n': 1073, 'pf': np.float64(0.83), 'net': np.float64(-5372.54), 'max_dd_pct': np.float64(12.0)}
+  ETHUSD.a: 244 weekend trades included above (no weekend gate in the backtest engine); weekday-only: {'n': 828, 'pf': np.float64(1.03), 'net': np.float64(808.28), 'max_dd_pct': np.float64(4.2)}
+
+Saved research/lsc_cross_instrument_IS_2026-09-16.json / .txt / _trades

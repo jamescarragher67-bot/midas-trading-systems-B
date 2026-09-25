@@ -1,0 +1,113 @@
+==============================================================================================================
+5-GATE VOTING ENGINE RE-TEST (a53504f engine, reconstructed + proven equivalent) - current standard
+==============================================================================================================
+$50,000 | 1:10 | margin budget 25% | screen risk 0.1% | 3-of-4 effective vote (Session Bias abstains, see module docstring) | cooldown 5 bars | no daily cap in this engine | soft exit 8h / hard 24h | trail 0.5 ATR | RR 2.0
+M5 windows: IS start..2026-02-28  OOS 2026-03-01..end  (M5 history on this broker starts Apr/May 2025 - the 2024-12-31 split is impossible on M5)
+
+[XAUUSD.a] M5 2025-04-21 08:00:00 -> 2026-09-16 13:50:00 (99999 bars) | spread 18.0pt
+  original config replay (last 100 days, $500, 1.5%, no spread, perf monitor on): 96 trades | PF 1.12 | WR 44.8% | DD 11.1% | final $529.54 | perf-monitor triggers 6   [committed report at a53504f: 96 trades, PF 1.55, WR 53.1%, DD 15.6%; 'PF 1.75 / 81 trades' not found in the repo]
+  IS 2025-04-21..2026-02-27  168 tr | PF  1.12 | WR  49.4% | DD   0.8% | net $      212 | B/S 102/66 (PF 1.161/1.068) | max/day 5, days>=4: 3.1% | floor 3.6% | margin 0.0% | spread 2.7% of SL | exits {'TRAIL': 163, 'SL': 5} | sub [25-Q2:0.642(41)  25-Q3:0.831(51)  25-Q4:1.581(50)  26-Q1:1.971(26)] pos 2/4
+  OOS 2026-03-02..2026-09-16  128 tr | PF  1.16 | WR  46.9% | DD   0.6% | net $      227 | B/S 55/73 (PF 0.894/1.405) | max/day 5, days>=4: 6.3% | floor 0.0% | margin 0.0% | spread 1.7% of SL | exits {'TRAIL': 121, 'SL': 7} | sub [26-Q1:1.749(19)  26-Q2:0.834(56)  26-Q3:1.44(53)] pos 2/3
+  vote patterns on IS trades: {'ema+1 rsi+0 atr+1 pd+1': 102, 'ema-1 rsi+0 atr-1 pd-1': 66}
+  full-history month-block calibration (M5, ~17 blocks):
+  risk sweep M5: full history 2025-04-21 -> 2026-09-16, 1000 month-block reorders x seeds (42, 1, 7, 99, 123)
+  risk=   0.1%  trades= 296  PF= 1.14  net=$      452  histDD=  0.8%  medDD= 0.84%  95th= 1.25% (max-seed  1.26%)  worst= 1.66% (max-seed  1.66%)  breach= 0.0%  floor=  6/296  margin=  0  blocks=18  PASS
+  risk= 0.075%  trades= 296  PF= 1.15  net=$      359  histDD=  0.6%  medDD= 0.66%  95th= 0.99% (max-seed  0.99%)  worst=  1.3% (max-seed   1.3%)  breach= 0.0%  floor= 11/296  margin=  0  blocks=18  PASS
+  risk= 0.065%  trades= 296  PF=  1.2  net=$      411  histDD=  0.5%  medDD= 0.51%  95th= 0.76% (max-seed  0.77%)  worst=  1.0% (max-seed   1.0%)  breach= 0.0%  floor= 14/296  margin=  0  blocks=18  PASS
+  risk=  0.06%  trades= 296  PF= 1.19  net=$      361  histDD=  0.5%  medDD= 0.51%  95th= 0.76% (max-seed  0.77%)  worst= 0.99% (max-seed   1.0%)  breach= 0.0%  floor= 15/296  margin=  0  blocks=18  PASS
+  risk=  0.05%  trades= 296  PF= 1.21  net=$      348  histDD=  0.4%  medDD= 0.41%  95th= 0.62% (max-seed  0.63%)  worst= 0.84% (max-seed  0.84%)  breach= 0.0%  floor= 19/296  margin=  0  blocks=18  PASS
+  risk= 0.045%  trades= 296  PF= 1.17  net=$      267  histDD=  0.4%  medDD= 0.42%  95th= 0.64% (max-seed  0.65%)  worst= 0.84% (max-seed  0.84%)  breach= 0.0%  floor= 26/296  margin=  0  blocks=18  PASS
+  risk=  0.04%  trades= 296  PF= 1.21  net=$      287  histDD=  0.3%  medDD= 0.34%  95th= 0.51% (max-seed  0.52%)  worst= 0.63% (max-seed   0.7%)  breach= 0.0%  floor= 31/296  margin=  0  blocks=18  PASS
+  risk= 0.035%  trades= 296  PF= 1.27  net=$      324  histDD=  0.3%  medDD= 0.32%  95th= 0.47% (max-seed  0.47%)  worst= 0.58% (max-seed  0.64%)  breach= 0.0%  floor= 39/296  margin=  0  blocks=18  PASS
+  risk=  0.03%  trades= 296  PF= 1.26  net=$      276  histDD=  0.3%  medDD= 0.28%  95th= 0.42% (max-seed  0.42%)  worst= 0.54% (max-seed  0.56%)  breach= 0.0%  floor= 50/296  margin=  0  blocks=18  PASS
+  risk=0.0275%  trades= 296  PF= 1.23  net=$      228  histDD=  0.3%  medDD= 0.29%  95th= 0.43% (max-seed  0.44%)  worst= 0.55% (max-seed  0.58%)  breach= 0.0%  floor= 64/296  margin=  0  blocks=18  PASS
+  risk= 0.025%  trades= 296  PF= 1.26  net=$      241  histDD=  0.3%  medDD= 0.26%  95th= 0.39% (max-seed  0.39%)  worst= 0.49% (max-seed  0.54%)  breach= 0.0%  floor= 76/296  margin=  0  blocks=18  PASS
+  risk=0.0225%  trades= 296  PF= 1.28  net=$      241  histDD=  0.2%  medDD= 0.24%  95th= 0.35% (max-seed  0.35%)  worst= 0.45% (max-seed  0.51%)  breach= 0.0%  floor=100/296  margin=  0  blocks=18  PASS
+  risk=  0.02%  trades= 296  PF=  1.3  net=$      243  histDD=  0.2%  medDD= 0.24%  95th= 0.36% (max-seed  0.36%)  worst= 0.47% (max-seed  0.51%)  breach= 0.0%  floor=121/296  margin=  0  blocks=18  PASS
+  risk=0.0175%  trades= 296  PF= 1.29  net=$      230  histDD=  0.2%  medDD= 0.23%  95th= 0.35% (max-seed  0.35%)  worst= 0.45% (max-seed  0.49%)  breach= 0.0%  floor=153/296  margin=  0  blocks=18  PASS
+  risk= 0.015%  trades= 296  PF= 1.31  net=$      234  histDD=  0.2%  medDD= 0.23%  95th= 0.34% (max-seed  0.34%)  worst= 0.43% (max-seed  0.48%)  breach= 0.0%  floor=182/296  margin=  0  blocks=18  PASS
+  risk=  0.01%  trades= 296  PF= 1.32  net=$      228  histDD=  0.2%  medDD= 0.22%  95th= 0.33% (max-seed  0.33%)  worst= 0.41% (max-seed  0.45%)  breach= 0.0%  floor=247/296  margin=  0  blocks=18  PASS
+  risk=0.0075%  trades= 296  PF= 1.32  net=$      226  histDD=  0.2%  medDD= 0.23%  95th= 0.33% (max-seed  0.33%)  worst= 0.41% (max-seed  0.45%)  breach= 0.0%  floor=283/296  margin=  0  blocks=18  PASS
+  risk= 0.005%  trades= 296  PF= 1.32  net=$      226  histDD=  0.2%  medDD= 0.23%  95th= 0.33% (max-seed  0.33%)  worst= 0.41% (max-seed  0.45%)  breach= 0.0%  floor=295/296  margin=  0  blocks=18  PASS
+  -> highest passing size 0.1%: PF 1.14, net $452, 95th max-seed 1.26%, worst max-seed 1.66%, real order 0.8%   [LSC: 0.015%, PF 1.1335, 95th 3.92%, worst 5.66%]
+
+[XAUUSD.a - SUPPLEMENTARY M15 ADAPTATION, hours preserved; NOT the validated M5 system]
+  M15 IS 2022-11-17..2024-12-31  241 tr | PF  0.99 | WR  41.9% | DD   0.7% | net $      -40 | B/S 137/104 (PF 1.12/0.829) | max/day 5, days>=4: 1.1% | floor 0.0% | margin 0.0% | spread 4.3% of SL | exits {'TRAIL': 237, 'SL': 4} | sub [22-H2:0.357(9)  23-H1:1.181(61)  23-H2:0.675(56)  24-H1:1.174(53)  24-H2:1.079(62)] pos 3/5
+  M15 OOS 2025-01-02..2026-09-09  211 tr | PF  1.26 | WR  49.8% | DD   0.4% | net $      478 | B/S 107/104 (PF 1.573/1.007) | max/day 6, days>=4: 2.8% | floor 3.8% | margin 0.0% | spread 1.2% of SL | exits {'TRAIL': 208, 'SL': 3} | sub [25-H1:1.668(70)  25-H2:1.311(38)  26-H1:1.231(76)  26-H2:0.603(27)] pos 3/4
+  risk sweep M15 adaptation: full history 2022-11-17 -> 2026-09-09, 1000 month-block reorders x seeds (42, 1, 7, 99, 123)
+  risk=   0.1%  trades= 454  PF= 1.09  net=$      404  histDD=  0.7%  medDD= 1.02%  95th= 1.52% (max-seed  1.55%)  worst= 2.12% (max-seed  2.16%)  breach= 0.0%  floor=  9/454  margin=  0  blocks=47  PASS
+  risk= 0.075%  trades= 454  PF= 1.07  net=$      245  histDD=  0.5%  medDD= 0.82%  95th= 1.22% (max-seed  1.24%)  worst= 1.68% (max-seed  1.74%)  breach= 0.0%  floor= 14/454  margin=  0  blocks=47  PASS
+  risk= 0.065%  trades= 454  PF= 1.06  net=$      180  histDD=  0.5%  medDD= 0.72%  95th= 1.05% (max-seed  1.09%)  worst= 1.47% (max-seed  1.47%)  breach= 0.0%  floor= 25/454  margin=  0  blocks=47  PASS
+  risk=  0.06%  trades= 454  PF= 1.05  net=$      153  histDD=  0.4%  medDD= 0.68%  95th=  1.0% (max-seed  1.04%)  worst= 1.39% (max-seed  1.43%)  breach= 0.0%  floor= 34/454  margin=  0  blocks=47  PASS
+  risk=  0.05%  trades= 454  PF= 1.08  net=$      189  histDD=  0.3%  medDD= 0.55%  95th= 0.81% (max-seed  0.84%)  worst= 1.12% (max-seed  1.13%)  breach= 0.0%  floor= 40/454  margin=  0  blocks=47  PASS
+  risk= 0.045%  trades= 454  PF= 1.05  net=$      118  histDD=  0.3%  medDD= 0.51%  95th= 0.76% (max-seed  0.77%)  worst= 1.06% (max-seed  1.07%)  breach= 0.0%  floor= 52/454  margin=  0  blocks=47  PASS
+  risk=  0.04%  trades= 454  PF= 1.03  net=$       67  histDD=  0.3%  medDD= 0.49%  95th= 0.72% (max-seed  0.75%)  worst= 1.02% (max-seed  1.02%)  breach= 0.0%  floor= 63/454  margin=  0  blocks=47  PASS
+  risk= 0.035%  trades= 454  PF= 1.05  net=$       85  histDD=  0.3%  medDD= 0.43%  95th= 0.63% (max-seed  0.65%)  worst= 0.86% (max-seed  0.88%)  breach= 0.0%  floor= 82/454  margin=  0  blocks=47  PASS
+  risk=  0.03%  trades= 454  PF= 1.03  net=$       52  histDD=  0.3%  medDD=  0.4%  95th= 0.58% (max-seed   0.6%)  worst= 0.81% (max-seed  0.81%)  breach= 0.0%  floor=106/454  margin=  0  blocks=47  PASS
+  risk=0.0275%  trades= 454  PF= 1.04  net=$       58  histDD=  0.3%  medDD= 0.37%  95th= 0.54% (max-seed  0.55%)  worst= 0.78% (max-seed  0.78%)  breach= 0.0%  floor=124/454  margin=  0  blocks=47  PASS
+  risk= 0.025%  trades= 454  PF= 1.02  net=$       29  histDD=  0.3%  medDD= 0.37%  95th= 0.53% (max-seed  0.54%)  worst= 0.74% (max-seed  0.74%)  breach= 0.0%  floor=140/454  margin=  0  blocks=47  PASS
+  risk=0.0225%  trades= 454  PF= 1.02  net=$       33  histDD=  0.3%  medDD= 0.35%  95th=  0.5% (max-seed  0.52%)  worst= 0.71% (max-seed  0.71%)  breach= 0.0%  floor=150/454  margin=  0  blocks=47  PASS
+  risk=  0.02%  trades= 454  PF= 1.02  net=$       28  histDD=  0.3%  medDD= 0.33%  95th= 0.47% (max-seed  0.48%)  worst= 0.65% (max-seed  0.65%)  breach= 0.0%  floor=173/454  margin=  0  blocks=47  PASS
+  risk=0.0175%  trades= 454  PF= 1.01  net=$        9  histDD=  0.3%  medDD= 0.33%  95th= 0.46% (max-seed  0.47%)  worst= 0.64% (max-seed  0.64%)  breach= 0.0%  floor=187/454  margin=  0  blocks=47  PASS
+  risk= 0.015%  trades= 454  PF=  1.0  net=$       -4  histDD=  0.3%  medDD= 0.32%  95th= 0.46% (max-seed  0.46%)  worst= 0.59% (max-seed  0.59%)  breach= 0.0%  floor=210/454  margin=  0  blocks=47  PASS
+  risk=  0.01%  trades= 454  PF=  1.0  net=$       -0  histDD=  0.3%  medDD= 0.31%  95th= 0.43% (max-seed  0.44%)  worst= 0.59% (max-seed  0.59%)  breach= 0.0%  floor=295/454  margin=  0  blocks=47  PASS
+  risk=0.0075%  trades= 454  PF=  1.0  net=$        1  histDD=  0.3%  medDD=  0.3%  95th= 0.43% (max-seed  0.43%)  worst= 0.54% (max-seed  0.54%)  breach= 0.0%  floor=346/454  margin=  0  blocks=47  PASS
+  risk= 0.005%  trades= 454  PF= 1.01  net=$       13  histDD=  0.3%  medDD= 0.29%  95th= 0.41% (max-seed  0.42%)  worst= 0.53% (max-seed  0.53%)  breach= 0.0%  floor=421/454  margin=  0  blocks=47  PASS
+  -> highest passing size 0.1%: PF 1.09, net $404, 95th max-seed 1.55%, worst max-seed 2.16%, real order 0.7%   [LSC: 0.015%, PF 1.1335, 95th 3.92%, worst 5.66%]
+
+[ALL INSTRUMENTS - M5 in-sample screen, 5-gate engine unmodified (SL rounding at symbol digits)]
+  AUDJPY.a          142 tr | PF  0.75 | WR  35.9% | DD   1.6% | net $     -557 | B/S 78/64 (PF 0.53/1.039) | max/day 7, days>=4: 2.9% | floor 0.0% | margin 2.1% | spread 17.8% of SL | exits {'TRAIL': 134, 'SL': 8} | sub [25-Q2:0.832(24)  25-Q3:0.677(41)  25-Q4:0.845(46)  26-Q1:0.621(31)] pos 0/4 | 2025-05-14..2026-02-27  [0s]
+  AUDUSD.a          144 tr | PF  0.63 | WR  38.2% | DD   2.0% | net $     -859 | B/S 92/52 (PF 0.504/0.89) | max/day 5, days>=4: 3.4% | floor 0.0% | margin 2.8% | spread 18.9% of SL | exits {'TRAIL': 138, 'SL': 6} | sub [25-Q2:0.689(23)  25-Q3:0.633(50)  25-Q4:0.498(38)  26-Q1:0.697(33)] pos 0/4 | 2025-05-14..2026-02-27  [0s]
+  BTCUSD.a           98 tr | PF  1.71 | WR  42.9% | DD   0.5% | net $      809 | B/S 43/55 (PF 0.728/2.48) | max/day 5, days>=4: 4.0% | floor 0.0% | margin 0.0% | spread 4.3% of SL | exits {'TRAIL': 96, 'SL': 2} | sub [25-Q4:2.076(61)  26-Q1:0.876(37)] pos 1/2 | 2025-10-03..2026-02-28 | LOW SAMPLE; 35 weekend trades  [0s]
+  Copper.a          205 tr | PF  0.61 | WR  36.1% | DD   2.9% | net $   -1,346 | B/S 128/77 (PF 0.645/0.539) | max/day 6, days>=4: 7.1% | floor 0.0% | margin 0.0% | spread 17.4% of SL | exits {'SL': 9, 'TRAIL': 196} | sub [25-Q2:0.625(47)  25-Q3:0.531(63)  25-Q4:0.722(48)  26-Q1:0.581(47)] pos 0/4 | 2025-04-17..2026-02-27  [0s]
+  ETHUSD.a          104 tr | PF   0.9 | WR  41.3% | DD   1.0% | net $     -135 | B/S 42/62 (PF 0.501/1.235) | max/day 5, days>=4: 2.7% | floor 0.0% | margin 0.0% | spread 12.1% of SL | exits {'TRAIL': 103, 'SL': 1} | sub [25-Q4:0.919(62)  26-Q1:0.871(42)] pos 0/2 | 2025-10-03..2026-02-28 | 32 weekend trades  [0s]
+  EURJPY.a          183 tr | PF  1.01 | WR  44.3% | DD   0.7% | net $       12 | B/S 102/81 (PF 0.882/1.134) | max/day 5, days>=4: 5.3% | floor 0.0% | margin 9.3% | spread 6.6% of SL | exits {'TRAIL': 175, 'SL': 8} | sub [25-Q2:0.553(32)  25-Q3:1.045(57)  25-Q4:1.478(60)  26-Q1:0.741(34)] pos 2/4 | 2025-05-14..2026-02-27  [0s]
+  EURUSD.a          198 tr | PF  0.73 | WR  41.4% | DD   1.6% | net $     -750 | B/S 117/81 (PF 0.828/0.604) | max/day 7, days>=4: 7.3% | floor 0.0% | margin 23.2% | spread 17.1% of SL | exits {'TRAIL': 184, 'SL': 14} | sub [25-Q2:0.543(41)  25-Q3:1.143(53)  25-Q4:0.679(65)  26-Q1:0.613(39)] pos 1/4 | 2025-05-14..2026-02-27  [0s]
+  GBPJPY.a          165 tr | PF   1.5 | WR  50.9% | DD   0.8% | net $      829 | B/S 73/92 (PF 1.473/1.521) | max/day 6, days>=4: 3.9% | floor 0.0% | margin 7.3% | spread 2.2% of SL | exits {'TRAIL': 159, 'SL': 6} | sub [25-Q2:1.882(31)  25-Q3:0.777(45)  25-Q4:1.659(50)  26-Q1:2.233(39)] pos 3/4 | 2025-05-14..2026-02-27  [0s]
+  GBPUSD.a          177 tr | PF  0.73 | WR  39.5% | DD   1.5% | net $     -682 | B/S 96/81 (PF 0.767/0.683) | max/day 6, days>=4: 5.3% | floor 0.0% | margin 17.5% | spread 19.2% of SL | exits {'TRAIL': 168, 'SL': 9} | sub [25-Q2:0.457(27)  25-Q3:0.712(64)  25-Q4:1.173(61)  26-Q1:0.418(25)] pos 1/4 | 2025-05-14..2026-02-27  [0s]
+  GER40.a           428 tr | PF  0.96 | WR  44.4% | DD   1.9% | net $     -241 | B/S 267/161 (PF 0.845/1.168) | max/day 7, days>=4: 14.6% | floor 0.0% | margin 0.9% | spread 5.3% of SL | exits {'TRAIL': 386, 'SL': 42} | sub [25-Q1:1.199(87)  25-Q2:0.956(83)  25-Q3:0.996(105)  25-Q4:0.668(97)  26-Q1:1.057(56)] pos 2/5 | 2025-01-02..2026-02-27  [0s]
+  NAS100.a          141 tr | PF  0.73 | WR  41.1% | DD   1.0% | net $     -431 | B/S 78/63 (PF 0.668/0.79) | max/day 6, days>=4: 1.3% | floor 0.0% | margin 1.4% | spread 5.1% of SL | exits {'TRAIL': 140, 'SL': 1} | sub [25-Q2:0.568(48)  25-Q3:1.393(45)  25-Q4:0.527(33)  26-Q1:0.266(15)] pos 1/4 | 2025-04-17..2026-02-27  [0s]
+  NatGas.a          258 tr | PF   0.4 | WR  27.5% | DD   7.5% | net $   -3,744 | B/S 141/117 (PF 0.573/0.201) | max/day 7, days>=4: 7.1% | floor 0.0% | margin 0.0% | spread 36.4% of SL | exits {'TRAIL': 240, 'SL': 18} | sub [25-Q2:0.616(54)  25-Q3:0.079(59)  25-Q4:0.583(93)  26-Q1:0.298(52)] pos 0/4 | 2025-04-17..2026-02-27 | SPREAD 36.4% of SL  [0s]
+  SpotCrude.a       212 tr | PF  0.53 | WR  32.1% | DD   4.2% | net $   -1,818 | B/S 98/114 (PF 0.556/0.516) | max/day 7, days>=4: 6.7% | floor 0.0% | margin 0.5% | spread 21.9% of SL | exits {'TRAIL': 200, 'SL': 12} | sub [25-Q2:0.815(58)  25-Q3:0.449(70)  25-Q4:0.559(44)  26-Q1:0.282(40)] pos 0/4 | 2025-04-17..2026-02-27  [0s]
+  US30.a            144 tr | PF  1.13 | WR  40.3% | DD   0.7% | net $      226 | B/S 72/72 (PF 0.794/1.561) | max/day 6, days>=4: 2.2% | floor 0.0% | margin 9.0% | spread 6.2% of SL | exits {'TRAIL': 142, 'SL': 2} | sub [25-Q2:1.031(47)  25-Q3:2.107(49)  25-Q4:0.349(30)  26-Q1:1.02(18)] pos 3/4 | 2025-04-17..2026-02-27  [0s]
+  US500.a            59 tr | PF  0.74 | WR  39.0% | DD   0.8% | net $     -187 | B/S 35/24 (PF 0.564/1.049) | max/day 4, days>=4: 3.1% | floor 0.0% | margin 25.4% | spread 8.9% of SL | exits {'TRAIL': 57, 'SL': 2} | sub [25-Q3:1.405(31)  25-Q4:0.328(28)] pos 1/2 | 2025-08-18..2025-12-31 | LOW SAMPLE  [0s]
+  USDCAD.a          126 tr | PF  0.41 | WR  29.4% | DD   2.4% | net $   -1,144 | B/S 79/47 (PF 0.392/0.439) | max/day 4, days>=4: 1.5% | floor 0.0% | margin 64.3% | spread 22.4% of SL | exits {'TRAIL': 119, 'SL': 7} | sub [25-Q2:0.646(31)  25-Q3:0.405(40)  25-Q4:0.268(37)  26-Q1:0.363(18)] pos 0/4 | 2025-05-14..2026-02-27 | MARGIN 64.3%  [0s]
+  USDJPY.a          197 tr | PF  0.87 | WR  42.6% | DD   1.4% | net $     -348 | B/S 99/98 (PF 0.728/1.044) | max/day 5, days>=4: 8.7% | floor 0.0% | margin 3.6% | spread 10.9% of SL | exits {'TRAIL': 186, 'SL': 11} | sub [25-Q2:0.97(40)  25-Q3:0.813(54)  25-Q4:0.896(66)  26-Q1:0.784(37)] pos 0/4 | 2025-05-14..2026-02-27  [0s]
+  USDMXN.a          174 tr | PF  0.03 | WR   8.0% | DD  12.7% | net $   -6,362 | B/S 68/106 (PF 0.052/0.018) | max/day 5, days>=4: 4.4% | floor 0.0% | margin 23.6% | spread 81.9% of SL | exits {'TRAIL': 170, 'SL': 4} | sub [25-Q2:0.027(33)  25-Q3:0.033(45)  25-Q4:0.022(62)  26-Q1:0.044(34)] pos 0/4 | 2025-05-14..2026-02-27 | SPREAD 81.9% of SL  [0s]
+  USDZAR.a          240 tr | PF  0.24 | WR  20.4% | DD  10.6% | net $   -5,172 | B/S 88/152 (PF 0.428/0.157) | max/day 6, days>=4: 6.3% | floor 0.0% | margin 0.4% | spread 54.8% of SL | exits {'TRAIL': 227, 'SL': 13} | sub [25-Q2:0.325(25)  25-Q3:0.226(80)  25-Q4:0.112(73)  26-Q1:0.402(62)] pos 0/4 | 2025-05-14..2026-02-27 | SPREAD 54.8% of SL  [0s]
+  XAGUSD.a          179 tr | PF  0.77 | WR  35.2% | DD   1.9% | net $     -708 | B/S 113/66 (PF 0.875/0.65) | max/day 6, days>=4: 4.0% | floor 3.9% | margin 0.0% | spread 22.3% of SL | exits {'TRAIL': 174, 'SL': 5} | sub [25-Q2:0.354(22)  25-Q3:0.556(62)  25-Q4:1.002(66)  26-Q1:1.242(29)] pos 2/4 | 2025-04-21..2026-02-27  [0s]
+  XAUUSD.a          168 tr | PF  1.12 | WR  49.4% | DD   0.8% | net $      212 | B/S 102/66 (PF 1.161/1.068) | max/day 5, days>=4: 3.1% | floor 3.6% | margin 0.0% | spread 2.7% of SL | exits {'TRAIL': 163, 'SL': 5} | sub [25-Q2:0.642(41)  25-Q3:0.831(51)  25-Q4:1.581(50)  26-Q1:1.971(26)] pos 2/4 | 2025-04-21..2026-02-27  [0s]
+  XPTUSD.a          195 tr | PF  0.17 | WR  22.1% | DD  11.4% | net $   -5,500 | B/S 127/68 (PF 0.128/0.255) | max/day 6, days>=4: 5.4% | floor 4.1% | margin 0.0% | spread 60.3% of SL | exits {'TRAIL': 188, 'SL': 7} | sub [25-Q2:0.028(55)  25-Q3:0.127(47)  25-Q4:0.288(57)  26-Q1:1.222(36)] pos 1/4 | 2025-04-17..2026-02-27 | SPREAD 60.3% of SL  [0s]
+
+RANKING (M5 in-sample PF, 5-gate engine):
+   # symbol         trades     PF    WR%    DD%   score  pos sub  flags
+   1 BTCUSD.a           98   1.71   42.9    0.5  1.6683      1/2  LOW SAMPLE; 35 weekend trades
+   2 GBPJPY.a          165    1.5   50.9    0.8  1.4423      3/4  -   -> PROMISING: run OOS
+   3 US30.a            144   1.13   40.3    0.7  1.0918      3/4  -   -> PROMISING: run OOS
+   4 XAUUSD.a          168   1.12   49.4    0.8  1.0769      2/4  -   -> PROMISING: run OOS
+   5 EURJPY.a          183   1.01   44.3    0.7  0.9758      2/4  -
+   6 GER40.a           428   0.96   44.4    1.9  0.8767      2/5  -
+   7 ETHUSD.a          104    0.9   41.3    1.0  0.8571      0/2  32 weekend trades
+   8 USDJPY.a          197   0.87   42.6    1.4  0.8131      0/4  -
+   9 XAGUSD.a          179   0.77   35.2    1.9  0.7032      2/4  -
+  10 AUDJPY.a          142   0.75   35.9    1.6  0.6944      0/4  -
+  11 US500.a            59   0.74   39.0    0.8  0.7115      1/2  LOW SAMPLE
+  12 EURUSD.a          198   0.73   41.4    1.6  0.6759      1/4  -
+  13 GBPUSD.a          177   0.73   39.5    1.5  0.6791      1/4  -
+  14 NAS100.a          141   0.73   41.1    1.0  0.6952      1/4  -
+  15 AUDUSD.a          144   0.63   38.2    2.0  0.5727      0/4  -
+  16 Copper.a          205   0.61   36.1    2.9  0.5328      0/4  -
+  17 SpotCrude.a       212   0.53   32.1    4.2   0.438      0/4  -
+  18 USDCAD.a          126   0.41   29.4    2.4  0.3661      0/4  MARGIN 64.3%
+  19 NatGas.a          258    0.4   27.5    7.5  0.2909      0/4  SPREAD 36.4% of SL
+  20 USDZAR.a          240   0.24   20.4   10.6  0.1569      0/4  SPREAD 54.8% of SL
+  21 XPTUSD.a          195   0.17   22.1   11.4  0.1083      1/4  SPREAD 60.3% of SL
+  22 USDMXN.a          174   0.03    8.0   12.7  0.0183      0/4  SPREAD 81.9% of SL
+
+OOS on promising instruments (own held-out window 2026-03-01..end):
+  OOS GBPJPY.a      106 tr | PF  1.45 | WR  52.8% | DD   0.7% | net $      547 | B/S 50/56 (PF 1.005/1.809) | max/day 6, days>=4: 2.8% | floor 0.0% | margin 18.9% | spread 2.7% of SL | exits {'TRAIL': 98, 'SL': 8} | sub [26-Q1:8.926(14)  26-Q2:0.87(41)  26-Q3:1.258(51)] pos 2/3 | IS PF 1.5
+  OOS US30.a         87 tr | PF  1.18 | WR  51.7% | DD   0.4% | net $      187 | B/S 49/38 (PF 1.069/1.329) | max/day 5, days>=4: 2.8% | floor 0.0% | margin 6.9% | spread 4.5% of SL | exits {'TRAIL': 81, 'SL': 6} | sub [26-Q1:0.441(7)  26-Q2:0.978(39)  26-Q3:1.639(41)] pos 1/3 | IS PF 1.13
+  OOS XAUUSD.a      128 tr | PF  1.16 | WR  46.9% | DD   0.6% | net $      227 | B/S 55/73 (PF 0.894/1.405) | max/day 5, days>=4: 6.3% | floor 0.0% | margin 0.0% | spread 1.7% of SL | exits {'TRAIL': 121, 'SL': 7} | sub [26-Q1:1.749(19)  26-Q2:0.834(56)  26-Q3:1.44(53)] pos 2/3 | IS PF 1.12
+
+SIDE BY SIDE: LSC on gold (live standard) = PF 1.1335 at 0.015%, real DD 2.40%, 95th max-seed 3.92%, worst max-seed 5.66%, 2643 trades on 2022-11..2026-09 M15.
+Saved research/five_gate_retest_2026-09-16.txt / .json

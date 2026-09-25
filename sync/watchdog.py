@@ -21,8 +21,17 @@ Restart policy — built for unattended operation:
 Deliberately does NOT import config.settings: settings.py fails fast on a
 broken config/.env, and that is exactly when the watchdog must still be
 alive to report main.py exiting.
+
+Launch it with sync/start_watchdog.bat, not a bare "python sync/watchdog.py":
+on Windows "python" can resolve to a launcher/shim (Microsoft Store alias,
+Python install manager) that spawns the real interpreter as a separate PID -
+killing the shim's PID then leaves the real watchdog running (observed
+2026-09-15). The .bat asks the interpreter for its own path and runs this
+script directly under it. Children are always started with sys.executable,
+which is the real interpreter regardless of how the watchdog was launched.
 """
 
+import os
 import subprocess
 import sys
 import time
@@ -107,7 +116,8 @@ class Supervised:
 
 
 def main():
-    log.info("Watchdog started — supervising: " + ", ".join(PROCESSES))
+    log.info(f"Watchdog started (PID {os.getpid()}, interpreter {sys.executable}) — "
+             "supervising: " + ", ".join(PROCESSES))
     children = [Supervised(name, script) for name, script in PROCESSES.items()]
     for child in children:
         child.start()

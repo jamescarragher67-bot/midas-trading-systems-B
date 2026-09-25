@@ -1,0 +1,54 @@
+==============================================================================================================
+STEP 2 - MONTE CARLO, 5-GATE ENGINE, LSC'S EXACT CORRECTED METHODOLOGY
+==============================================================================================================
+Method: month-block reordering (research.backtest.monte_carlo.monte_carlo_block_reorder_pct - the SAME function, not a re-implementation, LSC's calibrator and every tournament this week used), 1000 reorders per seed, seeds (42, 1, 7, 99, 123), decision on the WORST value over all 5 seeds.
+Targets (imported from risk_calibrator.py, 6.0% wall): 95th-pct DD <= 4.2%, absolute-worst DD <= 5.7%, real historical order's DD <= 5.7%. Framework: $50,000, 1:10 leverage, 25% margin-safety budget, broker lot floor/step - identical to LSC's own calibration.
+
+[XAUUSD.a] full M5 history 2025-04-21 08:00:00 -> 2026-09-16 13:50:00 (513 calendar days)
+  risk=  0.1%  trades= 296  PF= 1.14  net=$      452  histDD=  0.8%  95th max-seed= 1.26%  worst max-seed= 1.66%  breach=  0.0%  worst losing-month-streak=7  margin-capped=  0  floor=  6  PASS
+  risk= 0.15%  trades= 296  PF= 1.17  net=$      778  histDD=  1.1%  95th max-seed= 1.84%  worst max-seed= 2.41%  breach=  0.0%  worst losing-month-streak=7  margin-capped=  1  floor=  1  PASS
+  risk=  0.2%  trades= 296  PF= 1.18  net=$    1,117  histDD=  1.6%  95th max-seed= 2.51%  worst max-seed=  3.3%  breach=  0.0%  worst losing-month-streak=7  margin-capped=  2  floor=  1  PASS
+  risk=  0.3%  trades= 296  PF= 1.17  net=$    1,543  histDD=  2.4%  95th max-seed= 3.75%  worst max-seed= 4.99%  breach=  0.0%  worst losing-month-streak=7  margin-capped= 30  floor=  0  PASS
+  risk=  0.5%  trades= 296  PF= 1.17  net=$    2,424  histDD=  3.6%  95th max-seed= 5.45%  worst max-seed=  7.1%  breach=  1.5%  worst losing-month-streak=8  margin-capped=133  floor=  0  fail
+  risk= 0.75%  trades= 296  PF= 1.17  net=$    2,805  histDD=  4.7%  95th max-seed= 6.89%  worst max-seed=  9.2%  breach= 14.9%  worst losing-month-streak=9  margin-capped=229  floor=  0  fail
+  risk=  1.0%  trades= 296  PF= 1.18  net=$    3,245  histDD=  5.3%  95th max-seed= 7.77%  worst max-seed=10.41%  breach= 29.0%  worst losing-month-streak=9  margin-capped=256  floor=  0  fail
+  risk=  1.5%  trades= 296  PF= 1.23  net=$    4,412  histDD=  5.8%  95th max-seed= 8.69%  worst max-seed=11.43%  breach= 44.0%  worst losing-month-streak=9  margin-capped=277  floor=  0  fail
+  risk=  2.0%  trades= 296  PF= 1.26  net=$    5,318  histDD=  6.0%  95th max-seed= 8.79%  worst max-seed=11.71%  breach= 45.3%  worst losing-month-streak=9  margin-capped=286  floor=  0  fail
+  risk=  3.0%  trades= 296  PF= 1.28  net=$    5,950  histDD=  6.4%  95th max-seed= 9.07%  worst max-seed=12.11%  breach= 52.6%  worst losing-month-streak=9  margin-capped=292  floor=  0  fail
+  -> n_blocks (calendar months in this history): 18  |  trades in full history: 296
+  -> Recommended: 0.3% risk. PF 1.17, net $1,543, real DD 2.4%, 95th max-seed 3.75%, worst max-seed 4.99%, breach 0.0%, worst losing-month streak 7 of 18 months.
+
+[GBPJPY.a] full M5 history 2025-05-14 10:45:00 -> 2026-09-16 13:50:00 (490 calendar days)
+  risk=  0.1%  trades= 275  PF= 1.48  net=$    1,404  histDD=  0.8%  95th max-seed= 1.02%  worst max-seed= 1.51%  breach=  0.0%  worst losing-month-streak=5  margin-capped= 32  floor=  0  PASS
+  risk= 0.15%  trades= 275  PF=  1.5  net=$    1,978  histDD=  1.1%  95th max-seed= 1.28%  worst max-seed= 1.92%  breach=  0.0%  worst losing-month-streak=4  margin-capped=127  floor=  0  PASS
+  risk=  0.2%  trades= 275  PF=  1.5  net=$    2,260  histDD=  1.1%  95th max-seed= 1.47%  worst max-seed= 2.15%  breach=  0.0%  worst losing-month-streak=5  margin-capped=188  floor=  0  PASS
+  risk=  0.3%  trades= 275  PF=  1.5  net=$    2,453  histDD=  1.1%  95th max-seed= 1.66%  worst max-seed= 2.35%  breach=  0.0%  worst losing-month-streak=5  margin-capped=254  floor=  0  PASS
+  risk=  0.5%  trades= 275  PF= 1.51  net=$    2,600  histDD=  1.1%  95th max-seed=  1.8%  worst max-seed= 2.45%  breach=  0.0%  worst losing-month-streak=5  margin-capped=271  floor=  0  PASS
+  risk= 0.75%  trades= 275  PF= 1.51  net=$    2,619  histDD=  1.1%  95th max-seed= 1.87%  worst max-seed= 2.51%  breach=  0.0%  worst losing-month-streak=5  margin-capped=273  floor=  0  PASS
+  risk=  1.0%  trades= 275  PF=  1.5  net=$    2,606  histDD=  1.1%  95th max-seed= 1.88%  worst max-seed= 2.52%  breach=  0.0%  worst losing-month-streak=5  margin-capped=275  floor=  0  PASS
+  risk=  1.5%  trades= 275  PF=  1.5  net=$    2,606  histDD=  1.1%  95th max-seed= 1.88%  worst max-seed= 2.52%  breach=  0.0%  worst losing-month-streak=5  margin-capped=275  floor=  0  PASS
+  risk=  2.0%  trades= 275  PF=  1.5  net=$    2,606  histDD=  1.1%  95th max-seed= 1.88%  worst max-seed= 2.52%  breach=  0.0%  worst losing-month-streak=5  margin-capped=275  floor=  0  PASS
+  risk=  3.0%  trades= 275  PF=  1.5  net=$    2,606  histDD=  1.1%  95th max-seed= 1.88%  worst max-seed= 2.52%  breach=  0.0%  worst losing-month-streak=5  margin-capped=275  floor=  0  PASS
+  -> n_blocks (calendar months in this history): 17  |  trades in full history: 275
+  -> Recommended: 3.0% risk. PF 1.5, net $2,606, real DD 1.1%, 95th max-seed 1.88%, worst max-seed 2.52%, breach 0.0%, worst losing-month streak 5 of 17 months.
+
+==============================================================================================================
+SAMPLE-SIZE RELIABILITY - explicit, as instructed
+==============================================================================================================
+             trades  months (blocks)  trades/month  vs LSC trades  vs LSC blocks
+LSC            2643               47          56.2       baseline       baseline
+XAUUSD.a        296               18          16.4          11.2%          38.3%
+GBPJPY.a        275               17          16.2          10.4%          36.2%
+
+Month-block reordering draws its tail estimate from the number of DISTINCT MONTHLY BLOCKS, not the number of trades
+or the number of shuffles - 1000 reorders of ~17 blocks is 1000 different orderings of the SAME 17 pieces of data,
+not 1000 independent months of evidence. LSC's calibration reorders 47 blocks; GBPJPY's and gold's M5 history here
+give roughly a third of that. The 95th-pct and worst-of-1000 statistics reported above are real outputs of the same
+code LSC was calibrated with, but with ~17 blocks the tail is necessarily coarser - each block is close to 6% of the
+total weight, so a single unusually bad month moves the tail percentiles far more than it would with 45 blocks. This
+does not invalidate the numbers; it means they should be read as a rougher, less statistically confident estimate than
+LSC's, and this gap will not close by running more shuffles - only by accumulating more months of live/OOS history.
+
+LSC reference: 2643 trades / 47 months, 0.015% risk, PF 1.1335, real DD 2.4%, 95th max-seed 3.92%, worst max-seed 5.66%, net $2,712.43.
+
+Saved research/five_gate_montecarlo_2026-09-16.txt / .json

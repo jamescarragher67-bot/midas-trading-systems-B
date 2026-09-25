@@ -1,0 +1,11 @@
+# LSC validation run - 2026-09-15 (after RISK_PERCENT 0.045 -> 0.015)
+# Source: Pepperstone MT5 demo terminal, XAUUSD.a M15, 90,000 bars frozen 2022-11-17 02:15 -> 2026-09-09 11:00 UTC
+# Harness: research/tools/risk_calibrator.py run_backtest loop (INITIAL_BALANCE=50000, LEVERAGE_ASSUMED=10) and backtest/lsc_engine.py run_lsc_simulation on the same frozen bars
+# Spread assumption 18 points, 25%% margin budget, 6%% trailing-drawdown wall; risk calibrated by month-block reordering (research/lsc_risk_calibration_2026-09-15.txt)
+# md5 = research.tools.rolling_month_backtest.trade_md5 over (date,time,direction,entry,exit,lots,pnl); entries/exits are risk-independent, so the 0.045%% list is the bit-for-bit reference from before the settings change
+# entries+exits identical 0.045% vs 0.015%: True | lsc_engine vs calibrator at 0.015%: True
+[calibrator $50K/1:10/0.045% (pre-change reference)] trades=2643 PF=1.0848 WR=39.00% net=$3372.82 maxDD=6.00% final=$53372.82 md5=784f80adeec1a3a8c3981ffa1c1c9444
+[calibrator $50K/1:10/0.015%] trades=2643 PF=1.1335 WR=39.00% net=$2712.43 maxDD=2.40% final=$52712.43 md5=0fd6973d5e499fda2220de342e2ae6d4
+[calibrator $50K/1:10/1.0% (fidelity)] trades=2643 PF=1.1843 WR=39.00% net=$129846.95 maxDD=53.60% final=$179846.95 md5=1496cb0f6b42c2ed6668aa44b298b64b
+[lsc_engine $50K/0.015%] trades=2643 PF=1.1335 WR=39.00% net=$2712.43 maxDD=2.40% final=$52712.43 md5=0fd6973d5e499fda2220de342e2ae6d4
+# 2026-09-15 live-path replay (research/tools/replay_live_vs_backtest.py, full history, after the session/cooldown/bar-fetch fixes in main.py): main._get_signal() driven over the same frozen bars produced 2635 entries from 2022-11-23 00:00 server time onward, identical in sequence, direction, SL and TP to run_backtest's 2635 entries in that window (2643 total minus 8 before the window). Session gate = closed bar's server-time hour in SESSION_HOURS, i.e. 00-11 and 17-23 UTC at the measured UTC+3 server offset.

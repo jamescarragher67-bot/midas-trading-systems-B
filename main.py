@@ -41,6 +41,13 @@ _last_trade_bar  = -settings.COOLDOWN_BARS
 _last_bar_time   = None
 _bar_index       = 0   # monotonic counter standing in for the backtest's integer bar index
 
+# Bars fetched per scan. strategy/lsc_m15.py needs the WHOLE prior server-time
+# day present in the frame (prior_high/prior_low are that day's extremes) plus
+# ATR warm-up; the earlier 150 left the prior day truncated once the current
+# day was past ~13:30 server time. 300 covers two full days (2 x 96) with room.
+BARS_TO_FETCH = 300
+MIN_BARS      = 100   # = backtest/lsc_engine.py MIN_LOOKBACK
+
 
 def _reconnect():
     """
@@ -103,16 +110,23 @@ def _check_time_exit():
     if not settings.TIME_EXIT_ENABLED:
         return
     positions = mt5.positions_get(symbol=settings.SYMBOL) or []
-    now = datetime.now(timezone.utc)
+    if not positions:
+        return
+    # pos.time is stamped in BROKER SERVER time (UTC+3 measured 2026-09-15),
+    # so it must be compared against the server clock, not this machine's
+    # UTC - the wall-clock version fired the exit ~27h after entry, not 24h.
+    # The last tick's time is the server clock, fresh to the second while
+    # the market is open (positions are force-flat before the weekend).
+    tick = mt5.symbol_info_tick(settings.SYMBOL)
+    if not tick:
+        return
+    server_now = tick.time
     for pos in positions:
         if pos.magic != settings.MAGIC:
             continue
-        hours_open = (now - datetime.fromtimestamp(pos.time, tz=timezone.utc)).total_seconds() / 3600
+        hours_open = (server_now - pos.time) / 3600
         if hours_open >= settings.MAX_TRADE_HOURS_HARD:
             close_type = mt5.ORDER_TYPE_SELL if pos.type == mt5.ORDER_TYPE_BUY else mt5.ORDER_TYPE_BUY
-            tick = mt5.symbol_info_tick(settings.SYMBOL)
-            if not tick:
-                continue
             price = tick.bid if pos.type == mt5.ORDER_TYPE_BUY else tick.ask
             request = {
                 "action": mt5.TRADE_ACTION_DEAL, "symbol": settings.SYMBOL, "volume": pos.volume,
@@ -127,30 +141,24 @@ def _check_time_exit():
 
 
 def _get_signal() -> dict | None:
-    """Fetch M15 bars, compute the LSC signal on the latest closed bar."""
+    """
+    Fetch M15 bars, compute the LSC signal on the latest closed bar.
+
+    Every time-based gate in here is evaluated on the CLOSED BAR'S OWN
+    TIMESTAMP - broker server time, the clock backtest/lsc_engine.py's bar
+    index runs on - never on this machine's wall clock. The session window,
+    the per-day trade cap and the cooldown bar count therefore mean exactly
+    what they meant in the validated backtest. Before 2026-09-15 the session
+    test used wall-clock UTC; Pepperstone's server clock is UTC+3, so live
+    was trading 12-14 UTC (never backtested) and skipping 17-19 UTC (validated).
+    """
     global _bias_date, _trades_today, _last_trade_bar, _bar_index, _last_bar_time
 
-    now = datetime.now(timezone.utc)
-    today = now.date()
-    if _bias_date != today:
-        _bias_date, _trades_today = today, 0
-
-    if _trades_today >= settings.MAX_TRADES_PER_DAY:
-        return None
-    if now.hour not in settings.SESSION_HOURS:
-        return None
-    if not spread_ok():
-        log.debug("Spread filter blocked")
-        return None
-    if not news_ok():
-        # news_ok() logs the blocking event itself.
-        return None
-
     mt5.symbol_select(settings.SYMBOL, True)
-    rates = mt5.copy_rates_from_pos(settings.SYMBOL, settings.SIGNAL_TIMEFRAME, 0, 150)
-    if rates is None or len(rates) < 100:
+    rates = mt5.copy_rates_from_pos(settings.SYMBOL, settings.SIGNAL_TIMEFRAME, 0, BARS_TO_FETCH)
+    if rates is None or len(rates) < MIN_BARS:
         n = len(rates) if rates is not None else 0
-        log.warning(f"Insufficient M15 bars — got {n}/100 required")
+        log.warning(f"Insufficient M15 bars — got {n}/{MIN_BARS} required")
         return None
 
     df = pd.DataFrame(rates)
@@ -162,14 +170,38 @@ def _get_signal() -> dict | None:
     if latest_closed_time == _last_bar_time:
         return None
     _last_bar_time = latest_closed_time
-    _bar_index += 1
+    _bar_index += 1   # advances on EVERY closed bar, filtered or not - like the backtest's i
+
+    # Daily cap resets on the bar's server-time date, as in the backtest.
+    bar_date = latest_closed_time.date()
+    if _bias_date != bar_date:
+        _bias_date, _trades_today = bar_date, 0
+
+    if _trades_today >= settings.MAX_TRADES_PER_DAY:
+        return None
+    if latest_closed_time.hour not in settings.SESSION_HOURS:
+        return None
+    if not spread_ok():
+        log.debug("Spread filter blocked")
+        return None
+    if not news_ok():
+        # news_ok() logs the blocking event itself.
+        return None
 
     df["atr"] = compute_atr14(df, settings.ATR_PERIOD)
     df = precompute(df)
 
     i = len(df) - 2   # last fully closed bar
+    # check_entry measures the cooldown as (i - last_trade_bar) in bar-index
+    # units. i is a position inside THIS fetched frame, _last_trade_bar is
+    # the global closed-bar counter, so the last trade must be translated
+    # into frame coordinates. Passing the raw counter (as this did before
+    # 2026-09-15) meant no cooldown at all for the first ~frame-length bars
+    # of uptime and a PERMANENT cooldown after that - proven by replaying
+    # this function over frozen bars against the backtest harness.
+    last_trade_in_frame = i - (_bar_index - _last_trade_bar)
     direction, reason, sl, tp = check_entry(
-        df, i, _last_trade_bar, _trades_today,
+        df, i, last_trade_in_frame, _trades_today,
         settings.COOLDOWN_BARS, settings.MAX_TRADES_PER_DAY,
     )
     if direction == "NEUTRAL":

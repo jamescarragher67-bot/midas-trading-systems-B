@@ -1,0 +1,67 @@
+====================================================================================================
+TOURNAMENT 2 - ROUND 3: month-block-reorder Monte Carlo + risk calibration, 6.0% wall
+====================================================================================================
+Frozen bars: 90000 | 2022-11-17 02:15:00 -> 2026-09-09 11:00:00 UTC | OHLC md5 2d6ae28eb0d5797b68bcc45feaf24ddd
+IS window: 2022-11-17 02:15:00 .. 2024-12-31 (50106 bars)   OOS window: 2025-01-01 .. 2026-09-09 11:00:00 (39894 bars)
+Account $50,000 | leverage 1:10 | margin budget 25% | spread 18pt | specs point/contract/vmin/vmax/vstep = (0.01, 100.0, 0.01, 50.0, 0.01)
+Score = min(PF,10) / (1 + maxDD%/20); LOW_SAMPLE below 20 trades. Framework: hold cap 96 bars (MA crossover 960), cooldown 3, max 4 trades/day, no session filter.
+
+Standard (imported from research/tools/risk_calibrator.py): pass = worst-over-seeds 95th DD <= 4.20% AND worst-over-seeds absolute-worst DD <= 5.70% AND real historical DD <= 5.70%; seeds (42, 1, 7, 99, 123), 1000 paths each.
+LSC reference on these bars at 0.015%: 2643 trades, PF 1.1335, net $2,712.43, real DD 2.4%, 95th max-seed 3.92%, worst max-seed 5.66%.
+
+[1_ma_cross] Moving Average Crossover (EMA20/60 + EMA100 filter) - sub-variant sl0.5atr
+  OOS: score 0.6578, PF 0.99
+  risk sweep, full history 2022-11-17 02:15:00 -> 2026-09-09 11:00:00, 1000 month-block reorders x seeds (42, 1, 7, 99, 123)
+  risk=   0.1%  trades= 1311  PF= 0.94  net=$ -2,574.83  histDD=  7.7%  medDD= 7.87%  95th=10.15% (max-seed 10.34%)  worst=13.02% (max-seed 13.02%)  breach=95.8%  tradeShuffle95th= 10.5%  floor=   0/1311  fail  [7s]
+  risk= 0.075%  trades= 1311  PF= 0.94  net=$ -2,107.43  histDD=  6.3%  medDD= 6.23%  95th= 7.98% (max-seed  8.15%)  worst=10.12% (max-seed 10.12%)  breach=60.7%  tradeShuffle95th= 8.26%  floor=   0/1311  fail  [8s]
+  risk= 0.065%  trades= 1311  PF= 0.94  net=$ -1,733.67  histDD=  5.4%  medDD= 5.29%  95th= 6.85% (max-seed   7.0%)  worst= 8.67% (max-seed  8.69%)  breach=22.0%  tradeShuffle95th= 7.11%  floor=   0/1311  fail  [7s]
+  risk=  0.06%  trades= 1311  PF= 0.94  net=$ -1,642.19  histDD=  5.1%  medDD= 4.96%  95th=  6.4% (max-seed  6.51%)  worst= 8.12% (max-seed  8.12%)  breach=12.1%  tradeShuffle95th= 6.62%  floor=   0/1311  fail  [7s]
+  risk=  0.05%  trades= 1311  PF= 0.94  net=$ -1,299.03  histDD=  4.2%  medDD= 4.04%  95th= 5.26% (max-seed  5.35%)  worst= 6.66% (max-seed  6.67%)  breach= 0.6%  tradeShuffle95th= 5.48%  floor=   2/1311  fail  [7s]
+  risk= 0.045%  trades= 1311  PF= 0.94  net=$ -1,205.59  histDD=  3.8%  medDD= 3.69%  95th= 4.78% (max-seed  4.88%)  worst= 6.08% (max-seed   6.1%)  breach= 0.1%  tradeShuffle95th= 4.97%  floor=   2/1311  fail  [7s]
+  risk=  0.04%  trades= 1311  PF= 0.94  net=$ -1,039.06  histDD=  3.4%  medDD= 3.26%  95th= 4.25% (max-seed  4.33%)  worst=  5.4% (max-seed  5.42%)  breach= 0.0%  tradeShuffle95th= 4.38%  floor=   3/1311  fail  [7s]
+  risk= 0.035%  trades= 1311  PF= 0.95  net=$   -875.55  histDD=  3.0%  medDD=  2.8%  95th= 3.66% (max-seed  3.73%)  worst= 4.64% (max-seed  4.64%)  breach= 0.0%  tradeShuffle95th= 3.83%  floor=   3/1311  PASS  [7s]
+  risk=  0.03%  trades= 1311  PF= 0.95  net=$   -764.32  histDD=  2.6%  medDD= 2.43%  95th= 3.16% (max-seed  3.21%)  worst= 4.08% (max-seed  4.08%)  breach= 0.0%  tradeShuffle95th=  3.3%  floor=   5/1311  PASS  [7s]
+  risk=0.0275%  trades= 1311  PF= 0.94  net=$   -748.22  histDD=  2.3%  medDD= 2.29%  95th= 2.97% (max-seed  3.04%)  worst= 3.77% (max-seed   3.8%)  breach= 0.0%  tradeShuffle95th= 3.09%  floor=   6/1311  PASS  [8s]
+  risk= 0.025%  trades= 1311  PF= 0.95  net=$   -601.82  histDD=  2.1%  medDD= 1.98%  95th=  2.6% (max-seed  2.65%)  worst= 3.34% (max-seed  3.34%)  breach= 0.0%  tradeShuffle95th= 2.71%  floor=   9/1311  PASS  [7s]
+  risk=0.0225%  trades= 1311  PF= 0.95  net=$   -547.90  histDD=  2.0%  medDD= 1.78%  95th= 2.35% (max-seed  2.37%)  worst=  3.0% (max-seed   3.0%)  breach= 0.0%  tradeShuffle95th= 2.45%  floor=  12/1311  PASS  [8s]
+  risk=  0.02%  trades= 1311  PF= 0.95  net=$   -475.04  histDD=  1.7%  medDD= 1.57%  95th= 2.05% (max-seed   2.1%)  worst= 2.64% (max-seed  2.64%)  breach= 0.0%  tradeShuffle95th= 2.18%  floor=  18/1311  PASS  [7s]
+  risk=0.0175%  trades= 1311  PF= 0.96  net=$   -304.50  histDD=  1.5%  medDD= 1.26%  95th=  1.7% (max-seed  1.74%)  worst= 2.21% (max-seed  2.21%)  breach= 0.0%  tradeShuffle95th= 1.78%  floor=  23/1311  PASS  [7s]
+  risk= 0.015%  trades= 1311  PF= 0.95  net=$   -327.07  histDD=  1.3%  medDD= 1.15%  95th= 1.52% (max-seed  1.56%)  worst= 1.98% (max-seed  1.98%)  breach= 0.0%  tradeShuffle95th= 1.62%  floor=  33/1311  PASS  [8s]
+  risk=  0.01%  trades= 1311  PF= 0.95  net=$   -221.71  histDD=  0.8%  medDD= 0.78%  95th= 1.03% (max-seed  1.05%)  worst= 1.29% (max-seed  1.33%)  breach= 0.0%  tradeShuffle95th= 1.13%  floor= 124/1311  PASS  [7s]
+  risk=0.0075%  trades= 1311  PF= 0.95  net=$   -206.52  histDD=  0.7%  medDD= 0.65%  95th= 0.84% (max-seed  0.85%)  worst= 1.04% (max-seed  1.04%)  breach= 0.0%  tradeShuffle95th= 0.95%  floor= 253/1311  PASS  [7s]
+  risk= 0.005%  trades= 1311  PF= 0.95  net=$   -141.90  histDD=  0.5%  medDD= 0.47%  95th= 0.62% (max-seed  0.63%)  worst= 0.74% (max-seed  0.78%)  breach= 0.0%  tradeShuffle95th= 0.77%  floor= 426/1311  PASS  [7s]
+
+  VERDICT [1_ma_cross]: Recommended 0.035%: 95th max-seed 3.73% (<= 4.2%), worst max-seed 4.64% (<= 5.7%), real order 3.0%, breach 0.0% of paths (max over seeds), PF 0.95, net $-875.55, floor-clamped 3/1311
+  NOTE: full-history PF is 0.94 (<= 1): this is a losing strategy, so any risk% that 'clears the wall' does so only by making the losses small. Calibration is moot.
+
+[4_nr_breakout] Narrow Range Breakout (NR4 / NR7) - sub-variant nr4
+  OOS: score 0.5175, PF 1.11
+  risk sweep, full history 2022-11-17 02:15:00 -> 2026-09-09 11:00:00, 1000 month-block reorders x seeds (42, 1, 7, 99, 123)
+  risk=   0.1%  trades= 3928  PF= 0.94  net=$ -7,545.12  histDD= 24.2%  medDD=18.43%  95th=22.09% (max-seed 22.43%)  worst=26.38% (max-seed 27.29%)  breach=100.0%  tradeShuffle95th=21.47%  floor=  26/3928  fail  [6s]
+  risk= 0.075%  trades= 3928  PF= 0.94  net=$ -5,977.95  histDD= 19.3%  medDD= 14.6%  95th=17.57% (max-seed 17.88%)  worst= 21.2% (max-seed 21.57%)  breach=100.0%  tradeShuffle95th=17.02%  floor=  40/3928  fail  [5s]
+  risk= 0.065%  trades= 3928  PF= 0.93  net=$ -5,601.53  histDD= 17.4%  medDD=13.41%  95th=15.98% (max-seed 16.27%)  worst=19.14% (max-seed 19.46%)  breach=100.0%  tradeShuffle95th= 15.5%  floor=  57/3928  fail  [6s]
+  risk=  0.06%  trades= 3928  PF= 0.93  net=$ -5,317.40  histDD= 16.6%  medDD=12.63%  95th=15.03% (max-seed 15.18%)  worst=17.74% (max-seed 18.19%)  breach=100.0%  tradeShuffle95th=14.62%  floor=  66/3928  fail  [7s]
+  risk=  0.05%  trades= 3928  PF= 0.93  net=$ -4,444.75  histDD= 14.0%  medDD= 10.7%  95th=12.85% (max-seed 13.18%)  worst=15.47% (max-seed 15.47%)  breach=100.0%  tradeShuffle95th=12.33%  floor=  90/3928  fail  [5s]
+  risk= 0.045%  trades= 3928  PF= 0.93  net=$ -3,983.56  histDD= 12.6%  medDD= 9.59%  95th=11.58% (max-seed 11.78%)  worst=13.96% (max-seed 13.97%)  breach=100.0%  tradeShuffle95th=11.14%  floor= 104/3928  fail  [5s]
+  risk=  0.04%  trades= 3928  PF= 0.94  net=$ -3,299.87  histDD= 11.6%  medDD=  8.3%  95th=10.26% (max-seed 10.52%)  worst=12.43% (max-seed 12.55%)  breach=100.0%  tradeShuffle95th= 9.56%  floor= 139/3928  fail  [6s]
+  risk= 0.035%  trades= 3928  PF= 0.93  net=$ -3,166.24  histDD= 10.4%  medDD= 7.71%  95th= 9.41% (max-seed  9.58%)  worst=11.31% (max-seed 11.31%)  breach=100.0%  tradeShuffle95th= 8.96%  floor= 196/3928  fail  [5s]
+  risk=  0.03%  trades= 3928  PF= 0.94  net=$ -2,659.35  histDD=  8.5%  medDD= 6.59%  95th= 8.11% (max-seed  8.22%)  worst= 9.81% (max-seed  9.81%)  breach=78.1%  tradeShuffle95th= 7.71%  floor= 269/3928  fail  [5s]
+  risk=0.0275%  trades= 3928  PF= 0.94  net=$ -2,497.12  histDD=  8.1%  medDD= 6.23%  95th= 7.71% (max-seed  7.85%)  worst= 9.31% (max-seed  9.31%)  breach=62.7%  tradeShuffle95th=  7.2%  floor= 318/3928  fail  [5s]
+  risk= 0.025%  trades= 3928  PF= 0.94  net=$ -2,134.81  histDD=  7.3%  medDD= 5.47%  95th= 6.82% (max-seed  6.92%)  worst= 8.24% (max-seed  8.24%)  breach=26.0%  tradeShuffle95th= 6.46%  floor= 384/3928  fail  [5s]
+  risk=0.0225%  trades= 3928  PF= 0.95  net=$ -1,647.00  histDD=  6.6%  medDD= 4.64%  95th= 5.99% (max-seed  6.09%)  worst= 7.36% (max-seed  7.39%)  breach= 4.8%  tradeShuffle95th= 5.58%  floor= 445/3928  fail  [6s]
+  risk=  0.02%  trades= 3928  PF= 0.94  net=$ -1,632.20  histDD=  6.1%  medDD= 4.45%  95th= 5.67% (max-seed  5.84%)  worst= 6.82% (max-seed  6.89%)  breach= 2.0%  tradeShuffle95th= 5.29%  floor= 537/3928  fail  [5s]
+  risk=0.0175%  trades= 3928  PF= 0.95  net=$ -1,382.07  histDD=  5.3%  medDD= 3.95%  95th= 5.11% (max-seed  5.24%)  worst= 6.17% (max-seed  6.33%)  breach= 0.2%  tradeShuffle95th= 4.75%  floor= 643/3928  fail  [6s]
+  risk= 0.015%  trades= 3928  PF= 0.96  net=$   -915.88  histDD=  4.4%  medDD=  3.2%  95th= 4.29% (max-seed  4.39%)  worst= 5.24% (max-seed  5.44%)  breach= 0.0%  tradeShuffle95th= 3.97%  floor= 770/3928  fail  [6s]
+  risk=  0.01%  trades= 3928  PF=  1.0  net=$    -92.23  histDD=  2.8%  medDD= 2.05%  95th= 2.92% (max-seed  3.01%)  worst= 3.67% (max-seed  3.94%)  breach= 0.0%  tradeShuffle95th= 2.75%  floor=1175/3928  PASS  [5s]
+  risk=0.0075%  trades= 3928  PF= 1.02  net=$    288.73  histDD=  2.1%  medDD= 1.65%  95th= 2.39% (max-seed  2.43%)  worst= 3.08% (max-seed  3.34%)  breach= 0.0%  tradeShuffle95th= 2.26%  floor=1478/3928  PASS  [6s]
+  risk= 0.005%  trades= 3928  PF= 1.05  net=$    763.52  histDD=  1.2%  medDD= 1.26%  95th= 1.86% (max-seed  1.88%)  worst= 2.42% (max-seed  2.64%)  breach= 0.0%  tradeShuffle95th= 1.83%  floor=1996/3928  PASS  [5s]
+
+  VERDICT [4_nr_breakout]: Recommended 0.01%: 95th max-seed 3.01% (<= 4.2%), worst max-seed 3.94% (<= 5.7%), real order 2.8%, breach 0.0% of paths (max over seeds), PF 1.0, net $-92.23, floor-clamped 1175/3928
+  NOTE: full-history PF is 0.94 (<= 1): this is a losing strategy, so any risk% that 'clears the wall' does so only by making the losses small. Calibration is moot.
+
+ROUND 3 SUMMARY vs LSC:
+  candidate        variant          rec risk% trades     PF       net$  histDD  95thMax  worstMax      floor
+  LSC (live)       lsc_m15              0.015   2643 1.1335      2,712     2.4     3.92      5.66  1150/2643
+  1_ma_cross       sl0.5atr             0.035   1311   0.95       -876     3.0     3.73      4.64     3/1311
+  4_nr_breakout    nr4                   0.01   3928    1.0        -92     2.8     3.01      3.94  1175/3928
+Saved research\tournament2_calibration.json

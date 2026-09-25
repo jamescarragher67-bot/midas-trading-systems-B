@@ -1,11 +1,30 @@
 """
 tools/risk_calibrator.py - Prop-firm risk-per-trade calibration for LSC (Stage 4).
 
-Sweeps risk-per-trade levels for strategy/lsc_m15.py through a 1000-shuffle
+Sweeps risk-per-trade levels for strategy/lsc_m15.py through a 1000-path
 Monte Carlo drawdown stress test, to find the highest risk-per-trade that
-keeps worst-case (5th percentile) drawdown comfortably clear of a hard
-prop-firm max-total-loss ceiling (~10%, FTMO-style) - a breach of that
-line ends the account, so this is solved for margin, not for the wall.
+keeps worst-case drawdown comfortably clear of a hard prop-firm
+max-total-loss ceiling - a breach of that line ends the account, so this is
+solved for margin, not for the wall.
+
+TAIL METRIC - changed 2026-09-15, read this before comparing to older runs:
+The decision metric is now MONTH-BLOCK REORDERING
+(research/backtest/monte_carlo.monte_carlo_block_reorder_pct): the trade
+sequence is cut into calendar-month blocks, the block order is shuffled
+with every month's internal sequence preserved, and percent returns are
+recompounded along each path. Every earlier calibration (including the
+0.045% figure set on 2026-09-01) used an individual-trade shuffle
+(monte_carlo_drawdown_pct below, kept for comparison only). That shuffle
+destroys LSC's real month-level loss clustering and was shown by
+research/tools/rolling_month_backtest.py (research/lsc_rolling_month_2026-09-15.txt)
+to understate the tail by roughly 2x: at 0.045% it reported a 95th-pct
+max DD of 3.7% / worst 5.3%, while month-block reordering gives 6.4% /
+9.1% with 8.6% of paths breaching the 6% wall - and the actual historical
+order reached 5.99%. A level now passes only if the block-reordered
+95th-pct AND absolute-worst drawdowns clear the wall by the usual safety
+ratios AND the real historical order does too (the real order is one
+legitimate ordering; a level whose own history breached the wall cannot
+be recommended whatever the simulation says).
 
 DATA SOURCE - read this before trusting the numbers:
 There is no saved trade log, CSV, or Monte Carlo output anywhere in this
@@ -69,6 +88,7 @@ ASSUMPTIONS - revisit if the funded account differs from what's below:
 """
 
 import argparse
+import pickle
 import sys
 from pathlib import Path
 
@@ -81,7 +101,7 @@ import MetaTrader5 as mt5
 from strategy.lsc_m15 import precompute, check_entry
 from backtest.lsc_engine import compute_atr14, get_symbol_specs, SESSION_HOURS, MAX_HOLD_BARS, MIN_LOOKBACK
 from research.backtest.metrics import calculate_metrics
-from research.backtest.monte_carlo import monte_carlo_drawdown
+from research.backtest.monte_carlo import monte_carlo_block_reorder_pct
 
 SYMBOL              = "XAUUSD.a"
 MAX_BARS            = 90000     # verified true ceiling for this symbol/TF - see module docstring
@@ -93,8 +113,14 @@ MARGIN_BUDGET_PCT   = 0.25      # matches config.settings.MARGIN_SAFETY_BUDGET_P
 LEVERAGE_ASSUMED    = 50        # FTMO Standard XAUUSD leverage, confirmed - see module docstring
 N_SHUFFLES          = 1000
 SEED                = 42
+# The absolute-worst-of-1000 is a single order statistic and moves by up to
+# ~1 point with the seed (checked 2026-09-15: 0.0175% gave worst 4.94-6.05%
+# across 8 seeds). The pass/fail decision therefore takes the WORST value
+# of each tail statistic over SEED plus these extra seeds; the table shows
+# SEED's own distribution and the max-over-seeds columns side by side.
+EXTRA_SEEDS         = (1, 7, 99, 123)
 
-RISK_LEVELS = [0.1, 0.075, 0.065, 0.06, 0.05, 0.045, 0.04, 0.035, 0.03, 0.025, 0.02, 0.015, 0.01, 0.0075, 0.005]
+RISK_LEVELS = [0.1, 0.075, 0.065, 0.06, 0.05, 0.045, 0.04, 0.035, 0.03, 0.0275, 0.025, 0.0225, 0.02, 0.0175, 0.015, 0.01, 0.0075, 0.005]
 
 # Safety-margin ratios applied to whatever total-loss wall is passed via
 # --total-wall-pct (not hardcoded to one firm's number). Same ratios used
@@ -104,6 +130,18 @@ RISK_LEVELS = [0.1, 0.075, 0.065, 0.06, 0.05, 0.045, 0.04, 0.035, 0.03, 0.025, 0
 # right up against the line.
 WORST5_MARGIN_RATIO    = 0.70
 ABS_WORST_MARGIN_RATIO = 0.95
+
+
+def load_frozen(path: str):
+    """Frozen bars pickle ({'df', 'specs'}) as written by rolling_month_backtest.py -
+    lets a calibration be re-run on the exact bars of a saved validation
+    instead of whatever the terminal serves today."""
+    with open(path, "rb") as f:
+        blob = pickle.load(f)
+    df = blob["df"][["open", "high", "low", "close"]].copy()
+    df["atr"] = compute_atr14(df)
+    df = precompute(df)
+    return df, blob["specs"]
 
 
 def fetch_history(symbol: str) -> pd.DataFrame:
@@ -348,6 +386,8 @@ def main():
                         help="Leverage for the margin-safe lot cap, e.g. the broker/firm's confirmed XAUUSD leverage.")
     parser.add_argument("--total-wall-pct", type=float, default=10.0,
                         help="Hard total-loss ceiling to solve backward from (trailing peak-to-trough).")
+    parser.add_argument("--bars", default=None,
+                        help="Frozen bars pickle ({'df','specs'}); skips the MT5 fetch so the run is reproducible.")
     args = parser.parse_args()
 
     INITIAL_BALANCE  = args.account_size
@@ -357,17 +397,21 @@ def main():
     ABS_WORST_TARGET_PCT = round(PROP_MAX_LOSS_PCT * ABS_WORST_MARGIN_RATIO, 2)
 
     print("=" * 70)
-    print("LSC RISK CALIBRATOR - fetching full XAUUSD.a M15 history from MT5")
-    print("=" * 70)
-    df = fetch_history(SYMBOL)
-    print(f"Bars fetched: {len(df)} | {df.index[0]}  ->  {df.index[-1]}")
+    if args.bars:
+        print(f"LSC RISK CALIBRATOR - frozen bars from {args.bars}")
+        print("=" * 70)
+        df, (point, contract_size, vol_min, vol_max, vol_step) = load_frozen(args.bars)
+    else:
+        print("LSC RISK CALIBRATOR - fetching full XAUUSD.a M15 history from MT5")
+        print("=" * 70)
+        df = fetch_history(SYMBOL)
+        point, contract_size = get_symbol_specs(SYMBOL)
+        info = mt5.symbol_info(SYMBOL)
+        vol_min, vol_max, vol_step = info.volume_min, info.volume_max, info.volume_step
+    print(f"Bars: {len(df)} | {df.index[0]}  ->  {df.index[-1]}")
     print(f"Account size: ${INITIAL_BALANCE:,.0f}  |  Leverage: {LEVERAGE_ASSUMED}:1  |  "
-          f"Total-loss wall: {PROP_MAX_LOSS_PCT}%  (target worst-5%: {TARGET_WORST5_PCT}%, "
-          f"target abs-worst: {ABS_WORST_TARGET_PCT}%)")
-
-    point, contract_size = get_symbol_specs(SYMBOL)
-    info = mt5.symbol_info(SYMBOL)
-    vol_min, vol_max, vol_step = info.volume_min, info.volume_max, info.volume_step
+          f"Total-loss wall: {PROP_MAX_LOSS_PCT}%  (target 95th-pct: {TARGET_WORST5_PCT}%, "
+          f"target abs-worst and real order: {ABS_WORST_TARGET_PCT}%)")
     print(f"point={point} contract_size={contract_size} vol_min={vol_min} vol_max={vol_max} vol_step={vol_step}")
     print(f"Margin-safe cap: leverage={LEVERAGE_ASSUMED}:1, "
           f"{MARGIN_BUDGET_PCT*100:.0f}% equity budget\n")
@@ -417,20 +461,28 @@ def main():
 
     # ---- Full sweep ----
     print("=" * 70)
-    print(f"MONTE CARLO SWEEP - {N_SHUFFLES} shuffles per risk level, ${INITIAL_BALANCE:,.0f} start")
+    print(f"MONTE CARLO SWEEP - {N_SHUFFLES} month-block reorderings per risk level, ${INITIAL_BALANCE:,.0f} start")
     print("=" * 70)
 
-    print("Reporting the PERCENT-BASED recompounding Monte Carlo as the primary")
-    print("drawdown metric (see monte_carlo_drawdown_pct docstring for why), with")
-    print("the original fixed-dollar-reshuffle method alongside for comparison.\n")
+    print("Decision metric: MONTH-BLOCK REORDERING (calendar-month blocks shuffled,")
+    print("each month's internal trade sequence preserved, percent-return")
+    print("recompounding). The individual-trade shuffle every earlier calibration")
+    print("used is printed alongside as 'trade-shuffle' for comparison only - it")
+    print("understates the tail (see module docstring). 'histDD' is the real")
+    print("historical order's max drawdown at that risk level.\n")
 
     results = []
     for risk_pct in RISK_LEVELS:
         trades = baseline_trades if risk_pct == 1.0 else run_backtest(
             df, risk_pct, point, contract_size, vol_min, vol_max, vol_step)
         metrics = calculate_metrics(trades, INITIAL_BALANCE)
-        mc_pct = monte_carlo_drawdown_pct(trades, INITIAL_BALANCE, n_shuffles=N_SHUFFLES, seed=SEED)
-        mc_dollar = monte_carlo_drawdown(trades, INITIAL_BALANCE, n_shuffles=N_SHUFFLES, seed=SEED)
+        mc_block = monte_carlo_block_reorder_pct(trades, INITIAL_BALANCE, n_reorders=N_SHUFFLES,
+                                                 seed=SEED, wall_pct=PROP_MAX_LOSS_PCT)
+        extra = [monte_carlo_block_reorder_pct(trades, INITIAL_BALANCE, n_reorders=N_SHUFFLES,
+                                               seed=s, wall_pct=PROP_MAX_LOSS_PCT) for s in EXTRA_SEEDS]
+        worst5_maxseed = max(m["worst_5pct_dd_pct"] for m in [mc_block] + extra)
+        worst_maxseed  = max(m["worst_dd_pct"] for m in [mc_block] + extra)
+        mc_trade = monte_carlo_drawdown_pct(trades, INITIAL_BALANCE, n_shuffles=N_SHUFFLES, seed=SEED)
         floor_clamped = [t for t in trades if t["floor_clamped"]]
         row = {
             "risk_pct": risk_pct,
@@ -440,69 +492,84 @@ def main():
             "expectancy": metrics["expectancy"],
             "actual_final_balance": metrics["final_balance"],
             "actual_total_return_pct": metrics["total_return"],
-            "median_dd_pct": mc_pct["median_max_dd_pct"],
-            "worst5pct_dd_pct": mc_pct["worst_5pct_dd_pct"],
-            "worst1pct_dd_pct": mc_pct["worst_1pct_dd_pct"],
-            "absolute_worst_dd_pct": mc_pct["worst_dd_pct"],
-            "dollar_worst5pct_dd_pct": mc_dollar["worst_5pct_dd_pct"],
-            "dollar_absolute_worst_dd_pct": mc_dollar["worst_dd_pct"],
+            "hist_dd_pct": metrics["max_drawdown_pct"],
+            "mean_dd_pct": mc_block["mean_max_dd_pct"],
+            "median_dd_pct": mc_block["median_max_dd_pct"],
+            "worst5pct_dd_pct": mc_block["worst_5pct_dd_pct"],
+            "worst1pct_dd_pct": mc_block["worst_1pct_dd_pct"],
+            "absolute_worst_dd_pct": mc_block["worst_dd_pct"],
+            "pct_paths_breaching_wall": mc_block["pct_paths_breaching_wall"],
+            "worst5pct_dd_pct_maxseed": worst5_maxseed,
+            "absolute_worst_dd_pct_maxseed": worst_maxseed,
+            "trade_shuffle_worst5pct_dd_pct": mc_trade["worst_5pct_dd_pct"],
+            "trade_shuffle_absolute_worst_dd_pct": mc_trade["worst_dd_pct"],
             "floor_clamped_count": len(floor_clamped),
             "floor_clamped_worst_actual_risk_pct": max((t["actual_risk_pct"] for t in floor_clamped), default=0.0),
             "margin_capped_count": sum(1 for t in trades if t["margin_capped"]),
         }
         results.append(row)
-        print(f"  risk={risk_pct:>4}%  trades={row['trades']:>5}  PF={row['pf']:>5}  "
-              f"medianDD={row['median_dd_pct']:>5}%  worst5%DD={row['worst5pct_dd_pct']:>5}%  "
-              f"absWorstDD={row['absolute_worst_dd_pct']:>5}%  "
+        print(f"  risk={risk_pct:>6}%  trades={row['trades']:>5}  PF={row['pf']:>5}  "
+              f"histDD={row['hist_dd_pct']:>4}%  medianDD={row['median_dd_pct']:>5}%  "
+              f"95thDD={row['worst5pct_dd_pct']:>5}% (max-seed {row['worst5pct_dd_pct_maxseed']:>5}%)  "
+              f"worstDD={row['absolute_worst_dd_pct']:>5}% (max-seed {row['absolute_worst_dd_pct_maxseed']:>5}%)  "
+              f"breach={row['pct_paths_breaching_wall']:>4}%  "
               f"floorClamped={row['floor_clamped_count']:>4}/{row['trades']}  "
               f"finalBal=${row['actual_final_balance']:,.0f}")
 
     # ---- Table ----
-    print("\n" + "=" * 120)
-    print(f"{'Risk%':>6} {'Trades':>7} {'WinRate':>8} {'PF':>6} {'Expect$':>9} "
-          f"{'MedianDD%':>10} {'Worst5%DD':>10} {'Worst1%DD':>10} {'AbsWorstDD':>11} "
-          f"{'$-shufW5%':>10} {'$-shufAbsW':>11} {'FinalBal$':>12} {'Return%':>9}")
+    print("\n" + "=" * 150)
+    print(f"{'Risk%':>7} {'Trades':>6} {'WinRate':>8} {'PF':>6} {'Expect$':>8} "
+          f"{'HistDD%':>8} {'MeanDD%':>8} {'MedDD%':>7} {'95thDD%':>8} {'99thDD%':>8} {'WorstDD%':>9} "
+          f"{'95thMax':>8} {'WorstMax':>9} "
+          f"{'Breach%':>8} {'tsh95th':>8} {'tshWorst':>9} {'Floor':>10} {'FinalBal$':>10}")
     for r in results:
-        print(f"{r['risk_pct']:>6} {r['trades']:>7} {r['win_rate']:>7}% {r['pf']:>6} "
-              f"{r['expectancy']:>9.2f} {r['median_dd_pct']:>10} {r['worst5pct_dd_pct']:>10} "
-              f"{r['worst1pct_dd_pct']:>10} {r['absolute_worst_dd_pct']:>11} "
-              f"{r['dollar_worst5pct_dd_pct']:>10} {r['dollar_absolute_worst_dd_pct']:>11} "
-              f"{r['actual_final_balance']:>12,.0f} {r['actual_total_return_pct']:>9}")
-    print("=" * 120)
-    print("MedianDD/Worst5%DD/Worst1%DD/AbsWorstDD = percent-return recompounding method (primary).")
-    print("$-shufW5%/$-shufAbsW = original fixed-dollar-reshuffle method (backtest/monte_carlo.py), for comparison.")
+        print(f"{r['risk_pct']:>7} {r['trades']:>6} {r['win_rate']:>7}% {r['pf']:>6} "
+              f"{r['expectancy']:>8.2f} {r['hist_dd_pct']:>8} {r['mean_dd_pct']:>8} {r['median_dd_pct']:>7} "
+              f"{r['worst5pct_dd_pct']:>8} {r['worst1pct_dd_pct']:>8} {r['absolute_worst_dd_pct']:>9} "
+              f"{r['worst5pct_dd_pct_maxseed']:>8} {r['absolute_worst_dd_pct_maxseed']:>9} "
+              f"{r['pct_paths_breaching_wall']:>8} {r['trade_shuffle_worst5pct_dd_pct']:>8} "
+              f"{r['trade_shuffle_absolute_worst_dd_pct']:>9} "
+              f"{str(r['floor_clamped_count']) + '/' + str(r['trades']):>10} {r['actual_final_balance']:>10,.0f}")
+    print("=" * 150)
+    print(f"HistDD = real historical order. MeanDD..WorstDD, Breach% = month-block reordering, seed {SEED}.")
+    print(f"95thMax/WorstMax = worst of those two statistics over seeds {(SEED,) + EXTRA_SEEDS} - the DECISION columns.")
+    print("tsh95th/tshWorst = individual-trade shuffle (superseded 2026-09-15, comparison only).")
+    print("Floor = trades forced UP to the broker's minimum lot.")
 
     # ---- Solve backward ----
     print("\n" + "-" * 70)
-    print(f"RECOMMENDATION - highest tested risk% where BOTH the worst-5th-pct DD")
-    print(f"<= {TARGET_WORST5_PCT}% AND the absolute worst single shuffle (1-in-{N_SHUFFLES}) <= "
-          f"{ABS_WORST_TARGET_PCT}%")
+    print(f"RECOMMENDATION - highest tested risk% where, on EVERY seed, the month-block-")
+    print(f"reordered 95th-pct DD <= {TARGET_WORST5_PCT}% AND the absolute worst reordering "
+          f"(1-in-{N_SHUFFLES}) <= {ABS_WORST_TARGET_PCT}%,")
+    print(f"and the real historical order's DD <= {ABS_WORST_TARGET_PCT}%")
     print(f"(every tested tail case must clear the {PROP_MAX_LOSS_PCT}% hard wall with real")
-    print("margin, not just the median or the 5th percentile - a breach at any")
-    print("probability ends the account, so the rare 1-in-1000 case matters too)")
+    print("margin, not just the median - a breach at any probability ends the")
+    print("account, so the rare 1-in-1000 case and the one ordering that actually")
+    print("happened both matter)")
     print("-" * 70)
 
     passing = [r for r in results
-               if r["worst5pct_dd_pct"] <= TARGET_WORST5_PCT
-               and r["absolute_worst_dd_pct"] <= ABS_WORST_TARGET_PCT]
-    all_levels_fail_hard_wall = all(r["absolute_worst_dd_pct"] > PROP_MAX_LOSS_PCT for r in results)
+               if r["worst5pct_dd_pct_maxseed"] <= TARGET_WORST5_PCT
+               and r["absolute_worst_dd_pct_maxseed"] <= ABS_WORST_TARGET_PCT
+               and r["hist_dd_pct"] <= ABS_WORST_TARGET_PCT]
+    all_levels_fail_hard_wall = all(r["absolute_worst_dd_pct_maxseed"] > PROP_MAX_LOSS_PCT for r in results)
 
     if all_levels_fail_hard_wall:
         lowest = min(results, key=lambda r: r["risk_pct"])
         print(f"*** STRUCTURAL FLAG ***")
         print(f"Even the lowest tested risk level ({lowest['risk_pct']}%) has an absolute-worst")
-        print(f"single shuffle of {lowest['absolute_worst_dd_pct']}%, which does not clear the "
+        print(f"reordering of {lowest['absolute_worst_dd_pct_maxseed']}%, which does not clear the "
               f"{PROP_MAX_LOSS_PCT}% hard wall at all, let alone with margin.")
-        print("This is NOT a sizing problem - it means LSC's trade-to-trade P&L variance")
+        print("This is NOT a sizing problem - it means LSC's month-to-month P&L variance")
         print("is too large for a standard hard-max-loss prop-firm account regardless of")
         print("risk-per-trade. Sizing down further only delays the breach; it doesn't fix it.")
         recommended = None
     elif not passing:
-        best = min(results, key=lambda r: r["absolute_worst_dd_pct"])
-        print(f"No tested level reaches both targets simultaneously.")
-        print(f"Best available: {best['risk_pct']}% risk -> worst-5th-pct {best['worst5pct_dd_pct']}%, "
-              f"absolute-worst {best['absolute_worst_dd_pct']}%.")
-        if best["absolute_worst_dd_pct"] <= PROP_MAX_LOSS_PCT:
+        best = min(results, key=lambda r: r["absolute_worst_dd_pct_maxseed"])
+        print(f"No tested level reaches all targets simultaneously.")
+        print(f"Best available: {best['risk_pct']}% risk -> 95th-pct {best['worst5pct_dd_pct_maxseed']}%, "
+              f"absolute-worst {best['absolute_worst_dd_pct_maxseed']}%, real order {best['hist_dd_pct']}% (max over seeds).")
+        if best["absolute_worst_dd_pct_maxseed"] <= PROP_MAX_LOSS_PCT:
             print(f"This clears the {PROP_MAX_LOSS_PCT}% hard wall but without the requested "
                   f"safety margin - consider testing levels below {min(RISK_LEVELS)}% or "
                   "treat this as the practical floor.")
@@ -512,11 +579,15 @@ def main():
     else:
         recommended = max(passing, key=lambda r: r["risk_pct"])
         print(f"Recommended: {recommended['risk_pct']}% risk per trade")
-        print(f"  -> worst-5th-pct DD: {recommended['worst5pct_dd_pct']}%  "
+        print(f"  -> 95th-pct block-reordered DD: {recommended['worst5pct_dd_pct']}% on seed {SEED}, "
+              f"{recommended['worst5pct_dd_pct_maxseed']}% worst over seeds  "
               f"(target <= {TARGET_WORST5_PCT}%, hard wall {PROP_MAX_LOSS_PCT}%)")
-        print(f"  -> absolute worst single shuffle (1-in-{N_SHUFFLES}): "
-              f"{recommended['absolute_worst_dd_pct']}%  (target <= {ABS_WORST_TARGET_PCT}%)")
-        print(f"  -> median DD: {recommended['median_dd_pct']}%")
+        print(f"  -> absolute worst reordering (1-in-{N_SHUFFLES}): "
+              f"{recommended['absolute_worst_dd_pct']}% on seed {SEED}, "
+              f"{recommended['absolute_worst_dd_pct_maxseed']}% worst over seeds  (target <= {ABS_WORST_TARGET_PCT}%)")
+        print(f"  -> real historical order: {recommended['hist_dd_pct']}%  (target <= {ABS_WORST_TARGET_PCT}%)")
+        print(f"  -> paths breaching the {PROP_MAX_LOSS_PCT}% wall: {recommended['pct_paths_breaching_wall']}%")
+        print(f"  -> mean / median DD: {recommended['mean_dd_pct']}% / {recommended['median_dd_pct']}%")
         print(f"  -> PF {recommended['pf']}, expectancy ${recommended['expectancy']:.2f}/trade, "
               f"{recommended['trades']} trades")
 

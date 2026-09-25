@@ -1,0 +1,69 @@
+====================================================================================================
+5-GATE DIAGNOSTICS: intrabar trailing ordering + extended risk sweep
+====================================================================================================
+
+1) TRAILING ORDERING - original (raise stop, then test) vs conservative (test, then raise), 0.1% risk, same signals
+  instrument / window                trades | orig PF    net$   WR% | cons PF    net$   WR% | PF change
+  XAUUSD.a full                         296 |    1.14     452  48.3 |    1.38   1,345  53.0 | +0.24
+  XAUUSD.a IS                           168 |    1.12     212  49.4 |    1.32     640  54.2 | +0.20
+  XAUUSD.a OOS                          128 |    1.16     227  46.9 |    1.42     665  51.6 | +0.26
+  GBPJPY.a full                         275 |    1.48   1,404  51.6 |    1.61   2,011  56.0 | +0.13
+  GBPJPY.a IS                           165 |     1.5     829  50.9 |    1.69   1,249  53.9 | +0.19
+  GBPJPY.a OOS                          106 |    1.45     547  52.8 |    1.51     703  59.4 | +0.06
+  US30.a full                           234 |     1.2     540  44.9 |    1.38   1,105  47.0 | +0.18
+  BTCUSD.a full                         246 |     1.5   1,331  44.3 |    1.43   1,108  49.6 | -0.07
+  EURJPY.a full                         308 |     1.3   1,083  47.7 |    1.31   1,198  51.0 | +0.01
+  XAUUSD.a M15 adaptation 2022-2026     454 |    1.09     404  45.4 |    1.35   1,686  50.2 | +0.26
+
+2) EXTENDED RISK SWEEP (month-block reorder, worst of seeds 42/1/7/99/123; pass = 95th <= 4.2%, worst <= 5.7%, real <= 5.7%)
+  [XAUUSD.a] full M5 history, ORIGINAL trailing ordering
+    risk=  0.1%  trades= 296  PF= 1.14  net=$      452  histDD=  0.8%  95th max-seed= 1.26%  worst max-seed= 1.66%  breach=  0.0%  floor=6  margin=0  PASS
+    risk= 0.15%  trades= 296  PF= 1.17  net=$      778  histDD=  1.1%  95th max-seed= 1.84%  worst max-seed= 2.41%  breach=  0.0%  floor=1  margin=1  PASS
+    risk=  0.2%  trades= 296  PF= 1.18  net=$    1,117  histDD=  1.6%  95th max-seed= 2.51%  worst max-seed=  3.3%  breach=  0.0%  floor=1  margin=2  PASS
+    risk=  0.3%  trades= 296  PF= 1.17  net=$    1,543  histDD=  2.4%  95th max-seed= 3.75%  worst max-seed= 4.99%  breach=  0.0%  floor=0  margin=30  PASS
+    risk=  0.5%  trades= 296  PF= 1.17  net=$    2,424  histDD=  3.6%  95th max-seed= 5.45%  worst max-seed=  7.1%  breach=  1.5%  floor=0  margin=133  fail
+    risk= 0.75%  trades= 296  PF= 1.17  net=$    2,805  histDD=  4.7%  95th max-seed= 6.89%  worst max-seed=  9.2%  breach= 14.9%  floor=0  margin=229  fail
+    risk=  1.0%  trades= 296  PF= 1.18  net=$    3,245  histDD=  5.3%  95th max-seed= 7.77%  worst max-seed=10.41%  breach= 29.0%  floor=0  margin=256  fail
+    risk=  1.5%  trades= 296  PF= 1.23  net=$    4,412  histDD=  5.8%  95th max-seed= 8.69%  worst max-seed=11.43%  breach= 44.0%  floor=0  margin=277  fail
+    risk=  2.0%  trades= 296  PF= 1.26  net=$    5,318  histDD=  6.0%  95th max-seed= 8.79%  worst max-seed=11.71%  breach= 45.3%  floor=0  margin=286  fail
+    risk=  3.0%  trades= 296  PF= 1.28  net=$    5,950  histDD=  6.4%  95th max-seed= 9.07%  worst max-seed=12.11%  breach= 52.6%  floor=0  margin=292  fail
+    -> highest passing size 0.3%: PF 1.17, net $1,543 over the 2025-04-21..2026-09-16 history, 95th 3.75%, worst 4.99%, real 2.4%
+  [XAUUSD.a] full M5 history, CONSERVATIVE trailing ordering
+    risk=  0.1%  trades= 296  PF= 1.38  net=$    1,345  histDD=  0.6%  95th max-seed= 1.11%  worst max-seed= 1.55%  breach=  0.0%  floor=6  margin=0  PASS
+    risk= 0.15%  trades= 296  PF=  1.4  net=$    2,143  histDD=  0.9%  95th max-seed= 1.61%  worst max-seed= 2.25%  breach=  0.0%  floor=1  margin=1  PASS
+    risk=  0.2%  trades= 296  PF= 1.42  net=$    2,992  histDD=  1.3%  95th max-seed= 2.16%  worst max-seed= 2.95%  breach=  0.0%  floor=1  margin=2  PASS
+    risk=  0.3%  trades= 296  PF= 1.41  net=$    4,437  histDD=  1.9%  95th max-seed= 3.24%  worst max-seed= 4.37%  breach=  0.0%  floor=0  margin=30  PASS
+    risk=  0.5%  trades= 296  PF= 1.43  net=$    7,000  histDD=  2.5%  95th max-seed= 4.28%  worst max-seed= 5.78%  breach=  0.0%  floor=0  margin=133  fail
+    risk= 0.75%  trades= 296  PF= 1.44  net=$    8,669  histDD=  3.1%  95th max-seed= 4.93%  worst max-seed= 6.85%  breach=  0.4%  floor=0  margin=229  fail
+    risk=  1.0%  trades= 296  PF= 1.45  net=$    9,615  histDD=  3.7%  95th max-seed= 5.66%  worst max-seed= 7.71%  breach=  2.7%  floor=0  margin=256  fail
+    risk=  1.5%  trades= 296  PF= 1.51  net=$   11,671  histDD=  4.5%  95th max-seed= 6.32%  worst max-seed= 8.62%  breach=  8.0%  floor=0  margin=277  fail
+    risk=  2.0%  trades= 296  PF= 1.56  net=$   13,493  histDD=  4.7%  95th max-seed= 6.53%  worst max-seed= 8.94%  breach= 10.3%  floor=0  margin=286  fail
+    risk=  3.0%  trades= 296  PF= 1.58  net=$   14,651  histDD=  5.2%  95th max-seed=  6.8%  worst max-seed= 9.35%  breach= 14.3%  floor=0  margin=292  fail
+    -> highest passing size 0.3%: PF 1.41, net $4,437 over the 2025-04-21..2026-09-16 history, 95th 3.24%, worst 4.37%, real 1.9%
+  [GBPJPY.a] full M5 history, ORIGINAL trailing ordering
+    risk=  0.1%  trades= 275  PF= 1.48  net=$    1,404  histDD=  0.8%  95th max-seed= 1.02%  worst max-seed= 1.51%  breach=  0.0%  floor=0  margin=32  PASS
+    risk= 0.15%  trades= 275  PF=  1.5  net=$    1,978  histDD=  1.1%  95th max-seed= 1.28%  worst max-seed= 1.92%  breach=  0.0%  floor=0  margin=127  PASS
+    risk=  0.2%  trades= 275  PF=  1.5  net=$    2,260  histDD=  1.1%  95th max-seed= 1.47%  worst max-seed= 2.15%  breach=  0.0%  floor=0  margin=188  PASS
+    risk=  0.3%  trades= 275  PF=  1.5  net=$    2,453  histDD=  1.1%  95th max-seed= 1.66%  worst max-seed= 2.35%  breach=  0.0%  floor=0  margin=254  PASS
+    risk=  0.5%  trades= 275  PF= 1.51  net=$    2,600  histDD=  1.1%  95th max-seed=  1.8%  worst max-seed= 2.45%  breach=  0.0%  floor=0  margin=271  PASS
+    risk= 0.75%  trades= 275  PF= 1.51  net=$    2,619  histDD=  1.1%  95th max-seed= 1.87%  worst max-seed= 2.51%  breach=  0.0%  floor=0  margin=273  PASS
+    risk=  1.0%  trades= 275  PF=  1.5  net=$    2,606  histDD=  1.1%  95th max-seed= 1.88%  worst max-seed= 2.52%  breach=  0.0%  floor=0  margin=275  PASS
+    risk=  1.5%  trades= 275  PF=  1.5  net=$    2,606  histDD=  1.1%  95th max-seed= 1.88%  worst max-seed= 2.52%  breach=  0.0%  floor=0  margin=275  PASS
+    risk=  2.0%  trades= 275  PF=  1.5  net=$    2,606  histDD=  1.1%  95th max-seed= 1.88%  worst max-seed= 2.52%  breach=  0.0%  floor=0  margin=275  PASS
+    risk=  3.0%  trades= 275  PF=  1.5  net=$    2,606  histDD=  1.1%  95th max-seed= 1.88%  worst max-seed= 2.52%  breach=  0.0%  floor=0  margin=275  PASS
+    -> highest passing size 3.0%: PF 1.5, net $2,606 over the 2025-05-14..2026-09-16 history, 95th 1.88%, worst 2.52%, real 1.1%
+  [GBPJPY.a] full M5 history, CONSERVATIVE trailing ordering
+    risk=  0.1%  trades= 275  PF= 1.61  net=$    2,011  histDD=  0.7%  95th max-seed= 0.78%  worst max-seed= 1.08%  breach=  0.0%  floor=0  margin=32  PASS
+    risk= 0.15%  trades= 275  PF= 1.65  net=$    2,841  histDD=  1.0%  95th max-seed= 1.02%  worst max-seed= 1.37%  breach=  0.0%  floor=0  margin=127  PASS
+    risk=  0.2%  trades= 275  PF= 1.67  net=$    3,348  histDD=  1.0%  95th max-seed= 1.12%  worst max-seed= 1.56%  breach=  0.0%  floor=0  margin=188  PASS
+    risk=  0.3%  trades= 275  PF= 1.66  net=$    3,670  histDD=  1.0%  95th max-seed= 1.21%  worst max-seed= 1.73%  breach=  0.0%  floor=0  margin=254  PASS
+    risk=  0.5%  trades= 275  PF= 1.67  net=$    3,838  histDD=  1.0%  95th max-seed= 1.26%  worst max-seed= 1.78%  breach=  0.0%  floor=0  margin=271  PASS
+    risk= 0.75%  trades= 275  PF= 1.67  net=$    3,872  histDD=  1.0%  95th max-seed= 1.28%  worst max-seed= 1.77%  breach=  0.0%  floor=0  margin=273  PASS
+    risk=  1.0%  trades= 275  PF= 1.67  net=$    3,854  histDD=  1.0%  95th max-seed= 1.32%  worst max-seed=  1.8%  breach=  0.0%  floor=0  margin=275  PASS
+    risk=  1.5%  trades= 275  PF= 1.67  net=$    3,854  histDD=  1.0%  95th max-seed= 1.32%  worst max-seed=  1.8%  breach=  0.0%  floor=0  margin=275  PASS
+    risk=  2.0%  trades= 275  PF= 1.67  net=$    3,854  histDD=  1.0%  95th max-seed= 1.32%  worst max-seed=  1.8%  breach=  0.0%  floor=0  margin=275  PASS
+    risk=  3.0%  trades= 275  PF= 1.67  net=$    3,854  histDD=  1.0%  95th max-seed= 1.32%  worst max-seed=  1.8%  breach=  0.0%  floor=0  margin=275  PASS
+    -> highest passing size 3.0%: PF 1.67, net $3,854 over the 2025-05-14..2026-09-16 history, 95th 1.32%, worst 1.8%, real 1.0%
+
+LSC reference (gold M15, 45 months): 0.015%, PF 1.1335, net $2,712, real DD 2.40%, 95th 3.92%, worst 5.66%.
+Saved research\five_gate_diagnostics_2026-09-16.txt

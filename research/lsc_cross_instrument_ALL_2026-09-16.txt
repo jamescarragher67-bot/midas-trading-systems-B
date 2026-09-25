@@ -1,0 +1,19 @@
+==============================================================================================================
+LSC CROSS-INSTRUMENT SCREEN - ALL - strategy/lsc_m15.py unmodified, via risk_calibrator.run_backtest
+==============================================================================================================
+$50,000 | 1:10 | margin budget 25% | risk 0.1% | cooldown 3 | cap 4/day | session hours [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 20, 21, 22, 23] | hold 96 bars
+window ALL: ALL available bars - DESCRIPTIVE ONLY, not comparable to the IS screen | static quote->USD rates {'JPY': 0.006450572488308337, 'EUR': 1.15456, 'MXN': 0.05835075103251654, 'ZAR': 0.06145518503541662, 'GBP': 1.3470900000000001, 'CAD': 0.7178441703874923}
+Edge gate for OOS: PF > 1.05 on >= 100 trades AND no distortion flag.
+
+US30.a         US30 (Dow)             839 tr | PF  0.86 | WR  32.7% | DD  10.9% | net $    -3,788  | B/S 436/403 (PF 0.813/0.92) | cap 184/326d | floor 2.7% | margin 4.8% | spread 20.0pt = 2.7% of SL | HY PF [25-H1:4.107  25-H2:0.934  26-H1:0.703  26-H2:0.781] | cap-bound 56.4% of days  [2s]
+US500.a        US500 (S&P)            538 tr | PF  1.05 | WR  37.9% | DD   4.8% | net $       755  | B/S 334/204 (PF 1.412/0.626) | cap 121/195d | floor 0.7% | margin 6.9% | spread 4.0pt = 4.2% of SL | HY PF [25-H1:0.86  25-H2:1.124  26-H1:1.871  26-H2:12.25] | cap-bound 62.1% of days  [2s]
+
+RANKING BY IN-SAMPLE PF (all instruments together):
+   # symbol         trades     PF    WR%    DD%   score flags
+   1 US500.a           538   1.05   37.9    4.8  0.8468 cap-bound 62.1% of days
+   2 US30.a            839   0.86   32.7   10.9  0.5566 cap-bound 56.4% of days
+
+Advancing to OOS (PF > 1.05, >= 100 trades, no HARD flag): NONE
+* = quote currency converted to USD at a static freeze-time rate (PF/WR unaffected; DD/net approximate)
+
+Saved research/lsc_cross_instrument_ALL_2026-09-16.json / .txt / _trades

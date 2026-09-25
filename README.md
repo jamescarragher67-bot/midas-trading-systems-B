@@ -8,7 +8,7 @@
 
 Single-strategy algorithmic gold bot for MetaTrader 5, built to run unattended
 24/7 on a dedicated Windows box. One entry point (`main.py`), one validated
-strategy (`strategy/lsc_m15.py`), 26 files on the live path.
+strategy (`strategy/lsc_m15.py`), 27 files on the live path.
 
 The earlier dual-bot system (Bot 1 structural bias + Bot 2 volatility regime)
 was retired after proper backtesting found no edge. LSC is the strategy that
@@ -17,32 +17,34 @@ survived in-sample / out-of-sample validation, split-window checks and a
 
 > **This README is generated.** Every parameter and metric below is read from
 > `config/settings.py`, `sync/watchdog.py`, `utils/logger.py` and
-> `research/lsc_validation_2026-09-08.txt` by `research/tools/build_readme.py`. Re-run it after
+> `research/lsc_validation_2026-09-15.txt` by `research/tools/build_readme.py`. Re-run it after
 > changing any of them; `--check` exits 1 if it is stale.
 
 ---
 
 ## Validated performance
 
-Frozen-data backtest, 90,000 M15 bars of `XAUUSD.a` (2022-11-11 08:15 → 2026-09-08 13:45 UTC),
-run 2026-09-08. Both harnesses (the calibrator loop and `backtest/lsc_engine.py`)
+Frozen-data backtest, 90,000 M15 bars of `XAUUSD.a` (2022-11-17 02:15 → 2026-09-09 11:00 UTC),
+run 2026-09-15. Both harnesses (the calibrator loop and `backtest/lsc_engine.py`)
 reproduce the same trade list; the hash is checked after every refactor.
 
 | Metric | Value |
 |--------|-------|
 | Account / leverage | $50,000 at 1:10 |
-| Risk per trade | 0.045% (margin-capped) |
+| Risk per trade | 0.015% (margin-capped) |
 | Drawdown wall calibrated against | 6% trailing |
-| Trades | 2,649 |
-| Profit factor | **1.08** |
-| Win rate | 38.8% |
-| Net P&L | $3,119.68 |
-| Max drawdown | 6.00% |
-| Final balance | $53,119.68 |
+| Trades | 2,643 |
+| Profit factor | **1.13** |
+| Win rate | 39.0% |
+| Net P&L | $2,712.43 |
+| Max drawdown | 2.40% |
+| Final balance | $52,712.43 |
 
 Read that PF for what it is: a thin, positive edge at a risk setting chosen so
-the worst of 1000 shuffled sequences stays inside the drawdown wall, not a
-money machine. Full output: `research/lsc_validation_2026-09-08.txt`.
+the worst of 1000 month-block reorderings of the trade history (each month's
+internal sequence preserved) stays inside the drawdown wall, not a money
+machine. Full output: `research/lsc_validation_2026-09-15.txt`; the calibration sweep behind the
+risk figure is `research/lsc_risk_calibration_2026-09-15.txt`.
 
 ---
 
@@ -106,7 +108,7 @@ Logs: `logs/<process>.log`, rotated at midnight UTC, 30 days kept.
 Runtime state: `jasons/` (git-ignored).
 
 <details>
-<summary><strong>Live file structure (26 files, walked from disk)</strong></summary>
+<summary><strong>Live file structure (27 files, walked from disk)</strong></summary>
 
 ```
 .gitignore
@@ -122,6 +124,7 @@ risk/circuit_breaker.py           Consecutive-loss / daily-loss pause, resets at
 risk/trade_manager.py             Order send, margin-safe lot sizing, closed-trade detection
 strategy/lsc_m15.py               The strategy: precompute() + check_entry(), pure functions on a DataFrame
 sync/firebase_push.py             Pushes jasons/ state to Firebase for remote monitoring
+sync/start_watchdog.bat           Launches the watchdog under the real python.exe, not a PATH shim
 sync/trade_sync.py                Writes jasons/ state files, hourly WhatsApp summary
 sync/watchdog.py                  Supervisor: starts and restarts the three live processes
 tools/preflight_check.py          Go / no-go checker run before launch
@@ -132,7 +135,7 @@ utils/news_filter.py              Finnhub high-impact US event blackout (fails c
 utils/notifications.py            WhatsApp (CallMeBot) alerts
 ```
 
-`research/` holds 31 Python files of dev tooling (risk calibrator, backtest
+`research/` holds 33 Python files of dev tooling (risk calibrator, backtest
 engines, the strategy tournament and its results) that never run on the live
 box. See `research/requirements.txt`.
 
@@ -200,7 +203,7 @@ Exit code 0 = go (warnings allowed), 1 = any FAIL.
   broker behaviour or regime change, and past performance does not guarantee
   future results.
 - Algorithmic trading on leveraged instruments carries a real risk of losing
-  the entire account. A profit factor of 1.08 is a thin edge that can turn
+  the entire account. A profit factor of 1.13 is a thin edge that can turn
   negative in a different market regime.
 - The author is not a licensed financial adviser. Never trade with money you
   cannot afford to lose. Use at your own risk.

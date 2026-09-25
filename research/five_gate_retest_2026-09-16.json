@@ -1,0 +1,2512 @@
+{
+  "tag": "2026-09-16",
+  "standard": {
+    "account": 50000.0,
+    "leverage": 10,
+    "screen_risk": 0.1,
+    "wall": 6.0,
+    "targets": [
+      4.2,
+      5.7
+    ]
+  },
+  "xauusd": {
+    "IS": {
+      "total_trades": 168,
+      "win_rate": 49.4,
+      "profit_factor": 1.12,
+      "net_pnl": 211.8,
+      "max_drawdown_pct": 0.8,
+      "expectancy": 1.26,
+      "score": 1.0769,
+      "trading_days": 223,
+      "days_with_trades": 95,
+      "max_trades_in_a_day": 5,
+      "days_ge4_trades_pct": 3.1,
+      "floor_pct": 3.6,
+      "margin_pct": 0.0,
+      "median_sl_pts": 669.4,
+      "spread_over_sl_pct": 2.7,
+      "exit_reasons": {
+        "TRAIL": 163,
+        "SL": 5
+      },
+      "sl_methods": {
+        "atr": 119,
+        "structural": 49
+      },
+      "n_buy": 102,
+      "n_sell": 66,
+      "pf_buy": 1.161,
+      "pf_sell": 1.068,
+      "vote_patterns": {
+        "ema+1 rsi+0 atr+1 pd+1": 102,
+        "ema-1 rsi+0 atr-1 pd-1": 66
+      },
+      "sub_periods": {
+        "2025-Q2": {
+          "n": 41,
+          "pf": 0.642,
+          "net": -174.24
+        },
+        "2025-Q3": {
+          "n": 51,
+          "pf": 0.831,
+          "net": -99.31
+        },
+        "2025-Q4": {
+          "n": 50,
+          "pf": 1.581,
+          "net": 267.24
+        },
+        "2026-Q1": {
+          "n": 26,
+          "pf": 1.971,
+          "net": 218.11
+        }
+      },
+      "positive_sub_periods": "2/4",
+      "weekend_trades": 0,
+      "signals": 168
+    },
+    "OOS": {
+      "total_trades": 128,
+      "win_rate": 46.9,
+      "profit_factor": 1.16,
+      "net_pnl": 226.94,
+      "max_drawdown_pct": 0.6,
+      "expectancy": 1.77,
+      "score": 1.1262,
+      "trading_days": 142,
+      "days_with_trades": 63,
+      "max_trades_in_a_day": 5,
+      "days_ge4_trades_pct": 6.3,
+      "floor_pct": 0.0,
+      "margin_pct": 0.0,
+      "median_sl_pts": 1082.6,
+      "spread_over_sl_pct": 1.7,
+      "exit_reasons": {
+        "TRAIL": 121,
+        "SL": 7
+      },
+      "sl_methods": {
+        "atr": 95,
+        "structural": 33
+      },
+      "n_buy": 55,
+      "n_sell": 73,
+      "pf_buy": 0.894,
+      "pf_sell": 1.405,
+      "vote_patterns": {
+        "ema-1 rsi+0 atr-1 pd-1": 73,
+        "ema+1 rsi+0 atr+1 pd+1": 55
+      },
+      "sub_periods": {
+        "2026-Q1": {
+          "n": 19,
+          "pf": 1.749,
+          "net": 121.58
+        },
+        "2026-Q2": {
+          "n": 56,
+          "pf": 0.834,
+          "net": -120.14
+        },
+        "2026-Q3": {
+          "n": 53,
+          "pf": 1.44,
+          "net": 225.5
+        }
+      },
+      "positive_sub_periods": "2/3",
+      "weekend_trades": 0,
+      "signals": 128
+    },
+    "calibration_m5": {
+      "rows": [
+        {
+          "risk_pct": 0.1,
+          "trades": 296,
+          "pf": 1.14,
+          "net": 452.36,
+          "hist_dd": 0.8,
+          "n_blocks": 18,
+          "median_dd": 0.84,
+          "worst5": 1.25,
+          "worst": 1.66,
+          "worst5_maxseed": 1.26,
+          "worst_maxseed": 1.66,
+          "breach_maxseed": 0.0,
+          "floor": "6",
+          "margin": "0",
+          "passes": "True"
+        },
+        {
+          "risk_pct": 0.075,
+          "trades": 296,
+          "pf": 1.15,
+          "net": 358.53,
+          "hist_dd": 0.6,
+          "n_blocks": 18,
+          "median_dd": 0.66,
+          "worst5": 0.99,
+          "worst": 1.3,
+          "worst5_maxseed": 0.99,
+          "worst_maxseed": 1.3,
+          "breach_maxseed": 0.0,
+          "floor": "11",
+          "margin": "0",
+          "passes": "True"
+        },
+        {
+          "risk_pct": 0.065,
+          "trades": 296,
+          "pf": 1.2,
+          "net": 411.02,
+          "hist_dd": 0.5,
+          "n_blocks": 18,
+          "median_dd": 0.51,
+          "worst5": 0.76,
+          "worst": 1.0,
+          "worst5_maxseed": 0.77,
+          "worst_maxseed": 1.0,
+          "breach_maxseed": 0.0,
+          "floor": "14",
+          "margin": "0",
+          "passes": "True"
+        },
+        {
+          "risk_pct": 0.06,
+          "trades": 296,
+          "pf": 1.19,
+          "net": 360.97,
+          "hist_dd": 0.5,
+          "n_blocks": 18,
+          "median_dd": 0.51,
+          "worst5": 0.76,
+          "worst": 0.99,
+          "worst5_maxseed": 0.77,
+          "worst_maxseed": 1.0,
+          "breach_maxseed": 0.0,
+          "floor": "15",
+          "margin": "0",
+          "passes": "True"
+        },
+        {
+          "risk_pct": 0.05,
+          "trades": 296,
+          "pf": 1.21,
+          "net": 347.84,
+          "hist_dd": 0.4,
+          "n_blocks": 18,
+          "median_dd": 0.41,
+          "worst5": 0.62,
+          "worst": 0.84,
+          "worst5_maxseed": 0.63,
+          "worst_maxseed": 0.84,
+          "breach_maxseed": 0.0,
+          "floor": "19",
+          "margin": "0",
+          "passes": "True"
+        },
+        {
+          "risk_pct": 0.045,
+          "trades": 296,
+          "pf": 1.17,
+          "net": 267.19,
+          "hist_dd": 0.4,
+          "n_blocks": 18,
+          "median_dd": 0.42,
+          "worst5": 0.64,
+          "worst": 0.84,
+          "worst5_maxseed": 0.65,
+          "worst_maxseed": 0.84,
+          "breach_maxseed": 0.0,
+          "floor": "26",
+          "margin": "0",
+          "passes": "True"
+        },
+        {
+          "risk_pct": 0.04,
+          "trades": 296,
+          "pf": 1.21,
+          "net": 287.15,
+          "hist_dd": 0.3,
+          "n_blocks": 18,
+          "median_dd": 0.34,
+          "worst5": 0.51,
+          "worst": 0.63,
+          "worst5_maxseed": 0.52,
+          "worst_maxseed": 0.7,
+          "breach_maxseed": 0.0,
+          "floor": "31",
+          "margin": "0",
+          "passes": "True"
+        },
+        {
+          "risk_pct": 0.035,
+          "trades": 296,
+          "pf": 1.27,
+          "net": 323.92,
+          "hist_dd": 0.3,
+          "n_blocks": 18,
+          "median_dd": 0.32,
+          "worst5": 0.47,
+          "worst": 0.58,
+          "worst5_maxseed": 0.47,
+          "worst_maxseed": 0.64,
+          "breach_maxseed": 0.0,
+          "floor": "39",
+          "margin": "0",
+          "passes": "True"
+        },
+        {
+          "risk_pct": 0.03,
+          "trades": 296,
+          "pf": 1.26,
+          "net": 276.25,
+          "hist_dd": 0.3,
+          "n_blocks": 18,
+          "median_dd": 0.28,
+          "worst5": 0.42,
+          "worst": 0.54,
+          "worst5_maxseed": 0.42,
+          "worst_maxseed": 0.56,
+          "breach_maxseed": 0.0,
+          "floor": "50",
+          "margin": "0",
+          "passes": "True"
+        },
+        {
+          "risk_pct": 0.0275,
+          "trades": 296,
+          "pf": 1.23,
+          "net": 228.44,
+          "hist_dd": 0.3,
+          "n_blocks": 18,
+          "median_dd": 0.29,
+          "worst5": 0.43,
+          "worst": 0.55,
+          "worst5_maxseed": 0.44,
+          "worst_maxseed": 0.58,
+          "breach_maxseed": 0.0,
+          "floor": "64",
+          "margin": "0",
+          "passes": "True"
+        },
+        {
+          "risk_pct": 0.025,
+          "trades": 296,
+          "pf": 1.26,
+          "net": 240.92,
+          "hist_dd": 0.3,
+          "n_blocks": 18,
+          "median_dd": 0.26,
+          "worst5": 0.39,
+          "worst": 0.49,
+          "worst5_maxseed": 0.39,
+          "worst_maxseed": 0.54,
+          "breach_maxseed": 0.0,
+          "floor": "76",
+          "margin": "0",
+          "passes": "True"
+        },
+        {
+          "risk_pct": 0.0225,
+          "trades": 296,
+          "pf": 1.28,
+          "net": 241.23,
+          "hist_dd": 0.2,
+          "n_blocks": 18,
+          "median_dd": 0.24,
+          "worst5": 0.35,
+          "worst": 0.45,
+          "worst5_maxseed": 0.35,
+          "worst_maxseed": 0.51,
+          "breach_maxseed": 0.0,
+          "floor": "100",
+          "margin": "0",
+          "passes": "True"
+        },
+        {
+          "risk_pct": 0.02,
+          "trades": 296,
+          "pf": 1.3,
+          "net": 243.24,
+          "hist_dd": 0.2,
+          "n_blocks": 18,
+          "median_dd": 0.24,
+          "worst5": 0.36,
+          "worst": 0.47,
+          "worst5_maxseed": 0.36,
+          "worst_maxseed": 0.51,
+          "breach_maxseed": 0.0,
+          "floor": "121",
+          "margin": "0",
+          "passes": "True"
+        },
+        {
+          "risk_pct": 0.0175,
+          "trades": 296,
+          "pf": 1.29,
+          "net": 230.25,
+          "hist_dd": 0.2,
+          "n_blocks": 18,
+          "median_dd": 0.23,
+          "worst5": 0.35,
+          "worst": 0.45,
+          "worst5_maxseed": 0.35,
+          "worst_maxseed": 0.49,
+          "breach_maxseed": 0.0,
+          "floor": "153",
+          "margin": "0",
+          "passes": "True"
+        },
+        {
+          "risk_pct": 0.015,
+          "trades": 296,
+          "pf": 1.31,
+          "net": 234.03,
+          "hist_dd": 0.2,
+          "n_blocks": 18,
+          "median_dd": 0.23,
+          "worst5": 0.34,
+          "worst": 0.43,
+          "worst5_maxseed": 0.34,
+          "worst_maxseed": 0.48,
+          "breach_maxseed": 0.0,
+          "floor": "182",
+          "margin": "0",
+          "passes": "True"
+        },
+        {
+          "risk_pct": 0.01,
+          "trades": 296,
+          "pf": 1.32,
+          "net": 228.4,
+          "hist_dd": 0.2,
+          "n_blocks": 18,
+          "median_dd": 0.22,
+          "worst5": 0.33,
+          "worst": 0.41,
+          "worst5_maxseed": 0.33,
+          "worst_maxseed": 0.45,
+          "breach_maxseed": 0.0,
+          "floor": "247",
+          "margin": "0",
+          "passes": "True"
+        },
+        {
+          "risk_pct": 0.0075,
+          "trades": 296,
+          "pf": 1.32,
+          "net": 225.56,
+          "hist_dd": 0.2,
+          "n_blocks": 18,
+          "median_dd": 0.23,
+          "worst5": 0.33,
+          "worst": 0.41,
+          "worst5_maxseed": 0.33,
+          "worst_maxseed": 0.45,
+          "breach_maxseed": 0.0,
+          "floor": "283",
+          "margin": "0",
+          "passes": "True"
+        },
+        {
+          "risk_pct": 0.005,
+          "trades": 296,
+          "pf": 1.32,
+          "net": 225.56,
+          "hist_dd": 0.2,
+          "n_blocks": 18,
+          "median_dd": 0.23,
+          "worst5": 0.33,
+          "worst": 0.41,
+          "worst5_maxseed": 0.33,
+          "worst_maxseed": 0.45,
+          "breach_maxseed": 0.0,
+          "floor": "295",
+          "margin": "0",
+          "passes": "True"
+        }
+      ],
+      "recommended": {
+        "risk_pct": 0.1,
+        "trades": 296,
+        "pf": 1.14,
+        "net": 452.36,
+        "hist_dd": 0.8,
+        "n_blocks": 18,
+        "median_dd": 0.84,
+        "worst5": 1.25,
+        "worst": 1.66,
+        "worst5_maxseed": 1.26,
+        "worst_maxseed": 1.66,
+        "breach_maxseed": 0.0,
+        "floor": "6",
+        "margin": "0",
+        "passes": "True"
+      }
+    }
+  },
+  "xauusd_m15_adaptation": {
+    "IS": {
+      "total_trades": 241,
+      "win_rate": 41.9,
+      "profit_factor": 0.99,
+      "net_pnl": -39.51,
+      "max_drawdown_pct": 0.7,
+      "expectancy": -0.16,
+      "score": 0.9565,
+      "trading_days": 547,
+      "days_with_trades": 129,
+      "max_trades_in_a_day": 5,
+      "days_ge4_trades_pct": 1.1,
+      "floor_pct": 0.0,
+      "margin_pct": 0.0,
+      "median_sl_pts": 422.1,
+      "spread_over_sl_pct": 4.3,
+      "exit_reasons": {
+        "TRAIL": 237,
+        "SL": 4
+      },
+      "sl_methods": {
+        "atr": 176,
+        "structural": 65
+      },
+      "n_buy": 137,
+      "n_sell": 104,
+      "pf_buy": 1.12,
+      "pf_sell": 0.829,
+      "vote_patterns": {
+        "ema-1 rsi+0 atr-1 pd-1": 104,
+        "ema+1 rsi+0 atr+1 pd+1": 137
+      },
+      "sub_periods": {
+        "2022-H2": {
+          "n": 9,
+          "pf": 0.357,
+          "net": -71.18
+        },
+        "2023-H1": {
+          "n": 61,
+          "pf": 1.181,
+          "net": 117.89
+        },
+        "2023-H2": {
+          "n": 56,
+          "pf": 0.675,
+          "net": -231.87
+        },
+        "2024-H1": {
+          "n": 53,
+          "pf": 1.174,
+          "net": 96.63
+        },
+        "2024-H2": {
+          "n": 62,
+          "pf": 1.079,
+          "net": 49.02
+        }
+      },
+      "positive_sub_periods": "3/5",
+      "weekend_trades": 0
+    },
+    "OOS": {
+      "total_trades": 211,
+      "win_rate": 49.8,
+      "profit_factor": 1.26,
+      "net_pnl": 477.61,
+      "max_drawdown_pct": 0.4,
+      "expectancy": 2.26,
+      "score": 1.2353,
+      "trading_days": 436,
+      "days_with_trades": 106,
+      "max_trades_in_a_day": 6,
+      "days_ge4_trades_pct": 2.8,
+      "floor_pct": 3.8,
+      "margin_pct": 0.0,
+      "median_sl_pts": 1504.3,
+      "spread_over_sl_pct": 1.2,
+      "exit_reasons": {
+        "TRAIL": 208,
+        "SL": 3
+      },
+      "sl_methods": {
+        "atr": 160,
+        "structural": 51
+      },
+      "n_buy": 107,
+      "n_sell": 104,
+      "pf_buy": 1.573,
+      "pf_sell": 1.007,
+      "vote_patterns": {
+        "ema+1 rsi+0 atr+1 pd+1": 107,
+        "ema-1 rsi+0 atr-1 pd-1": 104
+      },
+      "sub_periods": {
+        "2025-H1": {
+          "n": 70,
+          "pf": 1.668,
+          "net": 357.79
+        },
+        "2025-H2": {
+          "n": 38,
+          "pf": 1.311,
+          "net": 102.14
+        },
+        "2026-H1": {
+          "n": 76,
+          "pf": 1.231,
+          "net": 153.15
+        },
+        "2026-H2": {
+          "n": 27,
+          "pf": 0.603,
+          "net": -135.47
+        }
+      },
+      "positive_sub_periods": "3/4",
+      "weekend_trades": 0
+    },
+    "calibration_m15": {
+      "rows": [
+        {
+          "risk_pct": 0.1,
+          "trades": 454,
+          "pf": 1.09,
+          "net": 404.07,
+          "hist_dd": 0.7,
+          "n_blocks": 47,
+          "median_dd": 1.02,
+          "worst5": 1.52,
+          "worst": 2.12,
+          "worst5_maxseed": 1.55,
+          "worst_maxseed": 2.16,
+          "breach_maxseed": 0.0,
+          "floor": "9",
+          "margin": "0",
+          "passes": "True"
+        },
+        {
+          "risk_pct": 0.075,
+          "trades": 454,
+          "pf": 1.07,
+          "net": 245.49,
+          "hist_dd": 0.5,
+          "n_blocks": 47,
+          "median_dd": 0.82,
+          "worst5": 1.22,
+          "worst": 1.68,
+          "worst5_maxseed": 1.24,
+          "worst_maxseed": 1.74,
+          "breach_maxseed": 0.0,
+          "floor": "14",
+          "margin": "0",
+          "passes": "True"
+        },
+        {
+          "risk_pct": 0.065,
+          "trades": 454,
+          "pf": 1.06,
+          "net": 180.36,
+          "hist_dd": 0.5,
+          "n_blocks": 47,
+          "median_dd": 0.72,
+          "worst5": 1.05,
+          "worst": 1.47,
+          "worst5_maxseed": 1.09,
+          "worst_maxseed": 1.47,
+          "breach_maxseed": 0.0,
+          "floor": "25",
+          "margin": "0",
+          "passes": "True"
+        },
+        {
+          "risk_pct": 0.06,
+          "trades": 454,
+          "pf": 1.05,
+          "net": 152.77,
+          "hist_dd": 0.4,
+          "n_blocks": 47,
+          "median_dd": 0.68,
+          "worst5": 1.0,
+          "worst": 1.39,
+          "worst5_maxseed": 1.04,
+          "worst_maxseed": 1.43,
+          "breach_maxseed": 0.0,
+          "floor": "34",
+          "margin": "0",
+          "passes": "True"
+        },
+        {
+          "risk_pct": 0.05,
+          "trades": 454,
+          "pf": 1.08,
+          "net": 189.16,
+          "hist_dd": 0.3,
+          "n_blocks": 47,
+          "median_dd": 0.55,
+          "worst5": 0.81,
+          "worst": 1.12,
+          "worst5_maxseed": 0.84,
+          "worst_maxseed": 1.13,
+          "breach_maxseed": 0.0,
+          "floor": "40",
+          "margin": "0",
+          "passes": "True"
+        },
+        {
+          "risk_pct": 0.045,
+          "trades": 454,
+          "pf": 1.05,
+          "net": 117.99,
+          "hist_dd": 0.3,
+          "n_blocks": 47,
+          "median_dd": 0.51,
+          "worst5": 0.76,
+          "worst": 1.06,
+          "worst5_maxseed": 0.77,
+          "worst_maxseed": 1.07,
+          "breach_maxseed": 0.0,
+          "floor": "52",
+          "margin": "0",
+          "passes": "True"
+        },
+        {
+          "risk_pct": 0.04,
+          "trades": 454,
+          "pf": 1.03,
+          "net": 67.39,
+          "hist_dd": 0.3,
+          "n_blocks": 47,
+          "median_dd": 0.49,
+          "worst5": 0.72,
+          "worst": 1.02,
+          "worst5_maxseed": 0.75,
+          "worst_maxseed": 1.02,
+          "breach_maxseed": 0.0,
+          "floor": "63",
+          "margin": "0",
+          "passes": "True"
+        },
+        {
+          "risk_pct": 0.035,
+          "trades": 454,
+          "pf": 1.05,
+          "net": 85.06,
+          "hist_dd": 0.3,
+          "n_blocks": 47,
+          "median_dd": 0.43,
+          "worst5": 0.63,
+          "worst": 0.86,
+          "worst5_maxseed": 0.65,
+          "worst_maxseed": 0.88,
+          "breach_maxseed": 0.0,
+          "floor": "82",
+          "margin": "0",
+          "passes": "True"
+        },
+        {
+          "risk_pct": 0.03,
+          "trades": 454,
+          "pf": 1.03,
+          "net": 52.46,
+          "hist_dd": 0.3,
+          "n_blocks": 47,
+          "median_dd": 0.4,
+          "worst5": 0.58,
+          "worst": 0.81,
+          "worst5_maxseed": 0.6,
+          "worst_maxseed": 0.81,
+          "breach_maxseed": 0.0,
+          "floor": "106",
+          "margin": "0",
+          "passes": "True"
+        },
+        {
+          "risk_pct": 0.0275,
+          "trades": 454,
+          "pf": 1.04,
+          "net": 57.78,
+          "hist_dd": 0.3,
+          "n_blocks": 47,
+          "median_dd": 0.37,
+          "worst5": 0.54,
+          "worst": 0.78,
+          "worst5_maxseed": 0.55,
+          "worst_maxseed": 0.78,
+          "breach_maxseed": 0.0,
+          "floor": "124",
+          "margin": "0",
+          "passes": "True"
+        },
+        {
+          "risk_pct": 0.025,
+          "trades": 454,
+          "pf": 1.02,
+          "net": 29.07,
+          "hist_dd": 0.3,
+          "n_blocks": 47,
+          "median_dd": 0.37,
+          "worst5": 0.53,
+          "worst": 0.74,
+          "worst5_maxseed": 0.54,
+          "worst_maxseed": 0.74,
+          "breach_maxseed": 0.0,
+          "floor": "140",
+          "margin": "0",
+          "passes": "True"
+        },
+        {
+          "risk_pct": 0.0225,
+          "trades": 454,
+          "pf": 1.02,
+          "net": 32.96,
+          "hist_dd": 0.3,
+          "n_blocks": 47,
+          "median_dd": 0.35,
+          "worst5": 0.5,
+          "worst": 0.71,
+          "worst5_maxseed": 0.52,
+          "worst_maxseed": 0.71,
+          "breach_maxseed": 0.0,
+          "floor": "150",
+          "margin": "0",
+          "passes": "True"
+        },
+        {
+          "risk_pct": 0.02,
+          "trades": 454,
+          "pf": 1.02,
+          "net": 27.6,
+          "hist_dd": 0.3,
+          "n_blocks": 47,
+          "median_dd": 0.33,
+          "worst5": 0.47,
+          "worst": 0.65,
+          "worst5_maxseed": 0.48,
+          "worst_maxseed": 0.65,
+          "breach_maxseed": 0.0,
+          "floor": "173",
+          "margin": "0",
+          "passes": "True"
+        },
+        {
+          "risk_pct": 0.0175,
+          "trades": 454,
+          "pf": 1.01,
+          "net": 9.13,
+          "hist_dd": 0.3,
+          "n_blocks": 47,
+          "median_dd": 0.33,
+          "worst5": 0.46,
+          "worst": 0.64,
+          "worst5_maxseed": 0.47,
+          "worst_maxseed": 0.64,
+          "breach_maxseed": 0.0,
+          "floor": "187",
+          "margin": "0",
+          "passes": "True"
+        },
+        {
+          "risk_pct": 0.015,
+          "trades": 454,
+          "pf": 1.0,
+          "net": -3.53,
+          "hist_dd": 0.3,
+          "n_blocks": 47,
+          "median_dd": 0.32,
+          "worst5": 0.46,
+          "worst": 0.59,
+          "worst5_maxseed": 0.46,
+          "worst_maxseed": 0.59,
+          "breach_maxseed": 0.0,
+          "floor": "210",
+          "margin": "0",
+          "passes": "True"
+        },
+        {
+          "risk_pct": 0.01,
+          "trades": 454,
+          "pf": 1.0,
+          "net": -0.13,
+          "hist_dd": 0.3,
+          "n_blocks": 47,
+          "median_dd": 0.31,
+          "worst5": 0.43,
+          "worst": 0.59,
+          "worst5_maxseed": 0.44,
+          "worst_maxseed": 0.59,
+          "breach_maxseed": 0.0,
+          "floor": "295",
+          "margin": "0",
+          "passes": "True"
+        },
+        {
+          "risk_pct": 0.0075,
+          "trades": 454,
+          "pf": 1.0,
+          "net": 1.22,
+          "hist_dd": 0.3,
+          "n_blocks": 47,
+          "median_dd": 0.3,
+          "worst5": 0.43,
+          "worst": 0.54,
+          "worst5_maxseed": 0.43,
+          "worst_maxseed": 0.54,
+          "breach_maxseed": 0.0,
+          "floor": "346",
+          "margin": "0",
+          "passes": "True"
+        },
+        {
+          "risk_pct": 0.005,
+          "trades": 454,
+          "pf": 1.01,
+          "net": 12.96,
+          "hist_dd": 0.3,
+          "n_blocks": 47,
+          "median_dd": 0.29,
+          "worst5": 0.41,
+          "worst": 0.53,
+          "worst5_maxseed": 0.42,
+          "worst_maxseed": 0.53,
+          "breach_maxseed": 0.0,
+          "floor": "421",
+          "margin": "0",
+          "passes": "True"
+        }
+      ],
+      "recommended": {
+        "risk_pct": 0.1,
+        "trades": 454,
+        "pf": 1.09,
+        "net": 404.07,
+        "hist_dd": 0.7,
+        "n_blocks": 47,
+        "median_dd": 1.02,
+        "worst5": 1.52,
+        "worst": 2.12,
+        "worst5_maxseed": 1.55,
+        "worst_maxseed": 2.16,
+        "breach_maxseed": 0.0,
+        "floor": "9",
+        "margin": "0",
+        "passes": "True"
+      }
+    }
+  },
+  "instruments": {
+    "AUDJPY.a": {
+      "total_trades": 142,
+      "win_rate": 35.9,
+      "profit_factor": 0.75,
+      "net_pnl": -556.71,
+      "max_drawdown_pct": 1.6,
+      "expectancy": -3.92,
+      "score": 0.6944,
+      "trading_days": 206,
+      "days_with_trades": 80,
+      "max_trades_in_a_day": 7,
+      "days_ge4_trades_pct": 2.9,
+      "floor_pct": 0.0,
+      "margin_pct": 2.1,
+      "median_sl_pts": 90.0,
+      "spread_over_sl_pct": 17.8,
+      "exit_reasons": {
+        "TRAIL": 134,
+        "SL": 8
+      },
+      "sl_methods": {
+        "atr": 98,
+        "structural": 44
+      },
+      "n_buy": 78,
+      "n_sell": 64,
+      "pf_buy": 0.53,
+      "pf_sell": 1.039,
+      "vote_patterns": {
+        "ema-1 rsi+0 atr-1 pd-1": 64,
+        "ema+1 rsi+0 atr+1 pd+1": 78
+      },
+      "sub_periods": {
+        "2025-Q2": {
+          "n": 24,
+          "pf": 0.832,
+          "net": -79.12
+        },
+        "2025-Q3": {
+          "n": 41,
+          "pf": 0.677,
+          "net": -189.31
+        },
+        "2025-Q4": {
+          "n": 46,
+          "pf": 0.845,
+          "net": -113.97
+        },
+        "2026-Q1": {
+          "n": 31,
+          "pf": 0.621,
+          "net": -174.31
+        }
+      },
+      "positive_sub_periods": "0/4",
+      "weekend_trades": 0,
+      "symbol": "AUDJPY.a",
+      "requested": "AUDJPY",
+      "spread_pts": 16.0,
+      "profit_ccy": "JPY",
+      "is_from": "2025-05-14",
+      "is_to": "2026-02-27",
+      "signals": 142,
+      "hard_flags": []
+    },
+    "AUDUSD.a": {
+      "total_trades": 144,
+      "win_rate": 38.2,
+      "profit_factor": 0.63,
+      "net_pnl": -859.43,
+      "max_drawdown_pct": 2.0,
+      "expectancy": -5.97,
+      "score": 0.5727,
+      "trading_days": 206,
+      "days_with_trades": 80,
+      "max_trades_in_a_day": 5,
+      "days_ge4_trades_pct": 3.4,
+      "floor_pct": 0.0,
+      "margin_pct": 2.8,
+      "median_sl_pts": 53.0,
+      "spread_over_sl_pct": 18.9,
+      "exit_reasons": {
+        "TRAIL": 138,
+        "SL": 6
+      },
+      "sl_methods": {
+        "atr": 107,
+        "structural": 37
+      },
+      "n_buy": 92,
+      "n_sell": 52,
+      "pf_buy": 0.504,
+      "pf_sell": 0.89,
+      "vote_patterns": {
+        "ema+1 rsi+0 atr+1 pd+1": 92,
+        "ema-1 rsi+0 atr-1 pd-1": 52
+      },
+      "sub_periods": {
+        "2025-Q2": {
+          "n": 23,
+          "pf": 0.689,
+          "net": -107.47
+        },
+        "2025-Q3": {
+          "n": 50,
+          "pf": 0.633,
+          "net": -286.56
+        },
+        "2025-Q4": {
+          "n": 38,
+          "pf": 0.498,
+          "net": -275.2
+        },
+        "2026-Q1": {
+          "n": 33,
+          "pf": 0.697,
+          "net": -190.2
+        }
+      },
+      "positive_sub_periods": "0/4",
+      "weekend_trades": 0,
+      "symbol": "AUDUSD.a",
+      "requested": "AUDUSD",
+      "spread_pts": 10.0,
+      "profit_ccy": "USD",
+      "is_from": "2025-05-14",
+      "is_to": "2026-02-27",
+      "signals": 144,
+      "hard_flags": []
+    },
+    "BTCUSD.a": {
+      "total_trades": 98,
+      "win_rate": 42.9,
+      "profit_factor": 1.71,
+      "net_pnl": 808.99,
+      "max_drawdown_pct": 0.5,
+      "expectancy": 8.26,
+      "score": 1.6683,
+      "trading_days": 149,
+      "days_with_trades": 44,
+      "max_trades_in_a_day": 5,
+      "days_ge4_trades_pct": 4.0,
+      "floor_pct": 0.0,
+      "margin_pct": 0.0,
+      "median_sl_pts": 35133.1,
+      "spread_over_sl_pct": 4.3,
+      "exit_reasons": {
+        "TRAIL": 96,
+        "SL": 2
+      },
+      "sl_methods": {
+        "atr": 71,
+        "structural": 27
+      },
+      "n_buy": 43,
+      "n_sell": 55,
+      "pf_buy": 0.728,
+      "pf_sell": 2.48,
+      "vote_patterns": {
+        "ema+1 rsi+0 atr+1 pd+1": 43,
+        "ema-1 rsi+0 atr-1 pd-1": 55
+      },
+      "sub_periods": {
+        "2025-Q4": {
+          "n": 61,
+          "pf": 2.076,
+          "net": 852.12
+        },
+        "2026-Q1": {
+          "n": 37,
+          "pf": 0.876,
+          "net": -43.13
+        }
+      },
+      "positive_sub_periods": "1/2",
+      "weekend_trades": 35,
+      "symbol": "BTCUSD.a",
+      "requested": "BTCUSD",
+      "spread_pts": 1500.0,
+      "profit_ccy": "USD",
+      "is_from": "2025-10-03",
+      "is_to": "2026-02-28",
+      "signals": 98,
+      "hard_flags": [
+        "LOW SAMPLE",
+        "35 weekend trades"
+      ]
+    },
+    "Copper.a": {
+      "total_trades": 205,
+      "win_rate": 36.1,
+      "profit_factor": 0.61,
+      "net_pnl": -1345.8,
+      "max_drawdown_pct": 2.9,
+      "expectancy": -6.56,
+      "score": 0.5328,
+      "trading_days": 224,
+      "days_with_trades": 93,
+      "max_trades_in_a_day": 6,
+      "days_ge4_trades_pct": 7.1,
+      "floor_pct": 0.0,
+      "margin_pct": 0.0,
+      "median_sl_pts": 115.0,
+      "spread_over_sl_pct": 17.4,
+      "exit_reasons": {
+        "SL": 9,
+        "TRAIL": 196
+      },
+      "sl_methods": {
+        "atr": 144,
+        "structural": 61
+      },
+      "n_buy": 128,
+      "n_sell": 77,
+      "pf_buy": 0.645,
+      "pf_sell": 0.539,
+      "vote_patterns": {
+        "ema+1 rsi+0 atr+1 pd+1": 128,
+        "ema-1 rsi+0 atr-1 pd-1": 77
+      },
+      "sub_periods": {
+        "2025-Q2": {
+          "n": 47,
+          "pf": 0.625,
+          "net": -273.65
+        },
+        "2025-Q3": {
+          "n": 63,
+          "pf": 0.531,
+          "net": -554.9
+        },
+        "2025-Q4": {
+          "n": 48,
+          "pf": 0.722,
+          "net": -213.71
+        },
+        "2026-Q1": {
+          "n": 47,
+          "pf": 0.581,
+          "net": -303.54
+        }
+      },
+      "positive_sub_periods": "0/4",
+      "weekend_trades": 0,
+      "symbol": "Copper.a",
+      "requested": "Copper",
+      "spread_pts": 20.0,
+      "profit_ccy": "USD",
+      "is_from": "2025-04-17",
+      "is_to": "2026-02-27",
+      "signals": 205,
+      "hard_flags": []
+    },
+    "ETHUSD.a": {
+      "total_trades": 104,
+      "win_rate": 41.3,
+      "profit_factor": 0.9,
+      "net_pnl": -134.63,
+      "max_drawdown_pct": 1.0,
+      "expectancy": -1.29,
+      "score": 0.8571,
+      "trading_days": 149,
+      "days_with_trades": 55,
+      "max_trades_in_a_day": 5,
+      "days_ge4_trades_pct": 2.7,
+      "floor_pct": 0.0,
+      "margin_pct": 0.0,
+      "median_sl_pts": 1652.4,
+      "spread_over_sl_pct": 12.1,
+      "exit_reasons": {
+        "TRAIL": 103,
+        "SL": 1
+      },
+      "sl_methods": {
+        "atr": 75,
+        "structural": 29
+      },
+      "n_buy": 42,
+      "n_sell": 62,
+      "pf_buy": 0.501,
+      "pf_sell": 1.235,
+      "vote_patterns": {
+        "ema+1 rsi+0 atr+1 pd+1": 42,
+        "ema-1 rsi+0 atr-1 pd-1": 62
+      },
+      "sub_periods": {
+        "2025-Q4": {
+          "n": 62,
+          "pf": 0.919,
+          "net": -61.3
+        },
+        "2026-Q1": {
+          "n": 42,
+          "pf": 0.871,
+          "net": -73.33
+        }
+      },
+      "positive_sub_periods": "0/2",
+      "weekend_trades": 32,
+      "symbol": "ETHUSD.a",
+      "requested": "ETHUSD",
+      "spread_pts": 200.0,
+      "profit_ccy": "USD",
+      "is_from": "2025-10-03",
+      "is_to": "2026-02-28",
+      "signals": 104,
+      "hard_flags": [
+        "32 weekend trades"
+      ]
+    },
+    "EURJPY.a": {
+      "total_trades": 183,
+      "win_rate": 44.3,
+      "profit_factor": 1.01,
+      "net_pnl": 11.6,
+      "max_drawdown_pct": 0.7,
+      "expectancy": 0.06,
+      "score": 0.9758,
+      "trading_days": 206,
+      "days_with_trades": 93,
+      "max_trades_in_a_day": 5,
+      "days_ge4_trades_pct": 5.3,
+      "floor_pct": 0.0,
+      "margin_pct": 9.3,
+      "median_sl_pts": 106.0,
+      "spread_over_sl_pct": 6.6,
+      "exit_reasons": {
+        "TRAIL": 175,
+        "SL": 8
+      },
+      "sl_methods": {
+        "atr": 137,
+        "structural": 46
+      },
+      "n_buy": 102,
+      "n_sell": 81,
+      "pf_buy": 0.882,
+      "pf_sell": 1.134,
+      "vote_patterns": {
+        "ema-1 rsi+0 atr-1 pd-1": 81,
+        "ema+1 rsi+0 atr+1 pd+1": 102
+      },
+      "sub_periods": {
+        "2025-Q2": {
+          "n": 32,
+          "pf": 0.553,
+          "net": -229.84
+        },
+        "2025-Q3": {
+          "n": 57,
+          "pf": 1.045,
+          "net": 25.61
+        },
+        "2025-Q4": {
+          "n": 60,
+          "pf": 1.478,
+          "net": 323.23
+        },
+        "2026-Q1": {
+          "n": 34,
+          "pf": 0.741,
+          "net": -107.4
+        }
+      },
+      "positive_sub_periods": "2/4",
+      "weekend_trades": 0,
+      "symbol": "EURJPY.a",
+      "requested": "EURJPY",
+      "spread_pts": 7.0,
+      "profit_ccy": "JPY",
+      "is_from": "2025-05-14",
+      "is_to": "2026-02-27",
+      "signals": 183,
+      "hard_flags": []
+    },
+    "EURUSD.a": {
+      "total_trades": 198,
+      "win_rate": 41.4,
+      "profit_factor": 0.73,
+      "net_pnl": -750.5,
+      "max_drawdown_pct": 1.6,
+      "expectancy": -3.79,
+      "score": 0.6759,
+      "trading_days": 206,
+      "days_with_trades": 86,
+      "max_trades_in_a_day": 7,
+      "days_ge4_trades_pct": 7.3,
+      "floor_pct": 0.0,
+      "margin_pct": 23.2,
+      "median_sl_pts": 58.5,
+      "spread_over_sl_pct": 17.1,
+      "exit_reasons": {
+        "TRAIL": 184,
+        "SL": 14
+      },
+      "sl_methods": {
+        "atr": 138,
+        "structural": 60
+      },
+      "n_buy": 117,
+      "n_sell": 81,
+      "pf_buy": 0.828,
+      "pf_sell": 0.604,
+      "vote_patterns": {
+        "ema+1 rsi+0 atr+1 pd+1": 117,
+        "ema-1 rsi+0 atr-1 pd-1": 81
+      },
+      "sub_periods": {
+        "2025-Q2": {
+          "n": 41,
+          "pf": 0.543,
+          "net": -270.49
+        },
+        "2025-Q3": {
+          "n": 53,
+          "pf": 1.143,
+          "net": 84.32
+        },
+        "2025-Q4": {
+          "n": 65,
+          "pf": 0.679,
+          "net": -313.32
+        },
+        "2026-Q1": {
+          "n": 39,
+          "pf": 0.613,
+          "net": -251.01
+        }
+      },
+      "positive_sub_periods": "1/4",
+      "weekend_trades": 0,
+      "symbol": "EURUSD.a",
+      "requested": "EURUSD",
+      "spread_pts": 10.0,
+      "profit_ccy": "USD",
+      "is_from": "2025-05-14",
+      "is_to": "2026-02-27",
+      "signals": 198,
+      "hard_flags": []
+    },
+    "GBPJPY.a": {
+      "total_trades": 165,
+      "win_rate": 50.9,
+      "profit_factor": 1.5,
+      "net_pnl": 828.67,
+      "max_drawdown_pct": 0.8,
+      "expectancy": 5.02,
+      "score": 1.4423,
+      "trading_days": 206,
+      "days_with_trades": 90,
+      "max_trades_in_a_day": 6,
+      "days_ge4_trades_pct": 3.9,
+      "floor_pct": 0.0,
+      "margin_pct": 7.3,
+      "median_sl_pts": 137.0,
+      "spread_over_sl_pct": 2.2,
+      "exit_reasons": {
+        "TRAIL": 159,
+        "SL": 6
+      },
+      "sl_methods": {
+        "atr": 116,
+        "structural": 49
+      },
+      "n_buy": 73,
+      "n_sell": 92,
+      "pf_buy": 1.473,
+      "pf_sell": 1.521,
+      "vote_patterns": {
+        "ema-1 rsi+0 atr-1 pd-1": 92,
+        "ema+1 rsi+0 atr+1 pd+1": 73
+      },
+      "sub_periods": {
+        "2025-Q2": {
+          "n": 31,
+          "pf": 1.882,
+          "net": 286.46
+        },
+        "2025-Q3": {
+          "n": 45,
+          "pf": 0.777,
+          "net": -123.3
+        },
+        "2025-Q4": {
+          "n": 50,
+          "pf": 1.659,
+          "net": 331.21
+        },
+        "2026-Q1": {
+          "n": 39,
+          "pf": 2.233,
+          "net": 334.3
+        }
+      },
+      "positive_sub_periods": "3/4",
+      "weekend_trades": 0,
+      "symbol": "GBPJPY.a",
+      "requested": "GBPJPY",
+      "spread_pts": 3.0,
+      "profit_ccy": "JPY",
+      "is_from": "2025-05-14",
+      "is_to": "2026-02-27",
+      "signals": 165,
+      "hard_flags": []
+    },
+    "GBPUSD.a": {
+      "total_trades": 177,
+      "win_rate": 39.5,
+      "profit_factor": 0.73,
+      "net_pnl": -681.89,
+      "max_drawdown_pct": 1.5,
+      "expectancy": -3.85,
+      "score": 0.6791,
+      "trading_days": 206,
+      "days_with_trades": 87,
+      "max_trades_in_a_day": 6,
+      "days_ge4_trades_pct": 5.3,
+      "floor_pct": 0.0,
+      "margin_pct": 17.5,
+      "median_sl_pts": 73.0,
+      "spread_over_sl_pct": 19.2,
+      "exit_reasons": {
+        "TRAIL": 168,
+        "SL": 9
+      },
+      "sl_methods": {
+        "atr": 116,
+        "structural": 61
+      },
+      "n_buy": 96,
+      "n_sell": 81,
+      "pf_buy": 0.767,
+      "pf_sell": 0.683,
+      "vote_patterns": {
+        "ema+1 rsi+0 atr+1 pd+1": 96,
+        "ema-1 rsi+0 atr-1 pd-1": 81
+      },
+      "sub_periods": {
+        "2025-Q2": {
+          "n": 27,
+          "pf": 0.457,
+          "net": -262.47
+        },
+        "2025-Q3": {
+          "n": 64,
+          "pf": 0.712,
+          "net": -256.12
+        },
+        "2025-Q4": {
+          "n": 61,
+          "pf": 1.173,
+          "net": 116.94
+        },
+        "2026-Q1": {
+          "n": 25,
+          "pf": 0.418,
+          "net": -280.24
+        }
+      },
+      "positive_sub_periods": "1/4",
+      "weekend_trades": 0,
+      "symbol": "GBPUSD.a",
+      "requested": "GBPUSD",
+      "spread_pts": 14.0,
+      "profit_ccy": "USD",
+      "is_from": "2025-05-14",
+      "is_to": "2026-02-27",
+      "signals": 177,
+      "hard_flags": []
+    },
+    "GER40.a": {
+      "total_trades": 428,
+      "win_rate": 44.4,
+      "profit_factor": 0.96,
+      "net_pnl": -241.49,
+      "max_drawdown_pct": 1.9,
+      "expectancy": -0.56,
+      "score": 0.8767,
+      "trading_days": 294,
+      "days_with_trades": 166,
+      "max_trades_in_a_day": 7,
+      "days_ge4_trades_pct": 14.6,
+      "floor_pct": 0.0,
+      "margin_pct": 0.9,
+      "median_sl_pts": 285.1,
+      "spread_over_sl_pct": 5.3,
+      "exit_reasons": {
+        "TRAIL": 386,
+        "SL": 42
+      },
+      "sl_methods": {
+        "atr": 307,
+        "structural": 121
+      },
+      "n_buy": 267,
+      "n_sell": 161,
+      "pf_buy": 0.845,
+      "pf_sell": 1.168,
+      "vote_patterns": {
+        "ema+1 rsi+0 atr+1 pd+1": 267,
+        "ema-1 rsi+0 atr-1 pd-1": 161
+      },
+      "sub_periods": {
+        "2025-Q1": {
+          "n": 87,
+          "pf": 1.199,
+          "net": 245.41
+        },
+        "2025-Q2": {
+          "n": 83,
+          "pf": 0.956,
+          "net": -45.81
+        },
+        "2025-Q3": {
+          "n": 105,
+          "pf": 0.996,
+          "net": -7.27
+        },
+        "2025-Q4": {
+          "n": 97,
+          "pf": 0.668,
+          "net": -476.84
+        },
+        "2026-Q1": {
+          "n": 56,
+          "pf": 1.057,
+          "net": 43.02
+        }
+      },
+      "positive_sub_periods": "2/5",
+      "weekend_trades": 0,
+      "symbol": "GER40.a",
+      "requested": "GER40 (DAX)",
+      "spread_pts": 15.0,
+      "profit_ccy": "EUR",
+      "is_from": "2025-01-02",
+      "is_to": "2026-02-27",
+      "signals": 428,
+      "hard_flags": []
+    },
+    "NAS100.a": {
+      "total_trades": 141,
+      "win_rate": 41.1,
+      "profit_factor": 0.73,
+      "net_pnl": -431.13,
+      "max_drawdown_pct": 1.0,
+      "expectancy": -3.06,
+      "score": 0.6952,
+      "trading_days": 224,
+      "days_with_trades": 77,
+      "max_trades_in_a_day": 6,
+      "days_ge4_trades_pct": 1.3,
+      "floor_pct": 0.0,
+      "margin_pct": 1.4,
+      "median_sl_pts": 253.9,
+      "spread_over_sl_pct": 5.1,
+      "exit_reasons": {
+        "TRAIL": 140,
+        "SL": 1
+      },
+      "sl_methods": {
+        "atr": 97,
+        "structural": 44
+      },
+      "n_buy": 78,
+      "n_sell": 63,
+      "pf_buy": 0.668,
+      "pf_sell": 0.79,
+      "vote_patterns": {
+        "ema-1 rsi+0 atr-1 pd-1": 63,
+        "ema+1 rsi+0 atr+1 pd+1": 78
+      },
+      "sub_periods": {
+        "2025-Q2": {
+          "n": 48,
+          "pf": 0.568,
+          "net": -208.9
+        },
+        "2025-Q3": {
+          "n": 45,
+          "pf": 1.393,
+          "net": 168.9
+        },
+        "2025-Q4": {
+          "n": 33,
+          "pf": 0.527,
+          "net": -214.86
+        },
+        "2026-Q1": {
+          "n": 15,
+          "pf": 0.266,
+          "net": -176.27
+        }
+      },
+      "positive_sub_periods": "1/4",
+      "weekend_trades": 0,
+      "symbol": "NAS100.a",
+      "requested": "NAS100",
+      "spread_pts": 13.0,
+      "profit_ccy": "USD",
+      "is_from": "2025-04-17",
+      "is_to": "2026-02-27",
+      "signals": 141,
+      "hard_flags": []
+    },
+    "NatGas.a": {
+      "total_trades": 258,
+      "win_rate": 27.5,
+      "profit_factor": 0.4,
+      "net_pnl": -3744.5,
+      "max_drawdown_pct": 7.5,
+      "expectancy": -14.51,
+      "score": 0.2909,
+      "trading_days": 224,
+      "days_with_trades": 120,
+      "max_trades_in_a_day": 7,
+      "days_ge4_trades_pct": 7.1,
+      "floor_pct": 0.0,
+      "margin_pct": 0.0,
+      "median_sl_pts": 11.0,
+      "spread_over_sl_pct": 36.4,
+      "exit_reasons": {
+        "TRAIL": 240,
+        "SL": 18
+      },
+      "sl_methods": {
+        "structural": 87,
+        "atr": 171
+      },
+      "n_buy": 141,
+      "n_sell": 117,
+      "pf_buy": 0.573,
+      "pf_sell": 0.201,
+      "vote_patterns": {
+        "ema-1 rsi+0 atr-1 pd-1": 117,
+        "ema+1 rsi+0 atr+1 pd+1": 141
+      },
+      "sub_periods": {
+        "2025-Q2": {
+          "n": 54,
+          "pf": 0.616,
+          "net": -537.0
+        },
+        "2025-Q3": {
+          "n": 59,
+          "pf": 0.079,
+          "net": -1667.6
+        },
+        "2025-Q4": {
+          "n": 93,
+          "pf": 0.583,
+          "net": -854.2
+        },
+        "2026-Q1": {
+          "n": 52,
+          "pf": 0.298,
+          "net": -685.7
+        }
+      },
+      "positive_sub_periods": "0/4",
+      "weekend_trades": 0,
+      "symbol": "NatGas.a",
+      "requested": "Natural Gas",
+      "spread_pts": 4.0,
+      "profit_ccy": "USD",
+      "is_from": "2025-04-17",
+      "is_to": "2026-02-27",
+      "signals": 258,
+      "hard_flags": [
+        "SPREAD 36.4% of SL"
+      ]
+    },
+    "SpotCrude.a": {
+      "total_trades": 212,
+      "win_rate": 32.1,
+      "profit_factor": 0.53,
+      "net_pnl": -1817.6,
+      "max_drawdown_pct": 4.2,
+      "expectancy": -8.57,
+      "score": 0.438,
+      "trading_days": 224,
+      "days_with_trades": 94,
+      "max_trades_in_a_day": 7,
+      "days_ge4_trades_pct": 6.7,
+      "floor_pct": 0.0,
+      "margin_pct": 0.5,
+      "median_sl_pts": 128.0,
+      "spread_over_sl_pct": 21.9,
+      "exit_reasons": {
+        "TRAIL": 200,
+        "SL": 12
+      },
+      "sl_methods": {
+        "atr": 142,
+        "structural": 70
+      },
+      "n_buy": 98,
+      "n_sell": 114,
+      "pf_buy": 0.556,
+      "pf_sell": 0.516,
+      "vote_patterns": {
+        "ema-1 rsi+0 atr-1 pd-1": 114,
+        "ema+1 rsi+0 atr+1 pd+1": 98
+      },
+      "sub_periods": {
+        "2025-Q2": {
+          "n": 58,
+          "pf": 0.815,
+          "net": -177.88
+        },
+        "2025-Q3": {
+          "n": 70,
+          "pf": 0.449,
+          "net": -742.79
+        },
+        "2025-Q4": {
+          "n": 44,
+          "pf": 0.559,
+          "net": -390.25
+        },
+        "2026-Q1": {
+          "n": 40,
+          "pf": 0.282,
+          "net": -506.68
+        }
+      },
+      "positive_sub_periods": "0/4",
+      "weekend_trades": 0,
+      "symbol": "SpotCrude.a",
+      "requested": "WTI / USOIL",
+      "spread_pts": 28.0,
+      "profit_ccy": "USD",
+      "is_from": "2025-04-17",
+      "is_to": "2026-02-27",
+      "signals": 212,
+      "hard_flags": []
+    },
+    "US30.a": {
+      "total_trades": 144,
+      "win_rate": 40.3,
+      "profit_factor": 1.13,
+      "net_pnl": 226.32,
+      "max_drawdown_pct": 0.7,
+      "expectancy": 1.57,
+      "score": 1.0918,
+      "trading_days": 224,
+      "days_with_trades": 74,
+      "max_trades_in_a_day": 6,
+      "days_ge4_trades_pct": 2.2,
+      "floor_pct": 0.0,
+      "margin_pct": 9.0,
+      "median_sl_pts": 325.0,
+      "spread_over_sl_pct": 6.2,
+      "exit_reasons": {
+        "TRAIL": 142,
+        "SL": 2
+      },
+      "sl_methods": {
+        "atr": 89,
+        "structural": 55
+      },
+      "n_buy": 72,
+      "n_sell": 72,
+      "pf_buy": 0.794,
+      "pf_sell": 1.561,
+      "vote_patterns": {
+        "ema-1 rsi+0 atr-1 pd-1": 72,
+        "ema+1 rsi+0 atr+1 pd+1": 72
+      },
+      "sub_periods": {
+        "2025-Q2": {
+          "n": 47,
+          "pf": 1.031,
+          "net": 17.18
+        },
+        "2025-Q3": {
+          "n": 49,
+          "pf": 2.107,
+          "net": 510.29
+        },
+        "2025-Q4": {
+          "n": 30,
+          "pf": 0.349,
+          "net": -305.66
+        },
+        "2026-Q1": {
+          "n": 18,
+          "pf": 1.02,
+          "net": 4.51
+        }
+      },
+      "positive_sub_periods": "3/4",
+      "weekend_trades": 0,
+      "symbol": "US30.a",
+      "requested": "US30 (Dow)",
+      "spread_pts": 20.0,
+      "profit_ccy": "USD",
+      "is_from": "2025-04-17",
+      "is_to": "2026-02-27",
+      "signals": 144,
+      "hard_flags": []
+    },
+    "US500.a": {
+      "total_trades": 59,
+      "win_rate": 39.0,
+      "profit_factor": 0.74,
+      "net_pnl": -187.48,
+      "max_drawdown_pct": 0.8,
+      "expectancy": -3.18,
+      "score": 0.7115,
+      "trading_days": 97,
+      "days_with_trades": 30,
+      "max_trades_in_a_day": 4,
+      "days_ge4_trades_pct": 3.1,
+      "floor_pct": 0.0,
+      "margin_pct": 25.4,
+      "median_sl_pts": 45.0,
+      "spread_over_sl_pct": 8.9,
+      "exit_reasons": {
+        "TRAIL": 57,
+        "SL": 2
+      },
+      "sl_methods": {
+        "atr": 40,
+        "structural": 19
+      },
+      "n_buy": 35,
+      "n_sell": 24,
+      "pf_buy": 0.564,
+      "pf_sell": 1.049,
+      "vote_patterns": {
+        "ema-1 rsi+0 atr-1 pd-1": 24,
+        "ema+1 rsi+0 atr+1 pd+1": 35
+      },
+      "sub_periods": {
+        "2025-Q3": {
+          "n": 31,
+          "pf": 1.405,
+          "net": 111.86
+        },
+        "2025-Q4": {
+          "n": 28,
+          "pf": 0.328,
+          "net": -299.34
+        }
+      },
+      "positive_sub_periods": "1/2",
+      "weekend_trades": 0,
+      "symbol": "US500.a",
+      "requested": "US500 (S&P)",
+      "spread_pts": 4.0,
+      "profit_ccy": "USD",
+      "is_from": "2025-08-18",
+      "is_to": "2025-12-31",
+      "signals": 59,
+      "hard_flags": [
+        "LOW SAMPLE"
+      ]
+    },
+    "USDCAD.a": {
+      "total_trades": 126,
+      "win_rate": 29.4,
+      "profit_factor": 0.41,
+      "net_pnl": -1144.39,
+      "max_drawdown_pct": 2.4,
+      "expectancy": -9.08,
+      "score": 0.3661,
+      "trading_days": 206,
+      "days_with_trades": 74,
+      "max_trades_in_a_day": 4,
+      "days_ge4_trades_pct": 1.5,
+      "floor_pct": 0.0,
+      "margin_pct": 64.3,
+      "median_sl_pts": 49.0,
+      "spread_over_sl_pct": 22.4,
+      "exit_reasons": {
+        "TRAIL": 119,
+        "SL": 7
+      },
+      "sl_methods": {
+        "atr": 86,
+        "structural": 40
+      },
+      "n_buy": 79,
+      "n_sell": 47,
+      "pf_buy": 0.392,
+      "pf_sell": 0.439,
+      "vote_patterns": {
+        "ema-1 rsi+0 atr-1 pd-1": 47,
+        "ema+1 rsi+0 atr+1 pd+1": 79
+      },
+      "sub_periods": {
+        "2025-Q2": {
+          "n": 31,
+          "pf": 0.646,
+          "net": -167.61
+        },
+        "2025-Q3": {
+          "n": 40,
+          "pf": 0.405,
+          "net": -319.86
+        },
+        "2025-Q4": {
+          "n": 37,
+          "pf": 0.268,
+          "net": -511.64
+        },
+        "2026-Q1": {
+          "n": 18,
+          "pf": 0.363,
+          "net": -145.28
+        }
+      },
+      "positive_sub_periods": "0/4",
+      "weekend_trades": 0,
+      "symbol": "USDCAD.a",
+      "requested": "USDCAD",
+      "spread_pts": 11.0,
+      "profit_ccy": "CAD",
+      "is_from": "2025-05-14",
+      "is_to": "2026-02-27",
+      "signals": 126,
+      "hard_flags": [
+        "MARGIN 64.3%"
+      ]
+    },
+    "USDJPY.a": {
+      "total_trades": 197,
+      "win_rate": 42.6,
+      "profit_factor": 0.87,
+      "net_pnl": -347.99,
+      "max_drawdown_pct": 1.4,
+      "expectancy": -1.77,
+      "score": 0.8131,
+      "trading_days": 206,
+      "days_with_trades": 92,
+      "max_trades_in_a_day": 5,
+      "days_ge4_trades_pct": 8.7,
+      "floor_pct": 0.0,
+      "margin_pct": 3.6,
+      "median_sl_pts": 119.0,
+      "spread_over_sl_pct": 10.9,
+      "exit_reasons": {
+        "TRAIL": 186,
+        "SL": 11
+      },
+      "sl_methods": {
+        "atr": 134,
+        "structural": 63
+      },
+      "n_buy": 99,
+      "n_sell": 98,
+      "pf_buy": 0.728,
+      "pf_sell": 1.044,
+      "vote_patterns": {
+        "ema-1 rsi+0 atr-1 pd-1": 98,
+        "ema+1 rsi+0 atr+1 pd+1": 99
+      },
+      "sub_periods": {
+        "2025-Q2": {
+          "n": 40,
+          "pf": 0.97,
+          "net": -19.06
+        },
+        "2025-Q3": {
+          "n": 54,
+          "pf": 0.813,
+          "net": -134.73
+        },
+        "2025-Q4": {
+          "n": 66,
+          "pf": 0.896,
+          "net": -85.41
+        },
+        "2026-Q1": {
+          "n": 37,
+          "pf": 0.784,
+          "net": -108.79
+        }
+      },
+      "positive_sub_periods": "0/4",
+      "weekend_trades": 0,
+      "symbol": "USDJPY.a",
+      "requested": "USDJPY",
+      "spread_pts": 13.0,
+      "profit_ccy": "JPY",
+      "is_from": "2025-05-14",
+      "is_to": "2026-02-27",
+      "signals": 197,
+      "hard_flags": []
+    },
+    "USDMXN.a": {
+      "total_trades": 174,
+      "win_rate": 8.0,
+      "profit_factor": 0.03,
+      "net_pnl": -6362.03,
+      "max_drawdown_pct": 12.7,
+      "expectancy": -36.56,
+      "score": 0.0183,
+      "trading_days": 206,
+      "days_with_trades": 89,
+      "max_trades_in_a_day": 5,
+      "days_ge4_trades_pct": 4.4,
+      "floor_pct": 0.0,
+      "margin_pct": 23.6,
+      "median_sl_pts": 1037.1,
+      "spread_over_sl_pct": 81.9,
+      "exit_reasons": {
+        "TRAIL": 170,
+        "SL": 4
+      },
+      "sl_methods": {
+        "atr": 123,
+        "structural": 51
+      },
+      "n_buy": 68,
+      "n_sell": 106,
+      "pf_buy": 0.052,
+      "pf_sell": 0.018,
+      "vote_patterns": {
+        "ema+1 rsi+0 atr+1 pd+1": 68,
+        "ema-1 rsi+0 atr-1 pd-1": 106
+      },
+      "sub_periods": {
+        "2025-Q2": {
+          "n": 33,
+          "pf": 0.027,
+          "net": -1195.13
+        },
+        "2025-Q3": {
+          "n": 45,
+          "pf": 0.033,
+          "net": -1615.48
+        },
+        "2025-Q4": {
+          "n": 62,
+          "pf": 0.022,
+          "net": -2434.44
+        },
+        "2026-Q1": {
+          "n": 34,
+          "pf": 0.044,
+          "net": -1116.98
+        }
+      },
+      "positive_sub_periods": "0/4",
+      "weekend_trades": 0,
+      "symbol": "USDMXN.a",
+      "requested": "USDMXN",
+      "spread_pts": 849.0,
+      "profit_ccy": "MXN",
+      "is_from": "2025-05-14",
+      "is_to": "2026-02-27",
+      "signals": 174,
+      "hard_flags": [
+        "SPREAD 81.9% of SL"
+      ]
+    },
+    "USDZAR.a": {
+      "total_trades": 240,
+      "win_rate": 20.4,
+      "profit_factor": 0.24,
+      "net_pnl": -5172.37,
+      "max_drawdown_pct": 10.6,
+      "expectancy": -21.55,
+      "score": 0.1569,
+      "trading_days": 206,
+      "days_with_trades": 108,
+      "max_trades_in_a_day": 6,
+      "days_ge4_trades_pct": 6.3,
+      "floor_pct": 0.0,
+      "margin_pct": 0.4,
+      "median_sl_pts": 1460.2,
+      "spread_over_sl_pct": 54.8,
+      "exit_reasons": {
+        "TRAIL": 227,
+        "SL": 13
+      },
+      "sl_methods": {
+        "structural": 74,
+        "atr": 166
+      },
+      "n_buy": 88,
+      "n_sell": 152,
+      "pf_buy": 0.428,
+      "pf_sell": 0.157,
+      "vote_patterns": {
+        "ema-1 rsi+0 atr-1 pd-1": 152,
+        "ema+1 rsi+0 atr+1 pd+1": 88
+      },
+      "sub_periods": {
+        "2025-Q2": {
+          "n": 25,
+          "pf": 0.325,
+          "net": -428.2
+        },
+        "2025-Q3": {
+          "n": 80,
+          "pf": 0.226,
+          "net": -1952.31
+        },
+        "2025-Q4": {
+          "n": 73,
+          "pf": 0.112,
+          "net": -1905.17
+        },
+        "2026-Q1": {
+          "n": 62,
+          "pf": 0.402,
+          "net": -886.69
+        }
+      },
+      "positive_sub_periods": "0/4",
+      "weekend_trades": 0,
+      "symbol": "USDZAR.a",
+      "requested": "USDZAR",
+      "spread_pts": 800.0,
+      "profit_ccy": "ZAR",
+      "is_from": "2025-05-14",
+      "is_to": "2026-02-27",
+      "signals": 240,
+      "hard_flags": [
+        "SPREAD 54.8% of SL"
+      ]
+    },
+    "XAGUSD.a": {
+      "total_trades": 179,
+      "win_rate": 35.2,
+      "profit_factor": 0.77,
+      "net_pnl": -707.9,
+      "max_drawdown_pct": 1.9,
+      "expectancy": -3.95,
+      "score": 0.7032,
+      "trading_days": 223,
+      "days_with_trades": 92,
+      "max_trades_in_a_day": 6,
+      "days_ge4_trades_pct": 4.0,
+      "floor_pct": 3.9,
+      "margin_pct": 0.0,
+      "median_sl_pts": 139.0,
+      "spread_over_sl_pct": 22.3,
+      "exit_reasons": {
+        "TRAIL": 174,
+        "SL": 5
+      },
+      "sl_methods": {
+        "atr": 127,
+        "structural": 52
+      },
+      "n_buy": 113,
+      "n_sell": 66,
+      "pf_buy": 0.875,
+      "pf_sell": 0.65,
+      "vote_patterns": {
+        "ema-1 rsi+0 atr-1 pd-1": 66,
+        "ema+1 rsi+0 atr+1 pd+1": 113
+      },
+      "sub_periods": {
+        "2025-Q2": {
+          "n": 22,
+          "pf": 0.354,
+          "net": -369.15
+        },
+        "2025-Q3": {
+          "n": 62,
+          "pf": 0.556,
+          "net": -473.95
+        },
+        "2025-Q4": {
+          "n": 66,
+          "pf": 1.002,
+          "net": 1.8
+        },
+        "2026-Q1": {
+          "n": 29,
+          "pf": 1.242,
+          "net": 133.4
+        }
+      },
+      "positive_sub_periods": "2/4",
+      "weekend_trades": 0,
+      "symbol": "XAGUSD.a",
+      "requested": "XAGUSD.a",
+      "spread_pts": 31.0,
+      "profit_ccy": "USD",
+      "is_from": "2025-04-21",
+      "is_to": "2026-02-27",
+      "signals": 179,
+      "hard_flags": []
+    },
+    "XAUUSD.a": {
+      "total_trades": 168,
+      "win_rate": 49.4,
+      "profit_factor": 1.12,
+      "net_pnl": 211.8,
+      "max_drawdown_pct": 0.8,
+      "expectancy": 1.26,
+      "score": 1.0769,
+      "trading_days": 223,
+      "days_with_trades": 95,
+      "max_trades_in_a_day": 5,
+      "days_ge4_trades_pct": 3.1,
+      "floor_pct": 3.6,
+      "margin_pct": 0.0,
+      "median_sl_pts": 669.4,
+      "spread_over_sl_pct": 2.7,
+      "exit_reasons": {
+        "TRAIL": 163,
+        "SL": 5
+      },
+      "sl_methods": {
+        "atr": 119,
+        "structural": 49
+      },
+      "n_buy": 102,
+      "n_sell": 66,
+      "pf_buy": 1.161,
+      "pf_sell": 1.068,
+      "vote_patterns": {
+        "ema+1 rsi+0 atr+1 pd+1": 102,
+        "ema-1 rsi+0 atr-1 pd-1": 66
+      },
+      "sub_periods": {
+        "2025-Q2": {
+          "n": 41,
+          "pf": 0.642,
+          "net": -174.24
+        },
+        "2025-Q3": {
+          "n": 51,
+          "pf": 0.831,
+          "net": -99.31
+        },
+        "2025-Q4": {
+          "n": 50,
+          "pf": 1.581,
+          "net": 267.24
+        },
+        "2026-Q1": {
+          "n": 26,
+          "pf": 1.971,
+          "net": 218.11
+        }
+      },
+      "positive_sub_periods": "2/4",
+      "weekend_trades": 0,
+      "symbol": "XAUUSD.a",
+      "requested": "XAUUSD.a (baseline)",
+      "spread_pts": 18.0,
+      "profit_ccy": "USD",
+      "is_from": "2025-04-21",
+      "is_to": "2026-02-27",
+      "signals": 168,
+      "hard_flags": []
+    },
+    "XPTUSD.a": {
+      "total_trades": 195,
+      "win_rate": 22.1,
+      "profit_factor": 0.17,
+      "net_pnl": -5500.09,
+      "max_drawdown_pct": 11.4,
+      "expectancy": -28.21,
+      "score": 0.1083,
+      "trading_days": 224,
+      "days_with_trades": 95,
+      "max_trades_in_a_day": 6,
+      "days_ge4_trades_pct": 5.4,
+      "floor_pct": 4.1,
+      "margin_pct": 0.0,
+      "median_sl_pts": 575.2,
+      "spread_over_sl_pct": 60.3,
+      "exit_reasons": {
+        "TRAIL": 188,
+        "SL": 7
+      },
+      "sl_methods": {
+        "structural": 81,
+        "atr": 114
+      },
+      "n_buy": 127,
+      "n_sell": 68,
+      "pf_buy": 0.128,
+      "pf_sell": 0.255,
+      "vote_patterns": {
+        "ema-1 rsi+0 atr-1 pd-1": 68,
+        "ema+1 rsi+0 atr+1 pd+1": 127
+      },
+      "sub_periods": {
+        "2025-Q2": {
+          "n": 55,
+          "pf": 0.028,
+          "net": -3293.97
+        },
+        "2025-Q3": {
+          "n": 47,
+          "pf": 0.127,
+          "net": -1489.17
+        },
+        "2025-Q4": {
+          "n": 57,
+          "pf": 0.288,
+          "net": -800.43
+        },
+        "2026-Q1": {
+          "n": 36,
+          "pf": 1.222,
+          "net": 83.48
+        }
+      },
+      "positive_sub_periods": "1/4",
+      "weekend_trades": 0,
+      "symbol": "XPTUSD.a",
+      "requested": "Platinum / XPTUSD",
+      "spread_pts": 347.0,
+      "profit_ccy": "USD",
+      "is_from": "2025-04-17",
+      "is_to": "2026-02-27",
+      "signals": 195,
+      "hard_flags": [
+        "SPREAD 60.3% of SL"
+      ]
+    }
+  },
+  "instruments_oos": {
+    "GBPJPY.a": {
+      "total_trades": 106,
+      "win_rate": 52.8,
+      "profit_factor": 1.45,
+      "net_pnl": 547.03,
+      "max_drawdown_pct": 0.7,
+      "expectancy": 5.16,
+      "score": 1.401,
+      "trading_days": 143,
+      "days_with_trades": 53,
+      "max_trades_in_a_day": 6,
+      "days_ge4_trades_pct": 2.8,
+      "floor_pct": 0.0,
+      "margin_pct": 18.9,
+      "median_sl_pts": 112.5,
+      "spread_over_sl_pct": 2.7,
+      "exit_reasons": {
+        "TRAIL": 98,
+        "SL": 8
+      },
+      "sl_methods": {
+        "atr": 77,
+        "structural": 29
+      },
+      "n_buy": 50,
+      "n_sell": 56,
+      "pf_buy": 1.005,
+      "pf_sell": 1.809,
+      "vote_patterns": {
+        "ema-1 rsi+0 atr-1 pd-1": 56,
+        "ema+1 rsi+0 atr+1 pd+1": 50
+      },
+      "sub_periods": {
+        "2026-Q1": {
+          "n": 14,
+          "pf": 8.926,
+          "net": 447.1
+        },
+        "2026-Q2": {
+          "n": 41,
+          "pf": 0.87,
+          "net": -65.72
+        },
+        "2026-Q3": {
+          "n": 51,
+          "pf": 1.258,
+          "net": 165.65
+        }
+      },
+      "positive_sub_periods": "2/3",
+      "weekend_trades": 0
+    },
+    "US30.a": {
+      "total_trades": 87,
+      "win_rate": 51.7,
+      "profit_factor": 1.18,
+      "net_pnl": 187.33,
+      "max_drawdown_pct": 0.4,
+      "expectancy": 2.15,
+      "score": 1.1569,
+      "trading_days": 143,
+      "days_with_trades": 44,
+      "max_trades_in_a_day": 5,
+      "days_ge4_trades_pct": 2.8,
+      "floor_pct": 0.0,
+      "margin_pct": 6.9,
+      "median_sl_pts": 443.9,
+      "spread_over_sl_pct": 4.5,
+      "exit_reasons": {
+        "TRAIL": 81,
+        "SL": 6
+      },
+      "sl_methods": {
+        "atr": 53,
+        "structural": 34
+      },
+      "n_buy": 49,
+      "n_sell": 38,
+      "pf_buy": 1.069,
+      "pf_sell": 1.329,
+      "vote_patterns": {
+        "ema-1 rsi+0 atr-1 pd-1": 38,
+        "ema+1 rsi+0 atr+1 pd+1": 49
+      },
+      "sub_periods": {
+        "2026-Q1": {
+          "n": 7,
+          "pf": 0.441,
+          "net": -73.91
+        },
+        "2026-Q2": {
+          "n": 39,
+          "pf": 0.978,
+          "net": -10.45
+        },
+        "2026-Q3": {
+          "n": 41,
+          "pf": 1.639,
+          "net": 271.69
+        }
+      },
+      "positive_sub_periods": "1/3",
+      "weekend_trades": 0
+    },
+    "XAUUSD.a": {
+      "total_trades": 128,
+      "win_rate": 46.9,
+      "profit_factor": 1.16,
+      "net_pnl": 226.94,
+      "max_drawdown_pct": 0.6,
+      "expectancy": 1.77,
+      "score": 1.1262,
+      "trading_days": 142,
+      "days_with_trades": 63,
+      "max_trades_in_a_day": 5,
+      "days_ge4_trades_pct": 6.3,
+      "floor_pct": 0.0,
+      "margin_pct": 0.0,
+      "median_sl_pts": 1082.6,
+      "spread_over_sl_pct": 1.7,
+      "exit_reasons": {
+        "TRAIL": 121,
+        "SL": 7
+      },
+      "sl_methods": {
+        "atr": 95,
+        "structural": 33
+      },
+      "n_buy": 55,
+      "n_sell": 73,
+      "pf_buy": 0.894,
+      "pf_sell": 1.405,
+      "vote_patterns": {
+        "ema-1 rsi+0 atr-1 pd-1": 73,
+        "ema+1 rsi+0 atr+1 pd+1": 55
+      },
+      "sub_periods": {
+        "2026-Q1": {
+          "n": 19,
+          "pf": 1.749,
+          "net": 121.58
+        },
+        "2026-Q2": {
+          "n": 56,
+          "pf": 0.834,
+          "net": -120.14
+        },
+        "2026-Q3": {
+          "n": 53,
+          "pf": 1.44,
+          "net": 225.5
+        }
+      },
+      "positive_sub_periods": "2/3",
+      "weekend_trades": 0
+    }
+  },
+  "ranking": [
+    "BTCUSD.a",
+    "GBPJPY.a",
+    "US30.a",
+    "XAUUSD.a",
+    "EURJPY.a",
+    "GER40.a",
+    "ETHUSD.a",
+    "USDJPY.a",
+    "XAGUSD.a",
+    "AUDJPY.a",
+    "US500.a",
+    "EURUSD.a",
+    "GBPUSD.a",
+    "NAS100.a",
+    "AUDUSD.a",
+    "Copper.a",
+    "SpotCrude.a",
+    "USDCAD.a",
+    "NatGas.a",
+    "USDZAR.a",
+    "XPTUSD.a",
+    "USDMXN.a"
+  ],
+  "promising": [
+    "GBPJPY.a",
+    "US30.a",
+    "XAUUSD.a"
+  ]
+}

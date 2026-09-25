@@ -46,8 +46,19 @@ else:
     DATABASE_URL = os.getenv("FIREBASE_DB_URL")
     PUSH_PREFIX  = ""
 if not DATABASE_URL:
-    raise SystemExit("ERROR: FIREBASE_DB_URL missing in config/.env"
-                      + (" (or FIREBASE_DB_URL_DIAGNOSTIC, for --config diagnostic)" if _IS_DIAGNOSTIC else ""))
+    # Do NOT exit: sync/watchdog.py restarts any child that exits, with a
+    # WhatsApp alert each time - on a box without Firebase configured that
+    # was an endless 10s..600s restart loop (observed 2026-09-15). Log once
+    # to logs/firebase_push.log and idle; set the URL and restart to enable.
+    sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+    from utils.logger import setup_logger
+    setup_logger("firebase_push").warning(
+        "FIREBASE_DB_URL missing in config/.env"
+        + (" (and FIREBASE_DB_URL_DIAGNOSTIC, for --config diagnostic)" if _IS_DIAGNOSTIC else "")
+        + " — Firebase sync DISABLED, idling so the watchdog does not restart-loop. "
+          "Add the URL to config/.env and restart to enable.")
+    while True:
+        time.sleep(3600)
 
 # Optional: leave empty string "" if your DB rules allow public write.
 # If you add Firebase Auth later, put your ID token here.

@@ -1,0 +1,154 @@
+{
+  "tag": "2026-09-16",
+  "window": "ALL",
+  "risk_pct": 0.1,
+  "account": 50000.0,
+  "leverage": 10,
+  "fx_rates": {
+    "JPY": 0.006450572488308337,
+    "EUR": 1.15456,
+    "MXN": 0.05835075103251654,
+    "ZAR": 0.06145518503541662,
+    "GBP": 1.3470900000000001,
+    "CAD": 0.7178441703874923
+  },
+  "results": {
+    "US30.a": {
+      "symbol": "US30.a",
+      "requested": "US30 (Dow)",
+      "profit_ccy": "USD",
+      "fx_rate_static": 1.0,
+      "spread_pts_used": 20.0,
+      "spread_now_pts": 20.0,
+      "spread_median_bars": 20.0,
+      "bars": 29673,
+      "from": "2025-06-16",
+      "to": "2026-09-16",
+      "trading_days": 326,
+      "contract": 1.0,
+      "point": 0.1,
+      "vmin": 0.1,
+      "total_trades": 839,
+      "win_rate": 32.7,
+      "profit_factor": 0.86,
+      "net_pnl": -3788.04,
+      "max_drawdown_pct": 10.9,
+      "expectancy": -4.51,
+      "max_consec_losses": 20,
+      "score": 0.5566,
+      "days_with_trades": 239,
+      "cap_days": 184,
+      "cap_days_pct_of_trading_days": 56.4,
+      "floor_pct": 2.7,
+      "margin_pct": 4.8,
+      "median_sl_pts": 753.4,
+      "spread_over_sl_pct": 2.7,
+      "n_buy": 436,
+      "n_sell": 403,
+      "pf_buy": 0.813,
+      "pf_sell": 0.92,
+      "half_years": {
+        "2025-H1": {
+          "n": 29,
+          "pf": 4.107,
+          "net": 1471.21
+        },
+        "2025-H2": {
+          "n": 332,
+          "pf": 0.934,
+          "net": -712.4
+        },
+        "2026-H1": {
+          "n": 344,
+          "pf": 0.703,
+          "net": -3605.99
+        },
+        "2026-H2": {
+          "n": 134,
+          "pf": 0.781,
+          "net": -940.86
+        }
+      },
+      "positive_half_years": 1,
+      "weekend_trades": 0,
+      "hard_flags": [],
+      "soft_flags": [
+        "cap-bound 56.4% of days"
+      ],
+      "flags": [
+        "cap-bound 56.4% of days"
+      ]
+    },
+    "US500.a": {
+      "symbol": "US500.a",
+      "requested": "US500 (S&P)",
+      "profit_ccy": "USD",
+      "fx_rate_static": 1.0,
+      "spread_pts_used": 4.0,
+      "spread_now_pts": 4.0,
+      "spread_median_bars": 4.0,
+      "bars": 17730,
+      "from": "2025-04-04",
+      "to": "2026-09-16",
+      "trading_days": 195,
+      "contract": 1.0,
+      "point": 0.1,
+      "vmin": 0.1,
+      "total_trades": 538,
+      "win_rate": 37.9,
+      "profit_factor": 1.05,
+      "net_pnl": 754.96,
+      "max_drawdown_pct": 4.8,
+      "expectancy": 1.4,
+      "max_consec_losses": 28,
+      "score": 0.8468,
+      "days_with_trades": 152,
+      "cap_days": 121,
+      "cap_days_pct_of_trading_days": 62.1,
+      "floor_pct": 0.7,
+      "margin_pct": 6.9,
+      "median_sl_pts": 95.9,
+      "spread_over_sl_pct": 4.2,
+      "n_buy": 334,
+      "n_sell": 204,
+      "pf_buy": 1.412,
+      "pf_sell": 0.626,
+      "half_years": {
+        "2025-H1": {
+          "n": 164,
+          "pf": 0.86,
+          "net": -754.94
+        },
+        "2025-H2": {
+          "n": 362,
+          "pf": 1.124,
+          "net": 1324.45
+        },
+        "2026-H1": {
+          "n": 8,
+          "pf": 1.871,
+          "net": 185.0
+        },
+        "2026-H2": {
+          "n": 4,
+          "pf": 12.25,
+          "net": 0.45
+        }
+      },
+      "positive_half_years": 3,
+      "weekend_trades": 0,
+      "hard_flags": [],
+      "soft_flags": [
+        "cap-bound 62.1% of days"
+      ],
+      "flags": [
+        "cap-bound 62.1% of days"
+      ]
+    }
+  },
+  "ranking": [
+    "US500.a",
+    "US30.a"
+  ],
+  "advancing": []
+}

@@ -76,11 +76,43 @@ def save_json(path, data):
 
 # ── Heartbeat ─────────────────────────────────────────────────────────────────
 
-def write_heartbeat():
+def write_heartbeat(status: str = "running"):
+    """status reflects the ACTUAL MT5 link: "running" only when the terminal
+    answers, "disconnected" while reconnecting. A blind "running" was proven
+    (2026-09-15) to keep being written for a process whose MT5 IPC had died."""
     save_json(HEARTBEAT_FILE, {
         "last_seen": datetime.now(timezone.utc).isoformat(),
-        "status":    "running"
+        "status":    status,
     })
+
+
+def _reconnect():
+    """
+    Same never-give-up policy as main.py._reconnect: retry until the terminal
+    answers, waiting RECONNECT_DELAY_MIN doubling up to RECONNECT_DELAY_MAX
+    between attempts. connect_mt5() relaunches terminal64.exe if it is not
+    running. No WhatsApp from here - main.py already alerts on the same
+    outage, and a second alert per outage would be noise.
+
+    Why this exists: a process that was connected before the terminal died
+    stays at (-10001, 'IPC send failed') FOREVER after the terminal is
+    relaunched by another process - only its own initialize() revives it.
+    Before 2026-09-15 this loop never re-initialised, so one MT5 restart
+    left trade_sync silently dead while still writing heartbeats.
+    """
+    delay   = getattr(_cfg, "RECONNECT_DELAY_MIN", 10)
+    d_max   = getattr(_cfg, "RECONNECT_DELAY_MAX", 300)
+    started = time.time()
+    attempt = 0
+    while True:
+        attempt += 1
+        time.sleep(delay)
+        if connect_mt5(login=_MT5_LOGIN, password=_MT5_PASSWORD, server=_MT5_SERVER, symbol=SYMBOL):
+            logger.info(f"MT5 reconnected (attempt {attempt}, {time.time() - started:.0f}s outage)")
+            return
+        logger.warning(f"Reconnect attempt {attempt} failed: {mt5.last_error()} — next attempt in "
+                       f"{min(delay * 2, d_max)}s")
+        delay = min(delay * 2, d_max)
 
 # ── Balance helper ────────────────────────────────────────────────────────────
 
@@ -307,18 +339,25 @@ def main():
 
     try:
         while True:
-            write_heartbeat()
+            if mt5.terminal_info() is None:
+                logger.warning(f"MT5 connection lost (error {mt5.last_error()}) — reconnecting...")
+                write_heartbeat("disconnected")
+                _reconnect()
+            write_heartbeat("running")
 
-            # Sync trades and positions
-            trades     = sync(on_trade_closed)
-            open_count = sync_open_positions()
+            try:
+                # Sync trades and positions
+                trades     = sync(on_trade_closed)
+                open_count = sync_open_positions()
 
-            # Hourly update — fires once at the top of each hour
-            now          = datetime.now(timezone.utc)
-            current_hour = now.replace(minute=0, second=0, microsecond=0)
-            if current_hour > last_hourly:
-                send_hourly(trades)
-                last_hourly = current_hour
+                # Hourly update — fires once at the top of each hour
+                now          = datetime.now(timezone.utc)
+                current_hour = now.replace(minute=0, second=0, microsecond=0)
+                if current_hour > last_hourly:
+                    send_hourly(trades)
+                    last_hourly = current_hour
+            except Exception as e:
+                logger.error(f"Sync loop error: {e}", exc_info=True)
 
             time.sleep(CHECK_INTERVAL)
 
