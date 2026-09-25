@@ -1,0 +1,6 @@
+live replay: 20000 closed bars, 603 signals, 60s
+comparison window (server time): 2025-11-04 00:00 -> 2026-09-09 11:00
+  backtest entries: 603 | live entries: 603 | sequence identical: True
+  server-time hours of live signal bars: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 20, 21, 22, 23]
+  all inside SESSION_HOURS [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 20, 21, 22, 23]: True
+  (MT5 bar timestamps are broker server time - the same clock the backtest's session filter runs on; wall-clock UTC is never consulted on this path)
